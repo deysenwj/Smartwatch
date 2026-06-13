@@ -120,6 +120,21 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 --   AFTER INSERT ON auth.users
 --   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
+-- 4b. Fungsi trigger otomatis saat profil dihapus oleh admin untuk membersihkan auth.users
+CREATE OR REPLACE FUNCTION public.handle_delete_profile()
+RETURNS trigger AS $$
+BEGIN
+  DELETE FROM auth.users WHERE id = OLD.id;
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Pasang trigger delete (jalankan ini untuk mengaktifkan sinkronisasi penghapusan)
+-- DROP TRIGGER IF EXISTS on_profile_deleted ON public.profiles;
+-- CREATE TRIGGER on_profile_deleted
+--   AFTER DELETE ON public.profiles
+--   FOR EACH ROW EXECUTE FUNCTION public.handle_delete_profile();
+
 -- 5. Konfigurasi Row Level Security (RLS) & Kebijakan (Policies)
 
 -- Definisikan fungsi is_admin() dengan SECURITY DEFINER agar aman dari infinite recursion RLS
