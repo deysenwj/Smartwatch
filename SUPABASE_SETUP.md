@@ -130,10 +130,10 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Pasang trigger delete (jalankan ini untuk mengaktifkan sinkronisasi penghapusan)
--- DROP TRIGGER IF EXISTS on_profile_deleted ON public.profiles;
--- CREATE TRIGGER on_profile_deleted
---   AFTER DELETE ON public.profiles
---   FOR EACH ROW EXECUTE FUNCTION public.handle_delete_profile();
+DROP TRIGGER IF EXISTS on_profile_deleted ON public.profiles;
+CREATE TRIGGER on_profile_deleted
+  AFTER DELETE ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION public.handle_delete_profile();
 
 -- 5. Konfigurasi Row Level Security (RLS) & Kebijakan (Policies)
 
