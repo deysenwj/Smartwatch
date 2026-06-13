@@ -42,6 +42,7 @@ const inputCls = "w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border bord
 const cardCls  = "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 md:p-6";
 
 export function SettingsPage({ user, onLogout, onSaved }: Props) {
+  const isAdmin = user.role === "admin";
   const [name,       setName]      = useState(user.name);
   const [phone,      setPhone]     = useState(user.phone);
   const [pwOld,      setPwOld]     = useState("");
@@ -244,11 +245,13 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Lengkap</label>
-            <input type="text" value={name} onChange={e => setName(e.target.value)} className={inputCls} />
+            <input type="text" value={name} onChange={e => setName(e.target.value)} className={inputCls} disabled={isAdmin} />
+            {isAdmin && <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Akun admin dikunci (didaftarkan dari Supabase)</p>}
           </div>
           <div>
             <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nomor Telepon</label>
-            <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+62 812-xxxx-xxxx" className={inputCls} />
+            <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+62 812-xxxx-xxxx" className={inputCls} disabled={isAdmin} />
+            {isAdmin && <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Akun admin dikunci (didaftarkan dari Supabase)</p>}
           </div>
           <div className="sm:col-span-2">
             <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Email</label>
@@ -284,74 +287,74 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
       </form>
 
       {/* ── Security ── */}
-      <div className={cardCls}>
-        <SectionHeader icon={Lock} label="Keamanan" />
+      {!isAdmin && (
+        <div className={cardCls}>
+          <SectionHeader icon={Lock} label="Keamanan" />
 
-        <form onSubmit={handleChangePassword} className="space-y-4">
-          <p className="text-sm text-slate-600 dark:text-slate-400 -mt-1">Ubah kata sandi akun Anda. Minimal 6 karakter.</p>
+          <form onSubmit={handleChangePassword} className="space-y-4">
+            <p className="text-sm text-slate-600 dark:text-slate-400 -mt-1">Ubah kata sandi akun Anda. Minimal 6 karakter.</p>
 
-          {/* Old password */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Kata Sandi Lama</label>
-            <div className="relative">
+            {/* Old password */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Kata Sandi Lama</label>
+              <div className="relative">
+                <input
+                  type={showPwOld ? "text" : "password"}
+                  placeholder="Masukkan kata sandi lama"
+                  value={pwOld}
+                  onChange={e => setPwOld(e.target.value)}
+                  className={`${inputCls} pr-10`}
+                />
+                <button type="button" onClick={() => setShowPwOld(v => !v)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-300">
+                  {showPwOld ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* New password */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Kata Sandi Baru</label>
+              <div className="relative">
+                <input
+                  type={showPwNew ? "text" : "password"}
+                  placeholder="Minimal 6 karakter"
+                  value={pwNew}
+                  onChange={e => setPwNew(e.target.value)}
+                  className={`${inputCls} pr-10`}
+                />
+                <button type="button" onClick={() => setShowPwNew(v => !v)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-300">
+                  {showPwNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Konfirmasi Kata Sandi Baru</label>
               <input
-                type={showPwOld ? "text" : "password"}
-                placeholder="Masukkan kata sandi lama"
-                value={pwOld}
-                onChange={e => setPwOld(e.target.value)}
-                className={`${inputCls} pr-10`}
+                type="password"
+                placeholder="Ulangi kata sandi baru"
+                value={pwConfirm}
+                onChange={e => setPwConfirm(e.target.value)}
+                className={`${inputCls} ${pwConfirm && pwNew && pwConfirm !== pwNew ? "border-red-400 dark:border-red-600 focus:ring-red-400" : ""}`}
               />
-              <button type="button" onClick={() => setShowPwOld(v => !v)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-300">
-                {showPwOld ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {pwConfirm && pwNew && pwConfirm !== pwNew && (
+                <p className="text-xs text-red-500 mt-1">Konfirmasi tidak cocok</p>
+              )}
+            </div>
+
+            <div className="flex justify-end">
+              <button type="submit" disabled={savingPw}
+                className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-slate-700 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 dark:hover:bg-slate-600 transition disabled:opacity-60">
+                <ChevronRight className="w-4 h-4" />
+                {savingPw ? "Mengubah…" : "Ubah Kata Sandi"}
               </button>
             </div>
-          </div>
-
-          {/* New password */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Kata Sandi Baru</label>
-            <div className="relative">
-              <input
-                type={showPwNew ? "text" : "password"}
-                placeholder="Minimal 6 karakter"
-                value={pwNew}
-                onChange={e => setPwNew(e.target.value)}
-                className={`${inputCls} pr-10`}
-              />
-              <button type="button" onClick={() => setShowPwNew(v => !v)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-300">
-                {showPwNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-
-          {/* Confirm */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Konfirmasi Kata Sandi Baru</label>
-            <input
-              type="password"
-              placeholder="Ulangi kata sandi baru"
-              value={pwConfirm}
-              onChange={e => setPwConfirm(e.target.value)}
-              className={`${inputCls} ${pwConfirm && pwNew && pwConfirm !== pwNew ? "border-red-400 dark:border-red-600 focus:ring-red-400" : ""}`}
-            />
-            {pwConfirm && pwNew && pwConfirm !== pwNew && (
-              <p className="text-xs text-red-500 mt-1">Konfirmasi tidak cocok</p>
-            )}
-          </div>
-
-
-
-          <div className="flex justify-end">
-            <button type="submit" disabled={savingPw}
-              className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-slate-700 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 dark:hover:bg-slate-600 transition disabled:opacity-60">
-              <ChevronRight className="w-4 h-4" />
-              {savingPw ? "Mengubah…" : "Ubah Kata Sandi"}
-            </button>
-          </div>
-        </form>
-      </div>
+          </form>
+        </div>
+      )}
 
       {/* ── Danger zone ── */}
       <div className="bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900/60 rounded-xl p-4 md:p-6">

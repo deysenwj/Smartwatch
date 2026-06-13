@@ -57,33 +57,22 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
     }
   }
 
-  function fillDemo(role: "admin" | "user") {
-    if (role === "admin") {
-      setEmail("admin@smartwatch.go.id");
-      setPassword("admin123");
-    } else {
-      setEmail("ahmad@mail.com");
-      setPassword("user123");
-    }
-    setError("");
-  }
-
   const inputCls =
-    "w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition";
+    "w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition duration-200";
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-2xl shadow-lg overflow-hidden flex flex-col md:flex-row">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800/80 overflow-hidden flex flex-col md:flex-row">
         {/* Left panel */}
-        <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 text-white flex flex-col justify-between p-8 md:p-10 md:w-[400px] md:shrink-0 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white flex flex-col justify-between p-8 md:p-10 md:w-[400px] md:shrink-0 relative overflow-hidden">
           {/* Ambient light flare overlays */}
-          <div className="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
+          <div className="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
 
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-1">
               <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center">
-                <Watch className="w-5 h-5 text-blue-300" />
+                <Watch className="w-5 h-5 text-indigo-300" />
               </div>
               <span className="text-xl font-bold tracking-tight">
                 Smartwatch
@@ -94,10 +83,10 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
             </p>
           </div>
 
-          <div className="space-y-5 mt-8 md:mt-0 relative z-10">
+          <div className="space-y-6 mt-8 md:mt-0 relative z-10">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center shrink-0">
-                <Shield className="w-5 h-5 text-blue-300" />
+                <Shield className="w-5 h-5 text-indigo-300" />
               </div>
               <h2 className="text-2xl md:text-3xl font-bold leading-snug">
                 Laporkan,
@@ -108,49 +97,21 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
               Platform transparan untuk menyampaikan pengaduan hukum Anda secara
               aman dan terstruktur.
             </p>
-            <div className="flex gap-6 pt-1">
+            <div className="flex gap-8 pt-1">
               {[
-                ["1.2K+", "Pengguna"],
                 ["100%", "Rahasia"],
                 ["24/7", "Akses"],
               ].map(([v, l]) => (
                 <div key={l}>
-                  <p className="text-xl font-bold">{v}</p>
+                  <p className="text-xl font-bold text-indigo-300">{v}</p>
                   <p className="text-xs text-slate-400 mt-0.5">{l}</p>
                 </div>
               ))}
             </div>
-
-            {/* Demo credentials */}
-            <div className="bg-white/5 rounded-xl p-4 space-y-2 mt-2">
-              <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide">
-                Demo Akun
-              </p>
-              <button
-                type="button"
-                onClick={() => fillDemo("admin")}
-                className="w-full text-left px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition text-xs"
-              >
-                <span className="font-bold text-blue-300">Admin</span>
-                <span className="text-slate-400 ml-2">
-                  admin@smartwatch.go.id / admin123
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => fillDemo("user")}
-                className="w-full text-left px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition text-xs"
-              >
-                <span className="font-bold text-green-300">User</span>
-                <span className="text-slate-400 ml-2">
-                  ahmad@mail.com / user123
-                </span>
-              </button>
-            </div>
           </div>
 
           <p className="text-xs text-slate-500 mt-8 md:mt-0 relative z-10">
-            © 2024 Smartwatch Indonesia
+            © 2026 Smartwatch Indonesia
           </p>
         </div>
 
@@ -183,7 +144,7 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-455" />
                 <input
                   type="email"
                   placeholder="nama@email.com"
@@ -204,13 +165,13 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
                 </label>
                 <button
                   type="button"
-                  className="text-xs font-semibold text-slate-600 dark:text-slate-400 hover:underline"
+                  className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors"
                 >
                   Lupa?
                 </button>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-455" />
                 <input
                   type={showPw ? "text" : "password"}
                   placeholder="••••••••"
@@ -238,7 +199,7 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
-                className="w-4 h-4 rounded border-slate-300 accent-slate-900"
+                className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 accent-indigo-650 text-indigo-650 focus:ring-indigo-500/20"
               />
               <span className="text-sm text-slate-600 dark:text-slate-400">
                 Ingat saya
@@ -248,7 +209,7 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-slate-900 dark:bg-slate-700 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-slate-800 dark:hover:bg-slate-600 transition disabled:opacity-60"
+              className="w-full bg-[#131b2e] dark:bg-slate-700 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-[#1c2742] dark:hover:bg-slate-600 transition duration-200 shadow-sm hover:shadow active:scale-98 disabled:opacity-60"
             >
               {loading ? "Memproses..." : "Masuk"}
             </button>
@@ -258,7 +219,7 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
             Belum punya akun?{" "}
             <button
               onClick={onGoRegister}
-              className="text-slate-900 dark:text-white font-bold hover:underline"
+              className="text-indigo-600 dark:text-indigo-400 font-bold hover:text-indigo-500 transition-colors"
             >
               Daftar di sini
             </button>

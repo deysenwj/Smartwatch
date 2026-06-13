@@ -114,21 +114,21 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
   }
 
   const inputCls =
-    "w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition";
+    "w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition duration-200";
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-2xl shadow-lg overflow-hidden flex flex-col md:flex-row">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800/80 overflow-hidden flex flex-col md:flex-row">
         {/* Left panel */}
-        <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 text-white flex flex-col justify-between p-8 md:p-10 md:w-[400px] md:shrink-0 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white flex flex-col justify-between p-8 md:p-10 md:w-[400px] md:shrink-0 relative overflow-hidden">
           {/* Ambient light flare overlays */}
-          <div className="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
+          <div className="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
 
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-1">
               <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center">
-                <Watch className="w-5 h-5 text-blue-300" />
+                <Watch className="w-5 h-5 text-indigo-300" />
               </div>
               <span className="text-xl font-bold tracking-tight">
                 Smartwatch
@@ -150,7 +150,7 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
             <div className="space-y-3 pt-1">
               {perks.map(({ icon: Icon, title, desc }) => (
                 <div key={title} className="flex items-start gap-3">
-                  <Icon className="w-4 h-4 text-blue-300 shrink-0 mt-0.5" />
+                  <Icon className="w-4 h-4 text-indigo-300 shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-semibold">{title}</p>
                     <p className="text-xs text-slate-400">{desc}</p>
@@ -161,7 +161,7 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
           </div>
           
           <p className="text-xs text-slate-500 mt-8 md:mt-0 relative z-10">
-            © 2024 Smartwatch Indonesia
+            © 2026 Smartwatch Indonesia
           </p>
         </div>
 
@@ -170,7 +170,7 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
           <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
             Buat Akun Baru
           </h3>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
+          <p className="text-slate-550 dark:text-slate-400 text-sm mb-6">
             Lengkapi data diri Anda di bawah ini
           </p>
 
@@ -183,7 +183,7 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
           {!hasSupabaseConfig() && (
             <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200 mb-4">
               Supabase belum aktif. Pendaftaran saat ini berjalan di mode lokal.
-              Isi file .env dengan VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY
+              Isi file .env dengan VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
               agar akun masuk ke Supabase.
             </div>
           )}
@@ -201,7 +201,7 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
                   key: "name",
                   label: "Nama Lengkap",
                   type: "text",
-                  placeholder: "Ahmad Fauzi",
+                  placeholder: "Deysen",
                 },
                 {
                   key: "email",
@@ -277,20 +277,20 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
                 type="checkbox"
                 checked={agreed}
                 onChange={(e) => setAgreed(e.target.checked)}
-                className="w-4 h-4 mt-0.5 rounded border-slate-300 accent-slate-900 shrink-0"
+                className="w-4 h-4 mt-0.5 rounded border-slate-300 dark:border-slate-700 accent-indigo-650 text-indigo-650 focus:ring-indigo-500/20 shrink-0"
               />
               <span className="text-sm text-slate-600 dark:text-slate-400">
                 Saya menyetujui{" "}
                 <button
                   type="button"
-                  className="text-slate-900 dark:text-white font-bold hover:underline"
+                  className="text-indigo-600 dark:text-indigo-400 font-bold hover:text-indigo-500 transition-colors"
                 >
                   Syarat & Ketentuan
                 </button>{" "}
                 serta{" "}
                 <button
                   type="button"
-                  className="text-slate-900 dark:text-white font-bold hover:underline"
+                  className="text-indigo-600 dark:text-indigo-400 font-bold hover:text-indigo-500 transition-colors"
                 >
                   Kebijakan Privasi
                 </button>
@@ -300,7 +300,7 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-slate-900 dark:bg-slate-700 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-slate-800 dark:hover:bg-slate-600 transition disabled:opacity-60"
+              className="w-full bg-[#131b2e] dark:bg-slate-700 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-[#1c2742] dark:hover:bg-slate-600 transition duration-200 shadow-sm hover:shadow active:scale-98 disabled:opacity-60"
             >
               {loading ? "Mendaftar..." : "Daftar Sekarang"}
             </button>
@@ -310,7 +310,7 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
             Sudah punya akun?{" "}
             <button
               onClick={onGoLogin}
-              className="text-slate-900 dark:text-white font-bold hover:underline"
+              className="text-indigo-600 dark:text-indigo-400 font-bold hover:text-indigo-500 transition-colors"
             >
               Masuk di sini
             </button>
