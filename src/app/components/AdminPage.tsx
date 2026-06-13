@@ -3,7 +3,7 @@ import {
   Watch, ClipboardCheck, Users, LogOut, X, Bell, Sun, Moon,
   Trash2, FileText, Clock, CheckCircle, XCircle, AlertCircle,
   ChevronRight, Menu, Search, Info, User, Calendar, MapPin,
-  TrendingUp, ShieldAlert, CheckCheck,
+  TrendingUp, ShieldAlert, CheckCheck, Settings,
 } from "lucide-react";
 import {
   getReports, updateReport, getUsers, deleteUser as removeUser,
@@ -14,8 +14,9 @@ import {
   hasSupabaseConfig, getSupabaseReports, getSupabaseUsers,
   updateSupabaseReport, deleteSupabaseUser, addSupabaseNotification,
 } from "../lib/supabase";
+import { SettingsPage } from "./SettingsPage";
 
-type AdminTab = "validasi" | "users";
+type AdminTab = "validasi" | "users" | "settings";
 type StatusFilter = "all" | Report["status"];
 
 interface Props {
@@ -27,6 +28,7 @@ interface Props {
   onMarkAllRead: () => void;
   onClearNotifs: () => void;
   onLogout: () => void;
+  onSaved?: () => void;
 }
 
 function initials(name: string) {
@@ -62,7 +64,7 @@ function NotifDropdown({ notifs, onMarkAllRead, onClearNotifs }: {
         )}
       </button>
       {open && (
-        <div className="absolute right-0 top-11 w-80 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden">
+        <div className="absolute right-0 top-12 w-80 max-w-[calc(100vw-2rem)] bg-white/98 dark:bg-slate-900/98 backdrop-blur-md border border-slate-200/80 dark:border-slate-700/60 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] z-50 overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700">
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold text-slate-900 dark:text-white">Notifikasi</h3>
@@ -269,7 +271,7 @@ function ValidasiModal({ report, onClose, onUpdate }: {
 }
 
 // ── Main AdminPage ─────────────────────────────────────────────────────────
-export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark, onMarkAllRead, onClearNotifs, onLogout }: Props) {
+export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark, onMarkAllRead, onClearNotifs, onLogout, onSaved }: Props) {
   const [tab,         setTab]        = useState<AdminTab>("validasi");
   const [reports,     setReports]    = useState<Report[]>([]);
   const [users,       setUsers]      = useState<UserType[]>([]);
@@ -376,7 +378,8 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
   const ditolak  = reports.filter(r => r.status === "Ditolak").length;
 
   const filteredReports = reports.filter(r => {
-    const mf = filter === "all" || r.status === filter;
+    const mf = filter === "all" ||
+               (filter === "Diproses" ? (r.status === "Diproses" || r.status === "Prioritas") : r.status === filter);
     const ms = !search || r.judul.toLowerCase().includes(search.toLowerCase())
       || r.id.toLowerCase().includes(search.toLowerCase())
       || r.userName.toLowerCase().includes(search.toLowerCase());
@@ -387,7 +390,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
     { key: "all",       label: "Semua",     count: total },
     { key: "Menunggu",  label: "Menunggu",  count: menunggu },
     { key: "Diproses",  label: "Diproses",  count: diproses },
-    { key: "Prioritas", label: "Prioritas" },
+    { key: "Prioritas", label: "Prioritas", count: reports.filter(r => r.status === "Prioritas").length },
     { key: "Selesai",   label: "Selesai",   count: selesai },
     { key: "Ditolak",   label: "Ditolak",   count: ditolak },
   ];
@@ -395,6 +398,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
   const navItems: { key: AdminTab; label: string; icon: React.ElementType }[] = [
     { key: "validasi", label: "Validasi Laporan", icon: ClipboardCheck },
     { key: "users",    label: "Kelola Pengguna",  icon: Users },
+    { key: "settings", label: "Pengaturan",       icon: Settings },
   ];
 
   return (
@@ -462,8 +466,8 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
         </nav>
 
         {/* User footer */}
-        <div className="px-3 py-4 border-t border-slate-800 shrink-0">
-          <div className="flex items-center gap-2.5 px-3 py-2 mb-1">
+        <div className="px-3 py-4 border-t border-slate-850 shrink-0">
+          <div className="flex items-center gap-2.5 px-3 py-2.5 mb-1 bg-slate-800/40 border border-slate-800/80 rounded-xl shadow-sm">
             {user.avatarUrl ? (
               <img
                 src={user.avatarUrl}
@@ -475,15 +479,11 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                 {initials(user.name)}
               </div>
             )}
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-white truncate">{user.name}</p>
-              <p className="text-xs text-slate-500 truncate">{user.email}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-white truncate leading-tight">{user.name}</p>
+              <p className="text-xs text-slate-500 truncate leading-none mt-1">{user.email}</p>
             </div>
           </div>
-          <button onClick={onLogout}
-            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-red-400 hover:bg-white/5 transition">
-            <LogOut className="w-4 h-4 shrink-0" /> Keluar
-          </button>
         </div>
       </aside>
 
@@ -499,7 +499,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
             </button>
             <div>
               <h2 className="text-base md:text-lg font-bold text-slate-900 dark:text-white">
-                {tab === "validasi" ? "Validasi Laporan" : "Kelola Pengguna"}
+                {tab === "validasi" ? "Validasi Laporan" : tab === "users" ? "Kelola Pengguna" : "Pengaturan"}
               </h2>
             </div>
           </div>
@@ -533,13 +533,13 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
               {/* Stats row */}
               <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
                 {[
-                  { label: "Total",     val: total,    icon: FileText,    ring: "ring-slate-200 dark:ring-slate-700",   num: "text-slate-900 dark:text-white",         icon_bg: "bg-slate-100 dark:bg-slate-700/50",     icon_c: "text-slate-500 dark:text-slate-400" },
-                  { label: "Menunggu", val: menunggu,  icon: Clock,       ring: "ring-indigo-200 dark:ring-indigo-800", num: "text-indigo-700 dark:text-indigo-300",    icon_bg: "bg-indigo-50 dark:bg-indigo-900/40",    icon_c: "text-indigo-500 dark:text-indigo-400" },
-                  { label: "Diproses", val: diproses,  icon: TrendingUp,  ring: "ring-amber-200 dark:ring-amber-800",   num: "text-amber-700 dark:text-amber-300",      icon_bg: "bg-amber-50 dark:bg-amber-900/40",      icon_c: "text-amber-500 dark:text-amber-400" },
-                  { label: "Selesai",  val: selesai,   icon: CheckCircle, ring: "ring-emerald-200 dark:ring-emerald-800",num:"text-emerald-700 dark:text-emerald-300", icon_bg: "bg-emerald-50 dark:bg-emerald-900/40",  icon_c: "text-emerald-500 dark:text-emerald-400" },
-                  { label: "Ditolak",  val: ditolak,   icon: XCircle,     ring: "ring-red-200 dark:ring-red-800",       num: "text-red-700 dark:text-red-300",          icon_bg: "bg-red-50 dark:bg-red-900/40",          icon_c: "text-red-500 dark:text-red-400" },
-                ].map(({ label, val, icon: Icon, ring, num, icon_bg, icon_c }) => (
-                  <div key={label} className={`bg-white dark:bg-slate-800 rounded-xl p-4 ring-1 ${ring}`}>
+                  { label: "Total",    val: total,    icon: FileText,    border: "border border-slate-200 dark:border-slate-800",       num: "text-slate-900 dark:text-white",         icon_bg: "bg-slate-50 dark:bg-slate-700/50",     icon_c: "text-slate-500 dark:text-slate-400" },
+                  { label: "Menunggu", val: menunggu,  icon: Clock,       border: "border border-indigo-100 dark:border-indigo-950/45",  num: "text-indigo-700 dark:text-indigo-300",    icon_bg: "bg-indigo-50 dark:bg-indigo-900/40",    icon_c: "text-indigo-500 dark:text-indigo-400" },
+                  { label: "Diproses", val: diproses,  icon: TrendingUp,  border: "border border-amber-100 dark:border-amber-950/45",   num: "text-amber-700 dark:text-amber-300",      icon_bg: "bg-amber-50 dark:bg-amber-900/40",      icon_c: "text-amber-500 dark:text-amber-400" },
+                  { label: "Selesai",  val: selesai,   icon: CheckCircle, border: "border border-emerald-100 dark:border-emerald-950/45",num:"text-emerald-700 dark:text-emerald-300", icon_bg: "bg-emerald-50 dark:bg-emerald-900/40",  icon_c: "text-emerald-500 dark:text-emerald-400" },
+                  { label: "Ditolak",  val: ditolak,   icon: XCircle,     border: "border border-red-100 dark:border-red-950/45",        num: "text-red-700 dark:text-red-300",          icon_bg: "bg-red-50 dark:bg-red-900/40",          icon_c: "text-red-500 dark:text-red-400" },
+                ].map(({ label, val, icon: Icon, border, num, icon_bg, icon_c }) => (
+                  <div key={label} className={`bg-white dark:bg-slate-800 rounded-xl p-4 ${border} hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-all duration-350`}>
                     <div className="flex items-center justify-between mb-3">
                       <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">{label}</p>
                       <div className={`w-7 h-7 ${icon_bg} rounded-lg flex items-center justify-center`}>
@@ -553,13 +553,13 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
 
               {/* Filter + Search bar */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                <div className="flex gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+                <div className="flex gap-1.5 overflow-x-auto pb-1.5 sm:pb-0 scrollbar-none">
                   {filterTabs.map(({ key, label, count }) => (
                     <button key={key} onClick={() => setFilter(key)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition whitespace-nowrap
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold border transition whitespace-nowrap
                         ${filter === key
-                          ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900"
-                          : "bg-white dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 text-slate-600 dark:text-slate-400 hover:ring-slate-300 dark:hover:ring-slate-600"
+                          ? "bg-slate-900 dark:bg-slate-100 border-slate-900 dark:border-slate-100 text-white dark:text-slate-900 shadow-sm"
+                          : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700/80 text-slate-600 dark:text-slate-400 hover:border-slate-350 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/30"
                         }`}>
                       {label}
                       {count !== undefined && (
@@ -574,7 +574,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                 <div className="relative sm:ml-auto">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input type="text" placeholder="Cari ID, judul, atau pelapor…" value={search} onChange={e => setSearch(e.target.value)}
-                    className="w-full sm:w-64 pl-9 pr-4 py-2 bg-white dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition" />
+                    className="w-full sm:w-64 pl-9 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition" />
                 </div>
               </div>
 
@@ -731,6 +731,18 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                 </table>
               </div>
             </div>
+          )}
+
+          {/* ════════ SETTINGS TAB ════════ */}
+          {tab === "settings" && (
+            <SettingsPage
+              user={user}
+              onLogout={onLogout}
+              onSaved={() => {
+                refresh();
+                if (onSaved) onSaved();
+              }}
+            />
           )}
         </main>
       </div>

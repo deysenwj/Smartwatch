@@ -174,6 +174,7 @@ export default function App() {
             refreshNotifs();
           }}
           onLogout={logout}
+          onSaved={() => setUser(getCurrentUser())}
         />
       </div>
     );

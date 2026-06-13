@@ -1,4 +1,4 @@
-import { LayoutDashboard, PlusCircle, History, Settings, LogOut, Watch, X } from "lucide-react";
+import { LayoutDashboard, PlusCircle, History, Settings, Watch, X } from "lucide-react";
 import { getUserReports, type User } from "../lib/storage";
 import { useState, useEffect } from "react";
 
@@ -91,30 +91,23 @@ export function Sidebar({ currentPage, onNavigate, onLogout, isOpen, onClose, us
 
         {/* User footer */}
         <div className="px-3 py-4 border-t border-slate-200 dark:border-slate-700/60 shrink-0">
-          <div className="flex items-center gap-2.5 px-3 py-2 mb-1">
+          <div className="flex items-center gap-2.5 px-3 py-2.5 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/80 rounded-xl shadow-sm">
             {user.avatarUrl ? (
               <img
                 src={user.avatarUrl}
                 alt={user.name}
-                className="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200 dark:border-slate-700"
+                className="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200 dark:border-slate-750"
               />
             ) : (
               <div className="w-8 h-8 bg-slate-900 dark:bg-slate-700 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
                 {initials(user.name)}
               </div>
             )}
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{user.name}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.email}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-slate-900 dark:text-white truncate leading-tight">{user.name}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate leading-none mt-1">{user.email}</p>
             </div>
           </div>
-          <button
-            onClick={onLogout}
-            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
-          >
-            <LogOut className="w-4 h-4 shrink-0" />
-            Keluar
-          </button>
         </div>
       </aside>
     </>

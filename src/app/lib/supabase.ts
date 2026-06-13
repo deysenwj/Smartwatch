@@ -177,6 +177,7 @@ export async function signUpWithSupabase(
           phone: options?.phone ?? "",
           role: "user",
         },
+        emailRedirectTo: "https://smartwatch-zeta.vercel.app/",
       },
     });
 
@@ -253,6 +254,7 @@ export async function signUpAdminWithSupabase(
           phone: options?.phone ?? "",
           role: "admin",
         },
+        emailRedirectTo: "https://smartwatch-zeta.vercel.app/",
       },
     });
 

@@ -216,10 +216,15 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
   }, [user.id, user.email]);
 
   // Filter count helper
-  const filterCount = (f: string) => f === "Semua" ? reports.length : reports.filter(r => r.status === f).length;
+  const filterCount = (f: string) => {
+    if (f === "Semua") return reports.length;
+    if (f === "Diproses") return reports.filter(r => r.status === "Diproses" || r.status === "Prioritas").length;
+    return reports.filter(r => r.status === f).length;
+  };
 
   const filtered = reports.filter(r => {
-    const mf = filter === "Semua" || r.status === filter;
+    const mf = filter === "Semua" || 
+               (filter === "Diproses" ? (r.status === "Diproses" || r.status === "Prioritas") : r.status === filter);
     const ms = !search || r.judul.toLowerCase().includes(search.toLowerCase()) || r.id.toLowerCase().includes(search.toLowerCase());
     return mf && ms;
   });
@@ -442,7 +447,7 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
 
       {/* Filter + Search */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-        <div className="flex gap-1.5 overflow-x-auto pb-1 sm:pb-0" style={{ scrollbarWidth: "none" }}>
+        <div className="flex gap-1.5 overflow-x-auto pb-1.5 sm:pb-0 scrollbar-none">
           {FILTERS.map(f => {
             const count = filterCount(f);
             const active = filter === f;
@@ -450,15 +455,15 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition whitespace-nowrap
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold transition whitespace-nowrap border
                   ${active
-                    ? "bg-slate-900 dark:bg-slate-700 text-white"
-                    : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50"
+                    ? "bg-slate-900 dark:bg-slate-100 border-slate-900 dark:border-slate-100 text-white dark:text-slate-900 shadow-sm"
+                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700/80 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/30 hover:border-slate-300 dark:hover:border-slate-600"
                   }`}
               >
                 {f}
                 <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold
-                  ${active ? "bg-white/20" : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"}`}>
+                  ${active ? "bg-white/20 dark:bg-black/10" : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"}`}>
                   {count}
                 </span>
               </button>
@@ -472,7 +477,7 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
             placeholder="Cari ID atau judul…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full sm:w-56 pl-9 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition"
+            className="w-full sm:w-56 pl-9 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition"
           />
         </div>
       </div>

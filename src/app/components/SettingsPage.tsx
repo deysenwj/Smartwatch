@@ -17,10 +17,10 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: () =
       role="switch"
       aria-checked={checked}
       aria-label={label}
-      className={`relative inline-flex items-center w-10 h-5 rounded-full transition-colors shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900
-        ${checked ? "bg-slate-900 dark:bg-slate-500" : "bg-slate-300 dark:bg-slate-600"}`}
+      className={`relative inline-flex items-center w-11 h-6 rounded-full transition-colors shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500/20
+        ${checked ? "bg-indigo-650" : "bg-slate-300 dark:bg-slate-600"}`}
     >
-      <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${checked ? "translate-x-5" : "translate-x-0"}`} />
+      <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 ${checked ? "translate-x-5" : "translate-x-0"}`} />
     </button>
   );
 }
@@ -225,7 +225,7 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
             <button
               type="button"
               onClick={() => document.getElementById("avatarInput")?.click()}
-              className="absolute inset-0 bg-black/50 text-white rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200 cursor-pointer"
+              className="absolute inset-0 bg-black/60 backdrop-blur-[2px] text-white rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer"
             >
               <Camera className="w-4 h-4 mb-0.5" />
               <span className="text-[10px] font-semibold">Ubah</span>

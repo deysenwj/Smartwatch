@@ -120,8 +120,12 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-2xl shadow-lg overflow-hidden flex flex-col md:flex-row">
         {/* Left panel */}
-        <div className="bg-slate-900 dark:bg-slate-800 text-white flex flex-col justify-between p-8 md:p-10 md:w-[400px] md:shrink-0">
-          <div>
+        <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 text-white flex flex-col justify-between p-8 md:p-10 md:w-[400px] md:shrink-0 relative overflow-hidden">
+          {/* Ambient light flare overlays */}
+          <div className="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
+
+          <div className="relative z-10">
             <div className="flex items-center gap-3 mb-1">
               <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center">
                 <Watch className="w-5 h-5 text-blue-300" />
@@ -134,7 +138,8 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
               Sistem Pelaporan Hukum Masyarakat
             </p>
           </div>
-          <div className="space-y-5 mt-8 md:mt-0">
+          
+          <div className="space-y-5 mt-8 md:mt-0 relative z-10">
             <h2 className="text-2xl md:text-3xl font-bold">
               Bergabung Sekarang
             </h2>
@@ -154,7 +159,8 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
               ))}
             </div>
           </div>
-          <p className="text-xs text-slate-500 mt-8 md:mt-0">
+          
+          <p className="text-xs text-slate-500 mt-8 md:mt-0 relative z-10">
             © 2024 Smartwatch Indonesia
           </p>
         </div>

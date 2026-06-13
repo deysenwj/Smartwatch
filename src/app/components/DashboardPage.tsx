@@ -48,27 +48,27 @@ export function DashboardPage({ user, onNavigate, onViewReport }: Props) {
     {
       icon: FileText, value: total, label: "Total Laporan",
       bg: "bg-slate-50 dark:bg-slate-700/50", color: "text-slate-600 dark:text-slate-400",
-      ring: "ring-1 ring-slate-200 dark:ring-slate-700",
+      border: "border border-slate-100 dark:border-slate-800/80",
     },
     {
       icon: Clock, value: menunggu, label: "Menunggu Validasi",
       bg: "bg-indigo-50 dark:bg-indigo-900/30", color: "text-indigo-600 dark:text-indigo-400",
-      ring: "ring-1 ring-indigo-100 dark:ring-indigo-900/50",
+      border: "border border-indigo-100/80 dark:border-indigo-950/40",
     },
     {
       icon: AlertCircle, value: diproses + prioritas, label: "Sedang Diproses",
       bg: "bg-amber-50 dark:bg-amber-900/30", color: "text-amber-600 dark:text-amber-400",
-      ring: "ring-1 ring-amber-100 dark:ring-amber-900/50",
+      border: "border border-amber-100/80 dark:border-amber-950/40",
     },
     {
       icon: ShieldAlert, value: prioritas, label: "Prioritas",
       bg: "bg-red-50 dark:bg-red-900/30", color: "text-red-600 dark:text-red-400",
-      ring: "ring-1 ring-red-100 dark:ring-red-900/50",
+      border: "border border-red-100/80 dark:border-red-950/40",
     },
     {
       icon: CheckCircle, value: selesai, label: "Selesai",
       bg: "bg-emerald-50 dark:bg-emerald-900/30", color: "text-emerald-600 dark:text-emerald-400",
-      ring: "ring-1 ring-emerald-100 dark:ring-emerald-900/50",
+      border: "border border-emerald-100/80 dark:border-emerald-950/40",
     },
   ];
 
@@ -96,8 +96,8 @@ export function DashboardPage({ user, onNavigate, onViewReport }: Props) {
 
       {/* Stats — 2 col mobile → 5 col desktop */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        {stats.map(({ icon: Icon, value, label, bg, color, ring }) => (
-          <div key={label} className={`bg-white dark:bg-slate-800 ${ring} rounded-xl p-4`}>
+        {stats.map(({ icon: Icon, value, label, bg, color, border }) => (
+          <div key={label} className={`bg-white dark:bg-slate-800 ${border} rounded-xl p-4 hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-all duration-350`}>
             <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center mb-3`}>
               <Icon className={`w-4 h-4 ${color}`} />
             </div>

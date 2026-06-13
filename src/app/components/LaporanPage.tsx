@@ -113,13 +113,13 @@ export function LaporanPage({ user, onNavigate, onSubmitted }: Props) {
           <div className="grid grid-cols-3 gap-2 md:gap-3">
             {CATEGORIES.map(({ key, icon: Icon }) => (
               <button key={key} type="button" onClick={() => setCategory(key)}
-                className={`flex flex-col items-center gap-2 py-3 md:py-4 px-2 rounded-lg border-2 text-center transition
+                className={`flex flex-col items-center gap-2 py-3 md:py-4 px-2 rounded-xl border text-center transition-all duration-200
                   ${category === key
-                    ? "border-slate-900 dark:border-slate-400 bg-slate-50 dark:bg-slate-700"
-                    : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50"
+                    ? "border-slate-900 dark:border-slate-200 bg-slate-50 dark:bg-slate-700/50 shadow-sm font-semibold"
+                    : "border-slate-200 dark:border-slate-700/80 hover:border-slate-350 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/30"
                   }`}>
-                <Icon className={`w-5 h-5 ${category === key ? "text-slate-900 dark:text-white" : "text-slate-400 dark:text-slate-500"}`} />
-                <span className="text-xs md:text-sm font-semibold text-slate-700 dark:text-slate-300">{key}</span>
+                <Icon className={`w-5 h-5 ${category === key ? "text-slate-900 dark:text-slate-100" : "text-slate-400 dark:text-slate-500"}`} />
+                <span className="text-xs md:text-sm font-medium text-slate-700 dark:text-slate-300">{key}</span>
               </button>
             ))}
           </div>
@@ -191,9 +191,9 @@ export function LaporanPage({ user, onNavigate, onSubmitted }: Props) {
           />
           <div
             onClick={() => document.getElementById("fileInput")?.click()}
-            className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg py-8 md:py-10 text-center hover:border-slate-500 dark:hover:border-slate-400 transition cursor-pointer group"
+            className="border border-dashed border-slate-300 dark:border-slate-600 rounded-xl py-8 md:py-10 text-center hover:border-slate-450 dark:hover:border-slate-400 hover:bg-slate-50/40 dark:hover:bg-slate-700/10 transition duration-200 cursor-pointer group"
           >
-            <CloudUpload className="w-7 h-7 md:w-8 md:h-8 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 mx-auto transition" />
+            <CloudUpload className="w-7 h-7 md:w-8 md:h-8 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 mx-auto transition-transform duration-200 group-hover:scale-105" />
             {file ? (
               <>
                 <p className="text-sm font-bold text-slate-900 dark:text-white mt-3 truncate px-4">
