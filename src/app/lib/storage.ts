@@ -8,6 +8,8 @@ export interface User {
   password: string;
   role: "admin" | "user";
   createdAt: string;
+  avatarUrl?: string;
+  pushNotif?: boolean;
 }
 
 export interface ReportNote {
@@ -44,10 +46,7 @@ export interface Notification {
 }
 
 export interface UserSettings {
-  emailNotif: boolean;
   pushNotif: boolean;
-  smsNotif: boolean;
-  twoFactor: boolean;
 }
 
 // ── Keys ───────────────────────────────────────────────────────────────────
@@ -185,19 +184,20 @@ export function clearNotifications(email: string) {
 
 export function getSettings(email: string): UserSettings {
   const raw = localStorage.getItem(settingsKey(email));
-  return raw ? JSON.parse(raw) : { emailNotif: true, pushNotif: false, smsNotif: true, twoFactor: true };
+  return raw ? JSON.parse(raw) : { pushNotif: false };
 }
 
 export function saveSettings(email: string, s: UserSettings) {
   localStorage.setItem(settingsKey(email), JSON.stringify(s));
 }
 
-export function updateUserProfile(email: string, patch: { name?: string; phone?: string; password?: string }) {
+export function updateUserProfile(email: string, patch: Partial<User>) {
   const users = getUsers();
   const i = users.findIndex(u => u.email === email);
-  if (i < 0) return;
-  users[i] = { ...users[i], ...patch };
-  saveUsers(users);
+  if (i >= 0) {
+    users[i] = { ...users[i], ...patch };
+    saveUsers(users);
+  }
   // update currentUser too
   const cur = getCurrentUser();
   if (cur?.email === email) setCurrentUser({ ...cur, ...patch });

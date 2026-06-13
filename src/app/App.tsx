@@ -86,11 +86,31 @@ export default function App() {
         try {
           const { data, error } = await supabase
             .from("profiles")
-            .select("role")
+            .select("*")
             .eq("id", user.id || "")
             .maybeSingle();
           if (error || !data) {
             logout();
+          } else {
+            const role = data.role as any;
+            const updatedUser = {
+              ...user,
+              name: data.full_name || "",
+              phone: data.phone || "",
+              role,
+              avatarUrl: data.avatar_url || "",
+              pushNotif: data.push_notif ?? false,
+            };
+            if (
+              user.name !== updatedUser.name ||
+              user.phone !== updatedUser.phone ||
+              user.role !== updatedUser.role ||
+              user.avatarUrl !== updatedUser.avatarUrl ||
+              user.pushNotif !== updatedUser.pushNotif
+            ) {
+              setCurrentUser(updatedUser);
+              setUser(updatedUser);
+            }
           }
         } catch (err) {
           console.error("Gagal memverifikasi status user:", err);
@@ -180,6 +200,7 @@ export default function App() {
             notifs={notifs}
             userInitials={initials(user.name)}
             userName={user.name}
+            avatarUrl={user.avatarUrl}
             onMarkAllRead={async () => {
               if (hasSupabaseConfig()) {
                 await markAllSupabaseNotificationsRead(user.id || "");

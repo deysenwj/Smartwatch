@@ -28,11 +28,17 @@ CREATE TABLE IF NOT EXISTS profiles (
   full_name TEXT,
   phone TEXT,
   role TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin')),
+  avatar_url TEXT,
+  push_notif BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- Pastikan kolom email ada jika tabel sudah terlanjur dibuat sebelumnya
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS email TEXT;
+
+-- Pastikan kolom settings & avatar ada jika tabel sudah terlanjur dibuat sebelumnya
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS push_notif BOOLEAN DEFAULT false;
 
 -- 2. Buat/perbarui tabel reports (pengaduan)
 CREATE TABLE IF NOT EXISTS reports (
@@ -168,26 +174,28 @@ DROP POLICY IF EXISTS "Admins can manage all notifications" ON notifications;
 CREATE POLICY "Admins can manage all notifications" ON notifications
   FOR ALL USING (public.is_admin());
 ```
-## 3. Konfigurasi Storage (Bucket Bukti Laporan)
+## 3. Konfigurasi Storage (Bucket Bukti Laporan & Foto Profil)
 
-Jalankan skrip SQL berikut di **SQL Editor** Supabase untuk membuat bucket storage `'bukti-laporan'` dan mengatur kebijakan akses (RLS) agar user terautentikasi dapat mengunggah bukti dan semua orang dapat membacanya secara publik:
+Jalankan skrip SQL berikut di **SQL Editor** Supabase untuk membuat bucket storage `'bukti-laporan'` dan `'avatars'` serta mengatur kebijakan akses (RLS) agar user terautentikasi dapat mengunggah file dan semua orang dapat membacanya secara publik:
 
 ```sql
--- 1. Buat bucket 'bukti-laporan' di storage Supabase (jika belum ada)
+-- 1. Buat bucket 'bukti-laporan' & 'avatars' di storage Supabase (jika belum ada)
 INSERT INTO storage.buckets (id, name, public)
-VALUES ('bukti-laporan', 'bukti-laporan', true)
+VALUES 
+  ('bukti-laporan', 'bukti-laporan', true),
+  ('avatars', 'avatars', true)
 ON CONFLICT (id) DO NOTHING;
 
--- 2. Kebijakan akses agar bukti laporan dapat dibaca/diunduh secara publik
+-- 2. Kebijakan akses agar file dapat dibaca/diunduh secara publik
 DROP POLICY IF EXISTS "Public Access" ON storage.objects;
 CREATE POLICY "Public Access" ON storage.objects
-  FOR SELECT USING (bucket_id = 'bukti-laporan');
+  FOR SELECT USING (bucket_id IN ('bukti-laporan', 'avatars'));
 
--- 3. Kebijakan akses agar pengguna terautentikasi dapat mengunggah file bukti
+-- 3. Kebijakan akses agar pengguna terautentikasi dapat mengunggah file
 DROP POLICY IF EXISTS "Authenticated Upload" ON storage.objects;
 CREATE POLICY "Authenticated Upload" ON storage.objects
   FOR INSERT WITH CHECK (
-    bucket_id = 'bukti-laporan' AND
+    bucket_id IN ('bukti-laporan', 'avatars') AND
     auth.role() = 'authenticated'
   );
 ```

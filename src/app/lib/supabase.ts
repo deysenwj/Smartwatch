@@ -37,15 +37,18 @@ export function toAppUser(
   user: SupabaseUser,
   password: string,
   role: AppRole,
+  profileData?: any,
 ): User {
   return {
     id: user.id,
-    name: user.user_metadata?.full_name || user.email?.split("@")[0] || "",
+    name: profileData?.full_name || user.user_metadata?.full_name || user.email?.split("@")[0] || "",
     email: user.email || "",
-    phone: user.user_metadata?.phone || "",
+    phone: profileData?.phone || user.user_metadata?.phone || "",
     password,
     role,
     createdAt: user.created_at || new Date().toISOString(),
+    avatarUrl: profileData?.avatar_url || user.user_metadata?.avatar_url || "",
+    pushNotif: profileData?.push_notif !== undefined ? profileData.push_notif : false,
   };
 }
 
@@ -71,7 +74,7 @@ export async function signInWithSupabase(email: string, password: string): Promi
   if (supabase) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("*")
       .eq("id", user.id)
       .maybeSingle();
     if (!profile) {
@@ -79,7 +82,7 @@ export async function signInWithSupabase(email: string, password: string): Promi
       throw new Error("Akun Anda telah dinonaktifkan atau dihapus oleh Administrator.");
     }
     const role = profile.role as AppRole;
-    return toAppUser(user, password, role);
+    return toAppUser(user, password, role, profile);
   }
 
   const role = await resolveUserRole(user.id, user.user_metadata?.role);
@@ -94,7 +97,7 @@ export async function signInUserWithSupabase(email: string, password: string) {
   if (supabase) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("*")
       .eq("id", user.id)
       .maybeSingle();
     if (!profile) {
@@ -106,7 +109,7 @@ export async function signInUserWithSupabase(email: string, password: string) {
       await signOutWithSupabase();
       throw new Error("Akun admin harus masuk melalui halaman Masuk Admin.");
     }
-    return toAppUser(user, password, role);
+    return toAppUser(user, password, role, profile);
   }
 
   const role = await resolveUserRole(user.id, user.user_metadata?.role);
@@ -126,7 +129,7 @@ export async function signInAdminWithSupabase(email: string, password: string) {
   if (supabase) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("*")
       .eq("id", user.id)
       .maybeSingle();
     if (!profile) {
@@ -140,7 +143,7 @@ export async function signInAdminWithSupabase(email: string, password: string) {
         "Akun ini tidak memiliki akses admin. Daftarkan admin di Supabase atau gunakan halaman masuk pengguna.",
       );
     }
-    return toAppUser(user, password, role);
+    return toAppUser(user, password, role, profile);
   }
 
   const role = await resolveUserRole(user.id, user.user_metadata?.role);
@@ -604,4 +607,70 @@ export async function clearSupabaseNotifications(
     .delete()
     .eq("user_id", userUUID);
   if (error) throw error;
+}
+
+export async function updateSupabaseProfile(
+  userId: string,
+  patch: {
+    name?: string;
+    phone?: string;
+    avatarUrl?: string;
+    pushNotif?: boolean;
+  }
+): Promise<void> {
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const dbPatch: any = {};
+  if (patch.name !== undefined) dbPatch.full_name = patch.name;
+  if (patch.phone !== undefined) dbPatch.phone = patch.phone;
+  if (patch.avatarUrl !== undefined) dbPatch.avatar_url = patch.avatarUrl;
+  if (patch.pushNotif !== undefined) dbPatch.push_notif = patch.pushNotif;
+
+  const { error } = await supabase
+    .from("profiles")
+    .update(dbPatch)
+    .eq("id", userId);
+
+  if (error) throw error;
+
+  // Also update Supabase auth metadata for compatibility
+  const authMeta: any = {};
+  if (patch.name !== undefined) authMeta.full_name = patch.name;
+  if (patch.phone !== undefined) authMeta.phone = patch.phone;
+  if (patch.avatarUrl !== undefined) authMeta.avatar_url = patch.avatarUrl;
+
+  if (Object.keys(authMeta).length > 0) {
+    try {
+      await supabase.auth.updateUser({
+        data: authMeta
+      });
+    } catch (authErr) {
+      console.warn("Gagal memperbarui metadata auth Supabase:", authErr);
+    }
+  }
+}
+
+export async function updateSupabasePassword(password: string): Promise<void> {
+  if (!supabase) throw new Error("Supabase not configured");
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) throw error;
+}
+
+export async function uploadSupabaseAvatar(file: File): Promise<string> {
+  if (!supabase) throw new Error("Supabase not configured");
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+  const filePath = `${fileName}`;
+
+  const { error } = await supabase.storage
+    .from("avatars")
+    .upload(filePath, file);
+
+  if (error) throw error;
+
+  const { data: publicUrlData } = supabase.storage
+    .from("avatars")
+    .getPublicUrl(filePath);
+
+  return publicUrlData.publicUrl;
 }

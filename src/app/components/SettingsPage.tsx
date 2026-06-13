@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { User, Lock, Bell, Smartphone, ChevronRight, AlertTriangle, LogOut, CheckCircle, Eye, EyeOff } from "lucide-react";
+import { User, Lock, Bell, Smartphone, ChevronRight, AlertTriangle, LogOut, CheckCircle, Eye, EyeOff, Camera } from "lucide-react";
 import { getSettings, saveSettings, updateUserProfile, type User as UserType } from "../lib/storage";
+import { hasSupabaseConfig, updateSupabaseProfile, updateSupabasePassword, uploadSupabaseAvatar } from "../lib/supabase";
 
 interface Props {
   user: UserType;
@@ -48,7 +49,16 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
   const [pwConfirm,  setPwConfirm] = useState("");
   const [showPwOld,  setShowPwOld] = useState(false);
   const [showPwNew,  setShowPwNew] = useState(false);
-  const [settings,   setSettings]  = useState(getSettings(user.email));
+
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarUrl,  setAvatarUrl]  = useState(user.avatarUrl || "");
+
+  const [settings,   setSettings]  = useState(() => {
+    const local = getSettings(user.email);
+    return {
+      pushNotif: user.pushNotif !== undefined ? user.pushNotif : local.pushNotif,
+    };
+  });
   const [toast,      setToast]     = useState<{ msg: string; type: "success" | "error" } | null>(null);
   const [savingPro,  setSavingPro] = useState(false);
   const [savingPw,   setSavingPw]  = useState(false);
@@ -56,7 +66,10 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
   useEffect(() => {
     setName(user.name);
     setPhone(user.phone);
-    setSettings(getSettings(user.email));
+    setAvatarUrl(user.avatarUrl || "");
+    setSettings({
+      pushNotif: user.pushNotif ?? false,
+    });
   }, [user]);
 
   function showMsg(msg: string, type: "success" | "error" = "success") {
@@ -64,33 +77,92 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
     setTimeout(() => setToast(null), 3500);
   }
 
-  function handleSaveProfile(e: React.FormEvent) {
+  async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) { showMsg("Nama tidak boleh kosong.", "error"); return; }
     setSavingPro(true);
-    setTimeout(() => {
-      updateUserProfile(user.email, { name: name.trim(), phone: phone.trim() });
+    
+    try {
+      let finalAvatarUrl = avatarUrl;
+
+      // 1. Upload avatar if selected
+      if (avatarFile) {
+        if (hasSupabaseConfig()) {
+          finalAvatarUrl = await uploadSupabaseAvatar(avatarFile);
+        } else {
+          // Convert to Base64 for local mode
+          finalAvatarUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = () => reject(new Error("Gagal membaca file gambar"));
+            reader.readAsDataURL(avatarFile);
+          });
+        }
+      }
+
+      // 2. Save to Supabase if active
+      if (hasSupabaseConfig()) {
+        await updateSupabaseProfile(user.id || "", {
+          name: name.trim(),
+          phone: phone.trim(),
+          avatarUrl: finalAvatarUrl,
+          pushNotif: settings.pushNotif,
+        });
+      }
+
+      // 3. Save locally for compatibility
+      updateUserProfile(user.email, {
+        name: name.trim(),
+        phone: phone.trim(),
+        avatarUrl: finalAvatarUrl,
+        pushNotif: settings.pushNotif,
+      });
+
+      // Update local settings helper
       saveSettings(user.email, settings);
+
       onSaved();
-      setSavingPro(false);
+      setAvatarFile(null);
       showMsg("Profil dan preferensi berhasil disimpan.");
-    }, 400);
+    } catch (err: any) {
+      console.error(err);
+      showMsg(err.message || "Gagal menyimpan profil.", "error");
+    } finally {
+      setSavingPro(false);
+    }
   }
 
-  function handleChangePassword(e: React.FormEvent) {
+  async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
     if (!pwOld)                      { showMsg("Kata sandi lama wajib diisi.", "error"); return; }
-    if (pwOld !== user.password)     { showMsg("Kata sandi lama salah.", "error"); return; }
+    
+    // Bypass local password verification if Supabase is active
+    if (!hasSupabaseConfig() && pwOld !== user.password) {
+      showMsg("Kata sandi lama salah.", "error");
+      return;
+    }
+
     if (!pwNew)                      { showMsg("Kata sandi baru wajib diisi.", "error"); return; }
     if (pwNew.length < 6)            { showMsg("Kata sandi baru minimal 6 karakter.", "error"); return; }
     if (pwNew !== pwConfirm)         { showMsg("Konfirmasi kata sandi tidak cocok.", "error"); return; }
+    
     setSavingPw(true);
-    setTimeout(() => {
+    try {
+      if (hasSupabaseConfig()) {
+        await updateSupabasePassword(pwNew);
+      }
+      
       updateUserProfile(user.email, { password: pwNew });
-      setPwOld(""); setPwNew(""); setPwConfirm("");
-      setSavingPw(false);
+      setPwOld("");
+      setPwNew("");
+      setPwConfirm("");
       showMsg("Kata sandi berhasil diubah.");
-    }, 400);
+    } catch (err: any) {
+      console.error(err);
+      showMsg(err.message || "Gagal mengubah kata sandi.", "error");
+    } finally {
+      setSavingPw(false);
+    }
   }
 
   return (
@@ -121,14 +193,49 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
 
         {/* Avatar row */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-5 pb-5 border-b border-slate-100 dark:border-slate-700">
-          <div className="w-14 h-14 bg-slate-900 dark:bg-slate-700 rounded-full flex items-center justify-center text-white font-bold text-xl shrink-0">
-            {initials(user.name)}
+          <div className="relative group w-16 h-16 shrink-0">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={user.name}
+                className="w-16 h-16 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700"
+              />
+            ) : (
+              <div className="w-16 h-16 bg-slate-900 dark:bg-slate-700 rounded-full flex items-center justify-center text-white font-bold text-2xl border-2 border-slate-200 dark:border-slate-700">
+                {initials(user.name)}
+              </div>
+            )}
+            <input
+              type="file"
+              id="avatarInput"
+              accept=".jpg,.jpeg,.png"
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  const selected = e.target.files[0];
+                  if (selected.size > 5 * 1024 * 1024) {
+                    showMsg("Ukuran file maksimal 5 MB.", "error");
+                    return;
+                  }
+                  setAvatarFile(selected);
+                  setAvatarUrl(URL.createObjectURL(selected));
+                }
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => document.getElementById("avatarInput")?.click()}
+              className="absolute inset-0 bg-black/50 text-white rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200 cursor-pointer"
+            >
+              <Camera className="w-4 h-4 mb-0.5" />
+              <span className="text-[10px] font-semibold">Ubah</span>
+            </button>
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-bold text-slate-900 dark:text-white">{user.name}</p>
             <p className="text-sm text-slate-500 dark:text-slate-400">{user.email}</p>
             <span className="inline-block mt-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-xs font-semibold rounded">
-              Pengguna
+              {user.role === "admin" ? "Administrator" : "Pengguna"}
             </span>
           </div>
         </div>
@@ -154,23 +261,17 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
         <div className="border-t border-slate-100 dark:border-slate-700 pt-5 mt-5">
           <SectionHeader icon={Bell} label="Notifikasi" />
           <div className="space-y-2">
-            {([
-              { key: "emailNotif" as const, label: "Email Notifikasi",  desc: "Perbaruan status laporan via email" },
-              { key: "pushNotif"  as const, label: "Push Notification", desc: "Notifikasi langsung di browser" },
-              { key: "smsNotif"   as const, label: "SMS Notifikasi",    desc: "Perbaruan penting via SMS" },
-            ]).map(({ key, label, desc }) => (
-              <div key={key} className="flex items-center justify-between px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700">
-                <div className="min-w-0 mr-3">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-white">{label}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{desc}</p>
-                </div>
-                <Toggle
-                  checked={settings[key]}
-                  onChange={() => setSettings(s => ({ ...s, [key]: !s[key] }))}
-                  label={label}
-                />
+            <div className="flex items-center justify-between px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700">
+              <div className="min-w-0 mr-3">
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">Push Notification</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Notifikasi langsung di browser</p>
               </div>
-            ))}
+              <Toggle
+                checked={settings.pushNotif}
+                onChange={() => setSettings(s => ({ ...s, pushNotif: !s.pushNotif }))}
+                label="Push Notification"
+              />
+            </div>
           </div>
         </div>
 
@@ -240,25 +341,7 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
             )}
           </div>
 
-          {/* 2FA toggle */}
-          <div className="flex items-center justify-between px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 mt-2">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center">
-                <Smartphone className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-900 dark:text-white">Verifikasi 2 Langkah</p>
-                <p className={`text-xs font-semibold ${settings.twoFactor ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"}`}>
-                  {settings.twoFactor ? "Aktif" : "Nonaktif"}
-                </p>
-              </div>
-            </div>
-            <Toggle
-              checked={settings.twoFactor}
-              onChange={() => setSettings(s => ({ ...s, twoFactor: !s.twoFactor }))}
-              label="Verifikasi 2 Langkah"
-            />
-          </div>
+
 
           <div className="flex justify-end">
             <button type="submit" disabled={savingPw}

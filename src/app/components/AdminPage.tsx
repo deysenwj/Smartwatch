@@ -464,9 +464,17 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
         {/* User footer */}
         <div className="px-3 py-4 border-t border-slate-800 shrink-0">
           <div className="flex items-center gap-2.5 px-3 py-2 mb-1">
-            <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
-              {initials(user.name)}
-            </div>
+            {user.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt={user.name}
+                className="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-700"
+              />
+            ) : (
+              <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
+                {initials(user.name)}
+              </div>
+            )}
             <div className="min-w-0">
               <p className="text-sm font-semibold text-white truncate">{user.name}</p>
               <p className="text-xs text-slate-500 truncate">{user.email}</p>
@@ -502,9 +510,17 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
               {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-500" />}
             </button>
             <NotifDropdown notifs={notifs} onMarkAllRead={onMarkAllRead} onClearNotifs={onClearNotifs} />
-            <div className="w-8 h-8 bg-slate-900 dark:bg-slate-700 rounded-full flex items-center justify-center text-white text-xs font-bold ml-2">
-              {initials(user.name)}
-            </div>
+            {user.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt={user.name}
+                className="w-8 h-8 rounded-full object-cover ml-2 shrink-0 border border-slate-200 dark:border-slate-800"
+              />
+            ) : (
+              <div className="w-8 h-8 bg-slate-900 dark:bg-slate-700 rounded-full flex items-center justify-center text-white text-xs font-bold ml-2 shrink-0">
+                {initials(user.name)}
+              </div>
+            )}
           </div>
         </header>
 

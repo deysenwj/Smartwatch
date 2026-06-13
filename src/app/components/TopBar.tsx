@@ -10,6 +10,7 @@ interface Props {
   notifs: Notification[];
   userInitials: string;
   userName: string;
+  avatarUrl?: string;
   onMarkAllRead: () => void;
   onClearNotifs: () => void;
 }
@@ -27,7 +28,7 @@ const TYPE_COLOR: Record<string, string> = {
   error:   "text-red-500",
 };
 
-export function TopBar({ title, onMenuOpen, isDark, onToggleDark, notifs, userInitials, userName, onMarkAllRead, onClearNotifs }: Props) {
+export function TopBar({ title, onMenuOpen, isDark, onToggleDark, notifs, userInitials, userName, avatarUrl, onMarkAllRead, onClearNotifs }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const unread = notifs.filter(n => !n.read).length;
@@ -141,12 +142,21 @@ export function TopBar({ title, onMenuOpen, isDark, onToggleDark, notifs, userIn
         </div>
 
         {/* User avatar */}
-        <div
-          title={userName}
-          className="w-8 h-8 bg-slate-900 dark:bg-slate-600 rounded-full flex items-center justify-center text-white text-xs font-bold ml-1 shrink-0 cursor-default select-none"
-        >
-          {userInitials}
-        </div>
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt={userName}
+            title={userName}
+            className="w-8 h-8 rounded-full object-cover ml-1 shrink-0 cursor-default select-none border border-slate-200 dark:border-slate-700"
+          />
+        ) : (
+          <div
+            title={userName}
+            className="w-8 h-8 bg-slate-900 dark:bg-slate-600 rounded-full flex items-center justify-center text-white text-xs font-bold ml-1 shrink-0 cursor-default select-none"
+          >
+            {userInitials}
+          </div>
+        )}
       </div>
     </header>
   );
