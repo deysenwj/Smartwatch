@@ -226,8 +226,9 @@ export async function signUpWithSupabase(
           await supabase.auth.signOut();
           throw err;
         }
-      } catch (innerErr) {
-        throw err;
+      } catch (innerErr: any) {
+        console.error("Gagal memulihkan profil saat registrasi ulang:", innerErr);
+        throw innerErr;
       }
     }
     throw err;
