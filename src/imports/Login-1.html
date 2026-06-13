@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - Smartwatch</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  h1, h2, h3, .font-headline { font-family: 'Public Sans', sans-serif; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+</style>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden grid md:grid-cols-2">
+    <div class="bg-slate-900 text-white p-8 md:p-10 flex flex-col justify-between">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
+            <span class="material-symbols-outlined text-blue-300">watch</span>
+          </div>
+          <h1 class="text-2xl font-bold font-headline">Smartwatch</h1>
+        </div>
+        <p class="text-slate-400 text-sm">Sistem Pelaporan Hukum</p>
+      </div>
+      <div class="space-y-6 my-8 md:my-12">
+        <h2 class="text-2xl md:text-3xl font-bold font-headline leading-tight">Laporkan,<br>Pantau, Selesaikan.</h2>
+        <p class="text-slate-300 leading-relaxed text-sm md:text-base">Platform transparan untuk menyampaikan pengaduan hukum Anda secara aman.</p>
+        <div class="bg-white/5 border border-white/10 rounded-lg p-4 text-xs text-slate-300">
+          <p class="font-bold text-white mb-2">Demo Akun:</p>
+          <p>👤 User: ahmad@mail.com / user123</p>
+          <p>🛡️ Admin: admin@smartwatch.go.id / admin123</p>
+        </div>
+      </div>
+      <p class="text-xs text-slate-500">© 2024 Smartwatch Indonesia</p>
+    </div>
+
+    <div class="p-8 md:p-10 flex flex-col justify-center">
+      <div class="mb-8">
+        <h3 class="text-2xl font-bold text-slate-900 mb-2">Selamat Datang</h3>
+        <p class="text-slate-500">Masuk ke akun Anda</p>
+      </div>
+
+      <form id="loginForm" class="space-y-5">
+        <div id="loginError" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"></div>
+        
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Email</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">mail</span>
+            <input type="email" id="email" placeholder="nama@email.com" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition">
+          </div>
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-2">
+            <label class="block text-sm font-semibold text-slate-700">Kata Sandi</label>
+            <a href="#" class="text-sm text-slate-900 font-semibold hover:underline">Lupa?</a>
+          </div>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">lock</span>
+            <input type="password" id="password" placeholder="••••••••" required class="w-full pl-12 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition">
+            <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900">
+              <span class="material-symbols-outlined text-[20px]" id="eyeIcon">visibility</span>
+            </button>
+          </div>
+        </div>
+
+        <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+          <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900">
+          Ingat saya
+        </label>
+
+        <button type="submit" class="w-full bg-slate-900 text-white py-3 rounded-lg font-semibold hover:bg-slate-800 active:scale-[0.98] transition flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-[20px]">login</span>
+          Masuk
+        </button>
+      </form>
+
+      <p class="text-center text-slate-600 mt-6">
+        Belum punya akun? <a href="register.html" class="text-slate-900 font-bold hover:underline">Daftar di sini</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    function togglePassword() {
+      const pw = document.getElementById('password');
+      const icon = document.getElementById('eyeIcon');
+      if (pw.type === 'password') { pw.type = 'text'; icon.textContent = 'visibility_off'; }
+      else { pw.type = 'password'; icon.textContent = 'visibility'; }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errorBox = document.getElementById('loginError');
+      
+      // Check admin
+      if (email === 'admin@smartwatch.go.id' && password === 'admin123') {
+        localStorage.setItem('currentUser', JSON.stringify({ name: 'Admin', email: email, role: 'admin' }));
+        window.location.href = 'admin.html';
+        return;
+      }
+      
+      // Check user
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const user = users.find(u => u.email === email && u.password === password);
+      
+      if (user) {
+        localStorage.setItem('currentUser', JSON.stringify({ name: user.name, email: user.email, role: 'user' }));
+        window.location.href = 'dashboard.html';
+      } else {
+        errorBox.classList.remove('hidden');
+        errorBox.textContent = 'Email atau kata sandi salah!';
+      }
+    });
+  </script>
+</body>
+</html>

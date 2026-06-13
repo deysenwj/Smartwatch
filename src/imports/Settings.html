@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pengaturan - Smartwatch</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  h1, h2, h3, .font-headline { font-family: 'Public Sans', sans-serif; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+</style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+  <!-- Mobile Header -->
+  <header class="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-50 flex items-center justify-between px-4">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
+        <span class="material-symbols-outlined text-white text-[20px]">watch</span>
+      </div>
+      <span class="font-bold text-lg font-headline">Smartwatch</span>
+    </div>
+    <button id="openSidebar" class="w-10 h-10 hover:bg-slate-100 rounded-lg flex items-center justify-center">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+  </header>
+
+  <div id="sidebarOverlay" class="hidden md:hidden fixed inset-0 bg-black/50 z-40"></div>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white border-r border-slate-200 flex flex-col z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+    <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
+          <span class="material-symbols-outlined text-white">watch</span>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg font-headline">Smartwatch</h1>
+          <p class="text-xs text-slate-500">User Portal</p>
+        </div>
+      </div>
+      <button id="closeSidebar" class="md:hidden w-8 h-8 hover:bg-slate-100 rounded-lg flex items-center justify-center">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+    
+    <nav class="flex-1 p-4 space-y-1">
+      <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-50 font-semibold text-sm">
+        <span class="material-symbols-outlined text-[20px]">dashboard</span> Dashboard
+      </a>
+      <a href="laporan.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-50 font-semibold text-sm">
+        <span class="material-symbols-outlined text-[20px]">add_circle</span> Buat Laporan
+      </a>
+      <a href="riwayat.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-50 font-semibold text-sm">
+        <span class="material-symbols-outlined text-[20px]">history</span> Riwayat Laporan
+      </a>
+      <a href="settings.html" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-900 text-white font-semibold text-sm">
+        <span class="material-symbols-outlined text-[20px]" style="font-variation-settings:'FILL' 1;">settings</span> Pengaturan
+      </a>
+    </nav>
+    
+    <div class="p-4 border-t border-slate-200">
+      <div class="flex items-center gap-3 mb-3 px-2">
+        <div class="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">AF</div>
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-sm truncate">Ahmad Fauzi</p>
+          <p class="text-xs text-slate-500 truncate">ahmad@mail.com</p>
+        </div>
+      </div>
+      <a href="login.html" class="flex items-center gap-3 px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 font-semibold text-sm">
+        <span class="material-symbols-outlined text-[20px]">logout</span> Keluar
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="md:ml-64 min-h-screen pt-16 md:pt-0">
+    <header class="hidden md:block bg-white border-b border-slate-200 sticky top-0 z-30">
+      <div class="flex items-center justify-between px-8 h-16">
+        <h2 class="text-xl font-bold font-headline">Pengaturan</h2>
+        <div class="flex items-center gap-3">
+          <button class="w-9 h-9 hover:bg-slate-100 rounded-lg flex items-center justify-center">
+            <span class="material-symbols-outlined text-slate-600">notifications</span>
+          </button>
+          <div class="w-9 h-9 bg-slate-900 rounded-full flex items-center justify-center text-white font-bold text-sm">AF</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="p-4 md:p-8 max-w-3xl space-y-4 md:space-y-6">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold font-headline text-slate-900">Pengaturan Akun</h1>
+        <p class="text-slate-500 mt-1 text-sm md:text-base">Kelola informasi profil dan preferensi Anda</p>
+      </div>
+
+      <!-- Profile -->
+      <div class="bg-white rounded-xl border border-slate-200 p-4 md:p-6">
+        <h2 class="text-base md:text-lg font-bold font-headline mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-slate-700">person</span> Profil
+        </h2>
+        
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 pb-6 border-b border-slate-200">
+          <div class="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center text-white font-bold text-xl shrink-0">AF</div>
+          <div class="flex-1">
+            <p class="font-bold text-slate-900">Ahmad Fauzi</p>
+            <p class="text-sm text-slate-500">ahmad.fauzi@email.com</p>
+          </div>
+          <button class="px-4 py-2 border border-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50">Ubah Foto</button>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Nama Lengkap</label>
+            <input type="text" value="Ahmad Fauzi" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none text-sm md:text-base">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Email</label>
+            <input type="email" value="ahmad.fauzi@email.com" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none text-sm md:text-base">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Nomor Telepon</label>
+            <input type="tel" value="+62 812-1234-5678" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none text-sm md:text-base">
+          </div>
+        </div>
+      </div>
+
+      <!-- Keamanan -->
+      <div class="bg-white rounded-xl border border-slate-200 p-4 md:p-6">
+        <h2 class="text-base md:text-lg font-bold font-headline mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-slate-700">lock</span> Keamanan
+        </h2>
+        
+        <div class="space-y-3">
+          <button class="w-full flex items-center justify-between p-3 md:p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition text-left">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-slate-600">key</span>
+              <div>
+                <p class="font-semibold text-slate-900 text-sm md:text-base">Ubah Kata Sandi</p>
+                <p class="text-[10px] md:text-xs text-slate-500">Terakhir diubah 3 bulan lalu</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-slate-400 shrink-0">chevron_right</span>
+          </button>
+
+          <div class="flex items-center justify-between p-3 md:p-4 border border-slate-200 rounded-lg">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-slate-600">smartphone</span>
+              <div>
+                <p class="font-semibold text-slate-900 text-sm md:text-base">Verifikasi 2 Langkah</p>
+                <p class="text-[10px] md:text-xs text-green-600 font-semibold">Aktif</p>
+              </div>
+            </div>
+            <label class="relative inline-block w-10 h-5 shrink-0">
+              <input type="checkbox" checked class="peer h-0 w-0 opacity-0">
+              <span class="absolute cursor-pointer inset-0 bg-slate-300 rounded-full transition peer-checked:bg-slate-900 before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 before:transition-all peer-checked:before:translate-x-5"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifikasi -->
+      <div class="bg-white rounded-xl border border-slate-200 p-4 md:p-6">
+        <h2 class="text-base md:text-lg font-bold font-headline mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-slate-700">notifications</span> Notifikasi
+        </h2>
+        
+        <div class="space-y-3">
+          <div class="flex items-center justify-between p-3 md:p-4 border border-slate-200 rounded-lg">
+            <div>
+              <p class="font-semibold text-slate-900 text-sm md:text-base">Email Notifikasi</p>
+              <p class="text-[10px] md:text-xs text-slate-500">Update status laporan via email</p>
+            </div>
+            <label class="relative inline-block w-10 h-5 shrink-0">
+              <input type="checkbox" checked class="peer h-0 w-0 opacity-0">
+              <span class="absolute cursor-pointer inset-0 bg-slate-300 rounded-full transition peer-checked:bg-slate-900 before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 before:transition-all peer-checked:before:translate-x-5"></span>
+            </label>
+          </div>
+
+          <div class="flex items-center justify-between p-3 md:p-4 border border-slate-200 rounded-lg">
+            <div>
+              <p class="font-semibold text-slate-900 text-sm md:text-base">Push Notification</p>
+              <p class="text-[10px] md:text-xs text-slate-500">Notifikasi langsung di browser</p>
+            </div>
+            <label class="relative inline-block w-10 h-5 shrink-0">
+              <input type="checkbox" class="peer h-0 w-0 opacity-0">
+              <span class="absolute cursor-pointer inset-0 bg-slate-300 rounded-full transition peer-checked:bg-slate-900 before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 before:transition-all peer-checked:before:translate-x-5"></span>
+            </label>
+          </div>
+
+          <div class="flex items-center justify-between p-3 md:p-4 border border-slate-200 rounded-lg">
+            <div>
+              <p class="font-semibold text-slate-900 text-sm md:text-base">SMS Notifikasi</p>
+              <p class="text-[10px] md:text-xs text-slate-500">Update penting via SMS</p>
+            </div>
+            <label class="relative inline-block w-10 h-5 shrink-0">
+              <input type="checkbox" checked class="peer h-0 w-0 opacity-0">
+              <span class="absolute cursor-pointer inset-0 bg-slate-300 rounded-full transition peer-checked:bg-slate-900 before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 before:transition-all peer-checked:before:translate-x-5"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logout -->
+      <div class="bg-white rounded-xl border border-red-200 p-4 md:p-6">
+        <h2 class="text-base md:text-lg font-bold font-headline mb-4 text-red-700 flex items-center gap-2">
+          <span class="material-symbols-outlined">warning</span> Zona Berbahaya
+        </h2>
+        <p class="text-xs md:text-sm text-slate-600 mb-4">Tindakan ini akan mengeluarkan Anda dari sesi saat ini.</p>
+        <a href="login.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition text-sm">
+          <span class="material-symbols-outlined text-[18px]">logout</span> Keluar dari Akun
+        </a>
+      </div>
+
+      <div class="flex flex-col-reverse md:flex-row justify-end gap-3 pt-2">
+        <button class="w-full md:w-auto px-5 py-2.5 border border-slate-300 rounded-lg font-semibold text-slate-700 hover:bg-slate-100 transition text-sm">Batal</button>
+        <button class="w-full md:w-auto px-6 py-2.5 bg-slate-900 text-white rounded-lg font-semibold hover:bg-slate-800 transition text-sm">Simpan Perubahan</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const openBtn = document.getElementById('openSidebar');
+    const closeBtn = document.getElementById('closeSidebar');
+    function openSidebar() { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); }
+    function closeSidebar() { sidebar.classList.add('-translate-x-full'); overlay.classList.add('hidden'); }
+    openBtn.addEventListener('click', openSidebar);
+    closeBtn.addEventListener('click', closeSidebar);
+    overlay.addEventListener('click', closeSidebar);
+  </script>
+</body>
+</html>
