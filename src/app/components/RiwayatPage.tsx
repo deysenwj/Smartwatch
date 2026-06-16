@@ -475,6 +475,43 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
             </div>
           </div>
         </div>
+
+        {/* Reusable Confirmation Modal */}
+        {confirmConfig && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm shadow-2xl p-6 flex flex-col items-center text-center space-y-4">
+              <div className={`w-12 h-12 ${confirmConfig.iconBg} ${confirmConfig.iconColor} rounded-full flex items-center justify-center`}>
+                <confirmConfig.icon className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">{confirmConfig.title}</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">{confirmConfig.description}</p>
+              </div>
+              <div className="flex w-full gap-3 pt-2">
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={() => setConfirmConfig(null)}
+                  className="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-55 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-350 transition disabled:opacity-50"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={confirmConfig.onConfirm}
+                  className={`flex-1 px-4 py-2.5 text-white rounded-xl text-xs font-semibold transition ${
+                    confirmConfig.isDestructive
+                      ? "bg-red-600 hover:bg-red-700"
+                      : "bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600"
+                  } disabled:opacity-60`}
+                >
+                  {isDeleting ? "Menghapus..." : confirmConfig.confirmText}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </>
     );
   }
