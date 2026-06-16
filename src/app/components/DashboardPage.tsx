@@ -228,7 +228,7 @@ export function DashboardPage({ user, onNavigate, onViewReport }: Props) {
                 <div className="hidden md:block overflow-x-auto">
                   <table className="w-full text-left">
                     <thead>
-                      <tr className="bg-slate-50/50 dark:bg-slate-855 border-b border-slate-100 dark:border-slate-800">
+                      <tr className="bg-slate-50/50 dark:bg-slate-900/30 border-b border-slate-100 dark:border-slate-800">
                         <th className="px-8 py-5 font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider text-[11px]">Detail Laporan</th>
                         <th className="px-8 py-5 font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider text-[11px]">Kategori</th>
                         <th className="px-8 py-5 font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider text-[11px]">Status</th>
@@ -241,9 +241,9 @@ export function DashboardPage({ user, onNavigate, onViewReport }: Props) {
                           onClick={() => onViewReport(r.id)}
                           className="hover:bg-slate-50/30 dark:hover:bg-slate-900/10 cursor-pointer transition-colors group"
                         >
-                          <td className="px-8 py-6">
+                          <td className="px-8 py-5">
                             <div className="flex flex-col gap-1">
-                              <span className="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                              <span className="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-650 dark:group-hover:text-indigo-400 transition-colors">
                                 {r.judul}
                               </span>
                               <span className="text-[11px] text-slate-400 dark:text-slate-550 font-mono">
@@ -251,7 +251,7 @@ export function DashboardPage({ user, onNavigate, onViewReport }: Props) {
                               </span>
                             </div>
                           </td>
-                          <td className="px-8 py-6">
+                          <td className="px-8 py-5">
                             <div className="flex flex-col">
                               <span className="text-xs font-bold text-slate-650 dark:text-slate-400">
                                 {r.kategori}
@@ -261,7 +261,7 @@ export function DashboardPage({ user, onNavigate, onViewReport }: Props) {
                               </span>
                             </div>
                           </td>
-                          <td className="px-8 py-6">
+                          <td className="px-8 py-5">
                             <span className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-tight ${MOCK_PILLS[r.status] ?? ""}`}>
                               {r.status}
                             </span>
@@ -282,7 +282,7 @@ export function DashboardPage({ user, onNavigate, onViewReport }: Props) {
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                          <span className="font-mono text-[10px] font-bold text-slate-400 dark:text-slate-550">
+                          <span className="font-mono text-[10px] font-bold text-slate-400 dark:text-slate-500">
                             {r.id.substring(0, 8)}...
                           </span>
                           <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tight ${MOCK_PILLS[r.status] ?? ""}`}>
