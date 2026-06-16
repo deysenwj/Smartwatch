@@ -1,7 +1,8 @@
-import { LayoutDashboard, PlusCircle, History, Settings, Watch, X } from "lucide-react";
+import { LayoutDashboard, PlusCircle, History, Settings, X } from "lucide-react";
 import { getUserReports, type User } from "../lib/storage";
 import { useState, useEffect } from "react";
 import { hasSupabaseConfig, getSupabaseUserReports } from "../lib/supabase";
+import systemLogo from "../../imports/system_logo_black.png";
 
 
 type Page = "dashboard" | "laporan" | "riwayat" | "settings";
@@ -58,8 +59,8 @@ export function Sidebar({ currentPage, onNavigate, onLogout, isOpen, onClose, us
         {/* Logo */}
         <div className="flex items-center justify-between px-5 h-16 border-b border-slate-200 dark:border-slate-700/60 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-slate-900 dark:bg-slate-700 rounded-lg flex items-center justify-center shrink-0">
-              <Watch className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+              <img src={systemLogo} alt="Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <p className="font-bold text-sm leading-tight text-slate-900 dark:text-white">Smartwatch</p>

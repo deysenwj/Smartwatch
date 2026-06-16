@@ -4,12 +4,12 @@ import {
   Lock,
   Eye,
   EyeOff,
-  Watch,
   Shield,
   AlertCircle,
 } from "lucide-react";
 import { login, initStorage, type User } from "../lib/storage";
 import { hasSupabaseConfig, signInWithSupabase } from "../lib/supabase";
+import systemLogo from "../../imports/system_logo_black.png";
 
 interface Props {
   onLogin: (user: User) => void;
@@ -66,62 +66,69 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
     "w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition duration-200";
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800/80 overflow-hidden flex flex-col md:flex-row">
-        {/* Left panel */}
-        <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white flex flex-col justify-between p-8 md:p-10 md:w-[400px] md:shrink-0 relative overflow-hidden">
-          {/* Ambient light flare overlays */}
-          <div className="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center px-4 py-16 relative overflow-hidden">
+      {/* Ambient background flares */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] rounded-full bg-indigo-500/5 dark:bg-indigo-500/10 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 translate-y-1/2 w-[550px] h-[550px] rounded-full bg-blue-500/5 dark:bg-blue-500/10 blur-3xl pointer-events-none" />
 
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-1">
-              <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center">
-                <Watch className="w-5 h-5 text-indigo-300" />
-              </div>
-              <span className="text-xl font-bold tracking-tight">
-                Smartwatch
-              </span>
-            </div>
-            <p className="text-slate-400 text-sm mt-1">
-              Sistem Pelaporan Hukum Masyarakat
-            </p>
-          </div>
-
-          <div className="space-y-6 mt-8 md:mt-0 relative z-10">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center shrink-0">
-                <Shield className="w-5 h-5 text-indigo-300" />
-              </div>
-              <h2 className="text-2xl md:text-3xl font-bold leading-snug">
-                Laporkan,
-                <br className="hidden md:block" /> Pantau, Selesaikan.
-              </h2>
-            </div>
-            <p className="text-slate-300 text-sm leading-relaxed">
-              Platform transparan untuk menyampaikan pengaduan hukum Anda secara
-              aman dan terstruktur.
-            </p>
-            <div className="flex gap-8 pt-1">
-              {[
-                ["100%", "Rahasia"],
-                ["24/7", "Akses"],
-              ].map(([v, l]) => (
-                <div key={l}>
-                  <p className="text-xl font-bold text-indigo-300">{v}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">{l}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <p className="text-xs text-slate-500 mt-8 md:mt-0 relative z-10">
-            © 2026 Smartwatch Indonesia
-          </p>
+      {/* Card Wrapper with absolute logo */}
+      <div className="relative w-full max-w-4xl mt-8 z-10">
+        
+        {/* Floating Logo: top center, circular, half-inside/half-outside */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-24 h-24 bg-black rounded-full flex items-center justify-center overflow-hidden shadow-xl border-4 border-slate-50 dark:border-slate-950">
+          <img src={systemLogo} alt="Logo" className="w-full h-full object-cover" />
         </div>
 
-        {/* Right panel */}
-        <div className="flex flex-col justify-center px-6 py-8 md:px-10 md:py-12 flex-1 bg-white dark:bg-slate-900">
+        <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800/80 overflow-hidden flex flex-col md:flex-row relative z-10">
+          {/* Left panel */}
+          <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white flex flex-col justify-between p-8 md:p-10 pt-16 md:pt-10 md:w-1/2 relative overflow-hidden">
+            {/* Ambient light flare overlays */}
+            <div className="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+
+            <div className="relative z-10">
+              <span className="text-2xl font-bold tracking-tight">
+                Smartwatch
+              </span>
+              <p className="text-slate-400 text-sm mt-1.5">
+                Sistem Pelaporan Hukum Masyarakat
+              </p>
+            </div>
+
+            <div className="space-y-6 mt-8 md:mt-0 relative z-10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center shrink-0">
+                  <Shield className="w-5 h-5 text-indigo-300" />
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold leading-snug">
+                  Laporkan,
+                  <br className="hidden md:block" /> Pantau, Selesaikan.
+                </h2>
+              </div>
+              <p className="text-slate-300 text-sm leading-relaxed">
+                Platform transparan untuk menyampaikan pengaduan hukum Anda secara
+                aman dan terstruktur.
+              </p>
+              <div className="flex gap-8 pt-1">
+                {[
+                  ["100%", "Rahasia"],
+                  ["24/7", "Akses"],
+                ].map(([v, l]) => (
+                  <div key={l}>
+                    <p className="text-xl font-bold text-indigo-300">{v}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">{l}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-500 mt-8 md:mt-0 relative z-10">
+              © 2026 Smartwatch Indonesia
+            </p>
+          </div>
+
+          {/* Right panel */}
+          <div className="flex flex-col justify-center px-6 py-8 md:px-10 md:py-12 md:w-1/2 bg-white dark:bg-slate-900 pt-16 md:pt-12">
           <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
             Selamat Datang Kembali
           </h3>
@@ -230,6 +237,7 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
             </button>
           </p>
         </div>
+      </div>
       </div>
     </div>
   );

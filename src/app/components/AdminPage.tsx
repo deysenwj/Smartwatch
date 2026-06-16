@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  Watch, ClipboardCheck, Users, LogOut, X, Bell, Sun, Moon,
+  ClipboardCheck, Users, LogOut, X, Bell, Sun, Moon,
   Trash2, FileText, Clock, CheckCircle, XCircle, AlertCircle,
   ChevronRight, Menu, Search, Info, User, Calendar, MapPin,
   TrendingUp, ShieldAlert, CheckCheck, Settings, MessageSquare, Send, Headphones,
 } from "lucide-react";
+import systemLogo from "../../imports/system_logo_black.png";
 import {
   getReports, updateReport, getUsers, deleteUser as removeUser,
   addNotification, formatDate, STATUS_PILL, timeAgo,
@@ -154,8 +155,8 @@ function ValidasiModal({ report, onClose, onUpdate }: {
     let title = "";
     let description = "";
     let icon = Clock;
-    let iconColor = "text-amber-500 dark:text-amber-400";
-    let iconBg = "bg-amber-50 dark:bg-amber-950/50";
+    let iconColor = "text-slate-500 dark:text-slate-400";
+    let iconBg = "bg-slate-50 dark:bg-slate-800/60";
     let confirmText = "Proses";
     let isDestructive = false;
 
@@ -163,23 +164,17 @@ function ValidasiModal({ report, onClose, onUpdate }: {
       title = "Setujui Laporan";
       description = `Apakah Anda yakin ingin menyetujui laporan "${report.judul}" dan mengubah statusnya menjadi Selesai?`;
       icon = CheckCircle;
-      iconColor = "text-emerald-600 dark:text-emerald-400";
-      iconBg = "bg-emerald-50 dark:bg-emerald-950/50";
       confirmText = "Setujui";
     } else if (status === "Ditolak") {
       title = "Tolak Laporan";
       description = `Apakah Anda yakin ingin menolak laporan "${report.judul}"?`;
       icon = XCircle;
-      iconColor = "text-red-600 dark:text-red-400";
-      iconBg = "bg-red-50 dark:bg-red-950/50";
       confirmText = "Tolak";
       isDestructive = true;
     } else {
       title = "Proses Laporan";
       description = `Apakah Anda yakin ingin memproses laporan "${report.judul}"? Status laporan akan diubah menjadi Diproses.`;
       icon = Clock;
-      iconColor = "text-amber-500 dark:text-amber-400";
-      iconBg = "bg-amber-50 dark:bg-amber-950/50";
       confirmText = "Proses";
     }
 
@@ -328,30 +323,41 @@ function ValidasiModal({ report, onClose, onUpdate }: {
       {/* Reusable Confirmation Modal */}
       {confirmConfig && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[150] flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm shadow-2xl p-6 flex flex-col items-center text-center space-y-4">
-            <div className={`w-12 h-12 ${confirmConfig.iconBg} ${confirmConfig.iconColor} rounded-full flex items-center justify-center`}>
-              <confirmConfig.icon className="w-6 h-6" />
+          <div className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-sm shadow-2xl p-6 flex flex-col items-start text-left space-y-4">
+            
+            {/* Top row: Icon and Close button */}
+            <div className="flex items-center justify-between w-full">
+              <div className={`w-12 h-12 ${confirmConfig.iconBg} ${confirmConfig.iconColor} border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center justify-center`}>
+                <confirmConfig.icon className="w-5 h-5" />
+              </div>
+              <button
+                type="button"
+                onClick={() => setConfirmConfig(null)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            <div>
+
+            {/* Title and Description */}
+            <div className="space-y-1.5">
               <h3 className="text-base font-bold text-slate-900 dark:text-white">{confirmConfig.title}</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">{confirmConfig.description}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{confirmConfig.description}</p>
             </div>
+
+            {/* Bottom Action buttons */}
             <div className="flex w-full gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setConfirmConfig(null)}
-                className="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-350 transition"
+                className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-350 transition"
               >
                 Batal
               </button>
               <button
                 type="button"
                 onClick={confirmConfig.onConfirm}
-                className={`flex-1 px-4 py-2.5 text-white rounded-xl text-xs font-semibold transition ${
-                  confirmConfig.isDestructive
-                    ? "bg-red-600 hover:bg-red-700"
-                    : "bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600"
-                }`}
+                className="flex-1 px-4 py-2.5 bg-slate-950 hover:bg-slate-900 dark:bg-slate-100 dark:hover:bg-slate-200 text-white dark:text-slate-950 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5"
               >
                 {confirmConfig.confirmText}
               </button>
@@ -495,8 +501,8 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
       title: "Hapus Pengguna",
       description: `Apakah Anda yakin ingin menghapus pengguna "${email}"? Semua data laporan terkait juga akan dihapus secara permanen.`,
       icon: Trash2,
-      iconColor: "text-red-600 dark:text-red-400",
-      iconBg: "bg-red-50 dark:bg-red-950/50",
+      iconColor: "text-slate-500 dark:text-slate-400",
+      iconBg: "bg-slate-50 dark:bg-slate-800/60",
       confirmText: "Hapus",
       isDestructive: true,
       onConfirm: async () => {
@@ -634,8 +640,8 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
         {/* Logo */}
         <div className="flex items-center justify-between px-5 h-16 border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center shrink-0">
-              <Watch className="w-4 h-4 text-indigo-300" />
+            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+              <img src={systemLogo} alt="Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <p className="font-bold text-sm text-white leading-tight">Smartwatch</p>
@@ -1085,30 +1091,41 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
       {/* Reusable Confirmation Modal */}
       {confirmConfig && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm shadow-2xl p-6 flex flex-col items-center text-center space-y-4">
-            <div className={`w-12 h-12 ${confirmConfig.iconBg} ${confirmConfig.iconColor} rounded-full flex items-center justify-center`}>
-              <confirmConfig.icon className="w-6 h-6" />
+          <div className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-sm shadow-2xl p-6 flex flex-col items-start text-left space-y-4">
+            
+            {/* Top row: Icon and Close button */}
+            <div className="flex items-center justify-between w-full">
+              <div className={`w-12 h-12 ${confirmConfig.iconBg} ${confirmConfig.iconColor} border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center justify-center`}>
+                <confirmConfig.icon className="w-5 h-5" />
+              </div>
+              <button
+                type="button"
+                onClick={() => setConfirmConfig(null)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            <div>
+
+            {/* Title and Description */}
+            <div className="space-y-1.5">
               <h3 className="text-base font-bold text-slate-900 dark:text-white">{confirmConfig.title}</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">{confirmConfig.description}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{confirmConfig.description}</p>
             </div>
+
+            {/* Bottom Action buttons */}
             <div className="flex w-full gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setConfirmConfig(null)}
-                className="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-350 transition"
+                className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-855 text-slate-700 dark:text-slate-350 transition"
               >
                 Batal
               </button>
               <button
                 type="button"
                 onClick={confirmConfig.onConfirm}
-                className={`flex-1 px-4 py-2.5 text-white rounded-xl text-xs font-semibold transition ${
-                  confirmConfig.isDestructive
-                    ? "bg-red-600 hover:bg-red-700"
-                    : "bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600"
-                }`}
+                className="flex-1 px-4 py-2.5 bg-slate-950 hover:bg-slate-900 dark:bg-slate-100 dark:hover:bg-slate-200 text-white dark:text-slate-950 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5"
               >
                 {confirmConfig.confirmText}
               </button>
