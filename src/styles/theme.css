@@ -234,23 +234,6 @@ header {
   box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* 4. Glassmorphic Floating Chat Drawer */
-.fixed.bottom-24.right-6, 
-.fixed.sm\:bottom-24 {
-  background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(20px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(190%) !important;
-  border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.08) !important;
-}
-.dark .fixed.bottom-24.right-6, 
-.dark .fixed.sm\:bottom-24 {
-  background: rgba(30, 41, 59, 0.55) !important;
-  backdrop-filter: blur(24px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.4) !important;
-}
 
 /* ── Micro-Interactions & Transitions ───────────────────────────────── */
 

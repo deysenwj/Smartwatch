@@ -373,7 +373,7 @@ export default function App() {
         </button>
 
         {isChatOpen && (
-          <div className="fixed sm:bottom-24 sm:right-6 right-4 bottom-24 left-4 sm:left-auto w-auto sm:w-96 h-[480px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-[24px] shadow-2xl flex flex-col overflow-hidden transition-all duration-300 ease-out">
+          <div className="chat-popup-container fixed sm:bottom-24 sm:right-6 right-4 bottom-24 left-4 sm:left-auto w-auto sm:w-96 z-40 h-[480px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-[24px] shadow-2xl flex flex-col overflow-hidden transition-all duration-300 ease-out">
             {/* Header */}
             <div className="px-5 py-4 bg-slate-800 border-b border-slate-700/50 flex items-center justify-between text-white">
               <div className="flex items-center gap-3">

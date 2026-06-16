@@ -73,7 +73,7 @@ export function TopBar({ title, onMenuOpen, isDark, onToggleDark, notifs, userIn
           </button>
 
           {/* Notifications */}
-          <div className="relative" ref={ref}>
+          <div className="md:relative" ref={ref}>
             <button
               onClick={() => setOpen(v => !v)}
               title="Notifikasi"
@@ -88,7 +88,7 @@ export function TopBar({ title, onMenuOpen, isDark, onToggleDark, notifs, userIn
             </button>
 
             {open && (
-              <div className="fixed md:absolute left-4 right-4 md:left-auto md:right-0 top-20 md:top-12 w-auto md:w-80 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-850 rounded-2xl shadow-xl z-50 overflow-hidden">
+              <div className="absolute left-4 right-4 md:left-auto md:right-0 top-20 md:top-12 w-auto md:w-80 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-850 rounded-2xl shadow-xl z-50 overflow-hidden">
                 {/* Dropdown header */}
                 <div className="flex items-center justify-between pl-6 pr-4 py-3 border-b border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-2">
