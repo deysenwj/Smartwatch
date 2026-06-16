@@ -19,7 +19,7 @@ interface Props {
   onRefreshNotifs: () => void;
 }
 
-const FILTERS = ["Semua", "Menunggu", "Diproses", "Prioritas", "Selesai", "Ditolak"];
+const FILTERS = ["Semua", "Menunggu", "Diproses", "Selesai", "Ditolak"];
 
 const cardCls = "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl";
 
@@ -35,7 +35,6 @@ function getTimelineState(status: string) {
   switch (status) {
     case "Menunggu":  return { done: 1, active: 1 };
     case "Diproses":  return { done: 2, active: 2 };
-    case "Prioritas": return { done: 2, active: 2 };
     case "Selesai":   return { done: 4, active: -1 };
     case "Ditolak":   return { done: 2, active: -1 };
     default:          return { done: 1, active: 1 };
@@ -197,6 +196,8 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
   const [search,     setSearch]     = useState("");
   const [delConfirm, setDelConfirm] = useState(false);
   const [showEdit,   setShowEdit]   = useState(false);
+  const [toast,      setToast]      = useState<{ msg: string; type: "success" | "error" } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [confirmConfig, setConfirmConfig] = useState<{
     title: string;
     description: string;
@@ -207,6 +208,11 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
     confirmText: string;
     isDestructive?: boolean;
   } | null>(null);
+
+  function showToast(msg: string, type: "success" | "error" = "success") {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  }
 
   async function refresh() {
     if (hasSupabaseConfig()) {
@@ -228,13 +234,11 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
   // Filter count helper
   const filterCount = (f: string) => {
     if (f === "Semua") return reports.length;
-    if (f === "Diproses") return reports.filter(r => r.status === "Diproses" || r.status === "Prioritas").length;
     return reports.filter(r => r.status === f).length;
   };
 
   const filtered = reports.filter(r => {
-    const mf = filter === "Semua" || 
-               (filter === "Diproses" ? (r.status === "Diproses" || r.status === "Prioritas") : r.status === filter);
+    const mf = filter === "Semua" || r.status === filter;
     const ms = !search || r.judul.toLowerCase().includes(search.toLowerCase()) || r.id.toLowerCase().includes(search.toLowerCase());
     return mf && ms;
   });
@@ -244,19 +248,24 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
 
   async function handleDelete() {
     if (!report) return;
-    if (hasSupabaseConfig()) {
-      try {
+    setIsDeleting(true);
+    try {
+      if (hasSupabaseConfig()) {
         await deleteSupabaseReport(report.id);
-      } catch (err) {
-        console.error("Gagal menghapus laporan dari Supabase:", err);
-        return;
+      } else {
+        deleteReport(report.id);
       }
-    } else {
-      deleteReport(report.id);
+      showToast("Laporan berhasil dihapus.");
+      setConfirmConfig(null);
+      setSelectedId(null);
+      await refresh();
+      onRefreshNotifs();
+    } catch (err) {
+      console.error("Gagal menghapus laporan:", err);
+      showToast("Gagal menghapus laporan dari database.", "error");
+    } finally {
+      setIsDeleting(false);
     }
-    setSelectedId(null);
-    await refresh();
-    onRefreshNotifs();
   }
 
   function handleDeleteClick() {
@@ -270,7 +279,6 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
       confirmText: "Hapus",
       isDestructive: true,
       onConfirm: async () => {
-        setConfirmConfig(null);
         await handleDelete();
       }
     });
@@ -296,6 +304,17 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
     window.print();
   }
 
+  function handleDownloadPDF() {
+    if (!report) return;
+    showToast("Mempersiapkan dokumen PDF...");
+    const originalTitle = document.title;
+    document.title = `Laporan_Hukum_${report.id}`;
+    setTimeout(() => {
+      window.print();
+      document.title = originalTitle;
+    }, 500);
+  }
+
   // ── Detail view ──────────────────────────────────────────────────────────
   if (report) {
     const allNotes = report.catatan ?? [];
@@ -305,10 +324,22 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
           <EditModal report={report} onClose={() => setShowEdit(false)} onSave={handleEdit} />
         )}
 
+        {/* Toast */}
+        {toast && (
+          <div className={`fixed top-5 right-5 z-[200] flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-2xl text-sm font-semibold border print:hidden
+            ${toast.type === "success"
+              ? "bg-white dark:bg-slate-800 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400"
+              : "bg-white dark:bg-slate-800 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400"
+            }`}>
+            {toast.type === "success" ? <CheckCircle className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+            {toast.msg}
+          </div>
+        )}
+
         <div className="flex-1 overflow-y-auto p-6 md:p-10 pb-28 md:pb-10 custom-scrollbar max-w-4xl mx-auto w-full space-y-6">
           <button
             onClick={() => { setSelectedId(null); setDelConfirm(false); setShowEdit(false); }}
-            className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition"
+            className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition print:hidden"
           >
             <ArrowLeft className="w-4 h-4" /> Kembali ke Riwayat
           </button>
@@ -360,9 +391,7 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
                       ? "bg-emerald-50 dark:bg-emerald-900/10 border-emerald-400"
                       : n.status === "Ditolak"
                         ? "bg-red-50 dark:bg-red-900/10 border-red-400"
-                        : n.status === "Prioritas"
-                          ? "bg-red-50 dark:bg-red-900/10 border-red-300"
-                          : "bg-amber-50 dark:bg-amber-900/10 border-amber-300"
+                        : "bg-amber-50 dark:bg-amber-900/10 border-amber-300"
                     }`}>
                     <p className="text-slate-700 dark:text-slate-300">{n.text}</p>
                     <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{n.by} · {formatDate(n.at)} · Status diubah ke <strong>{n.status}</strong></p>
@@ -401,13 +430,14 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
           </div>
 
           {/* Action bar */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1 print:hidden">
             {/* Left: destructive actions */}
             <button
               onClick={handleDeleteClick}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-lg text-sm font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 transition w-full sm:w-auto"
+              disabled={isDeleting}
+              className="flex items-center justify-center gap-2 px-4 py-2.5 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-lg text-sm font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 transition w-full sm:w-auto disabled:opacity-50"
             >
-              <Trash2 className="w-4 h-4" /> Hapus Laporan
+              <Trash2 className="w-4 h-4" /> {isDeleting ? "Menghapus..." : "Hapus Laporan"}
             </button>
 
             {/* Right: safe actions */}
@@ -415,24 +445,31 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
               {report.status === "Menunggu" && (
                 <button
                   onClick={() => setShowEdit(true)}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+                  disabled={isDeleting}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition disabled:opacity-50"
                 >
                   <Pencil className="w-4 h-4" /> Edit Laporan
                 </button>
               )}
               <button
                 onClick={handlePrint}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+                disabled={isDeleting}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition disabled:opacity-50"
               >
                 <Printer className="w-4 h-4" /> Cetak
               </button>
               <button
                 onClick={() => setSelectedId(null)}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+                disabled={isDeleting}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition disabled:opacity-50"
               >
                 Kembali
               </button>
-              <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-slate-700 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 dark:hover:bg-slate-600 transition">
+              <button
+                onClick={handleDownloadPDF}
+                disabled={isDeleting}
+                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-slate-700 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 dark:hover:bg-slate-600 transition disabled:opacity-50"
+              >
                 <Download className="w-4 h-4" /> Unduh PDF
               </button>
             </div>
@@ -445,6 +482,17 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
   // ── List view ────────────────────────────────────────────────────────────
   return (
     <div className="flex-1 overflow-y-auto p-6 md:p-10 pb-28 md:pb-10 custom-scrollbar max-w-5xl mx-auto w-full space-y-6">
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed top-5 right-5 z-[200] flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-2xl text-sm font-semibold border print:hidden
+          ${toast.type === "success"
+            ? "bg-white dark:bg-slate-800 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400"
+            : "bg-white dark:bg-slate-800 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400"
+          }`}>
+          {toast.type === "success" ? <CheckCircle className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+          {toast.msg}
+        </div>
+      )}
       <div>
         <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Riwayat Laporan</h1>
         <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">
@@ -545,7 +593,7 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
           <button
             key={r.id}
             onClick={() => setSelectedId(r.id)}
-            className={`w-full flex items-center gap-3 ${cardCls} px-4 py-4 text-left hover:border-slate-400 dark:hover:border-slate-500 transition`}
+            className={`w-full flex items-center gap-3 ${cardCls} hover-lift px-4 py-4 text-left hover:border-slate-400 dark:hover:border-slate-500 transition`}
           >
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -576,21 +624,23 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
             <div className="flex w-full gap-3 pt-2">
               <button
                 type="button"
+                disabled={isDeleting}
                 onClick={() => setConfirmConfig(null)}
-                className="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-350 transition"
+                className="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-350 transition disabled:opacity-50"
               >
                 Batal
               </button>
               <button
                 type="button"
+                disabled={isDeleting}
                 onClick={confirmConfig.onConfirm}
                 className={`flex-1 px-4 py-2.5 text-white rounded-xl text-xs font-semibold transition ${
                   confirmConfig.isDestructive
                     ? "bg-red-600 hover:bg-red-700"
                     : "bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600"
-                }`}
+                } disabled:opacity-60`}
               >
-                {confirmConfig.confirmText}
+                {isDeleting ? "Menghapus..." : confirmConfig.confirmText}
               </button>
             </div>
           </div>

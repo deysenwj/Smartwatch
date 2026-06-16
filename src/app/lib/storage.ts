@@ -28,7 +28,7 @@ export interface Report {
   tanggalKejadian: string;
   tanggalDibuat: string;
   tanggalUpdate?: string;
-  status: "Menunggu" | "Diproses" | "Selesai" | "Ditolak" | "Prioritas";
+  status: "Menunggu" | "Diproses" | "Selesai" | "Ditolak";
   userId: string;   // email
   userUUID?: string; // Supabase user ID UUID
   userName: string;
@@ -68,7 +68,7 @@ const SEED_USERS: User[] = [
 const SEED_REPORTS: Report[] = [
   { id: "LW-2024-001", judul: "Ketidaksesuaian Data Lahan",    kategori: "Agraria",  deskripsi: "Ditemukan perbedaan antara sertifikat digital dan koordinat fisik tanah yang signifikan.",                                              lokasi: "Kecamatan X, Jakarta",       tanggalKejadian: "2024-10-10", tanggalDibuat: "2024-10-12T09:00:00Z", status: "Selesai",  userId: "ahmad@mail.com", userName: "Ahmad Fauzi",  catatan: [{ text: "Laporan telah diverifikasi dan diselesaikan oleh tim agraria.", status: "Selesai", by: "Admin", at: "2024-10-14T10:00:00Z" }] },
   { id: "LW-2024-002", judul: "Prosedur Pengadaan Barang",     kategori: "Korupsi",  deskripsi: "Diduga ada penyimpangan prosedur tender di instansi pemerintah daerah tanpa transparansi.",                                              lokasi: "Balai Kota Jakarta",         tanggalKejadian: "2024-10-14", tanggalDibuat: "2024-10-15T14:00:00Z", status: "Diproses", userId: "ahmad@mail.com", userName: "Ahmad Fauzi",  catatan: [{ text: "Laporan sedang dalam proses investigasi.", status: "Diproses", by: "Admin", at: "2024-10-16T08:00:00Z" }] },
-  { id: "LW-2024-003", judul: "Tindakan Pungutan Liar",        kategori: "Pungli",   deskripsi: "Saya diminta membayar Rp 250.000 oleh petugas loket A untuk pengurusan surat keterangan domisili tanpa kuitansi resmi.",                 lokasi: "Kecamatan X, Jakarta",       tanggalKejadian: "2024-10-15", tanggalDibuat: "2024-10-18T10:00:00Z", status: "Prioritas",userId: "ahmad@mail.com", userName: "Ahmad Fauzi",  catatan: [{ text: "Laporan ditandai prioritas. Tim investigasi segera diterjunkan.", status: "Prioritas", by: "Admin", at: "2024-10-19T09:00:00Z" }] },
+  { id: "LW-2024-003", judul: "Tindakan Pungutan Liar",        kategori: "Pungli",   deskripsi: "Saya diminta membayar Rp 250.000 oleh petugas loket A untuk pengurusan surat keterangan domisili tanpa kuitansi resmi.",                 lokasi: "Kecamatan X, Jakarta",       tanggalKejadian: "2024-10-15", tanggalDibuat: "2024-10-18T10:00:00Z", status: "Diproses", userId: "ahmad@mail.com", userName: "Ahmad Fauzi",  catatan: [{ text: "Laporan sedang dalam proses investigasi.", status: "Diproses", by: "Admin", at: "2024-10-19T09:00:00Z" }] },
   { id: "LW-2024-004", judul: "Pelayanan Administrasi Lambat", kategori: "Hukum",    deskripsi: "Proses administrasi penerbitan KTP memakan waktu lebih dari 3 bulan tanpa penjelasan yang memadai.",                                      lokasi: "Dinas Kependudukan Jakarta", tanggalKejadian: "2024-10-18", tanggalDibuat: "2024-10-20T08:00:00Z", status: "Selesai",  userId: "ahmad@mail.com", userName: "Ahmad Fauzi",  catatan: [{ text: "Masalah telah diselesaikan dengan koordinasi dinas terkait.", status: "Selesai", by: "Admin", at: "2024-10-25T09:00:00Z" }] },
   { id: "LW-2024-005", judul: "Laporan Tidak Valid",           kategori: "Lainnya",  deskripsi: "Laporan uji coba tanpa bukti yang cukup.",                                                                                               lokasi: "Online",                     tanggalKejadian: "2024-10-20", tanggalDibuat: "2024-10-22T11:00:00Z", status: "Ditolak",  userId: "ahmad@mail.com", userName: "Ahmad Fauzi",  catatan: [{ text: "Laporan tidak memenuhi syarat kelengkapan bukti yang diperlukan.", status: "Ditolak", by: "Admin", at: "2024-10-23T08:00:00Z" }] },
   { id: "LW-2024-006", judul: "Penyalahgunaan Wewenang",       kategori: "Hukum",    deskripsi: "Petugas kelurahan menyalahgunakan wewenang untuk kepentingan pribadi.",                                                                  lokasi: "Kelurahan Y, Bandung",       tanggalKejadian: "2024-11-01", tanggalDibuat: "2024-11-03T13:00:00Z", status: "Menunggu", userId: "siti@mail.com",  userName: "Siti Rahayu",  catatan: [] },
@@ -76,7 +76,7 @@ const SEED_REPORTS: Report[] = [
 
 // ── Init ───────────────────────────────────────────────────────────────────
 
-const STORAGE_VERSION = "v2";
+const STORAGE_VERSION = "v3";
 
 export function initStorage() {
   // Re-seed when version changes so status "Menunggu" is applied
@@ -230,7 +230,6 @@ export function timeAgo(iso: string): string {
 export const STATUS_PILL: Record<string, string> = {
   Menunggu: "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400",
   Diproses: "bg-amber-50 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400",
-  Prioritas:"bg-red-50 text-red-700 dark:bg-red-900/40 dark:text-red-400",
   Selesai:  "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400",
   Ditolak:  "bg-slate-100 text-slate-500 dark:bg-slate-700/60 dark:text-slate-400",
 };

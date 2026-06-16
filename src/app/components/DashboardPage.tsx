@@ -44,7 +44,7 @@ export function DashboardPage({ user, onNavigate, onViewReport }: Props) {
 
   const total     = reports.length;
   const menunggu  = reports.filter(r => r.status === "Menunggu").length;
-  const diproses  = reports.filter(r => r.status === "Diproses" || r.status === "Prioritas").length;
+  const diproses  = reports.filter(r => r.status === "Diproses").length;
   const selesai   = reports.filter(r => r.status === "Selesai").length;
   const ditolak   = reports.filter(r => r.status === "Ditolak").length;
 

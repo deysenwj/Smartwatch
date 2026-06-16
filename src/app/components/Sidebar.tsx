@@ -1,6 +1,8 @@
 import { LayoutDashboard, PlusCircle, History, Settings, Watch, X } from "lucide-react";
 import { getUserReports, type User } from "../lib/storage";
 import { useState, useEffect } from "react";
+import { hasSupabaseConfig, getSupabaseUserReports } from "../lib/supabase";
+
 
 type Page = "dashboard" | "laporan" | "riwayat" | "settings";
 
@@ -21,10 +23,21 @@ export function Sidebar({ currentPage, onNavigate, onLogout, isOpen, onClose, us
   const [pendingCount, setPendingCount] = useState(0);
 
   useEffect(() => {
-    // Count reports still waiting for validation
-    const reports = getUserReports(user.email);
-    setPendingCount(reports.filter(r => r.status === "Menunggu").length);
-  }, [user.email, currentPage]);
+    async function updatePendingCount() {
+      if (hasSupabaseConfig() && user.id) {
+        try {
+          const reports = await getSupabaseUserReports(user.id);
+          setPendingCount(reports.filter(r => r.status === "Menunggu").length);
+        } catch (err) {
+          console.error("Gagal mengambil status laporan Supabase di sidebar:", err);
+        }
+      } else {
+        const reports = getUserReports(user.email);
+        setPendingCount(reports.filter(r => r.status === "Menunggu").length);
+      }
+    }
+    updatePendingCount();
+  }, [user.email, user.id, currentPage]);
 
   const navItems: { key: Page; label: string; icon: React.ElementType; badge?: number }[] = [
     { key: "dashboard", label: "Dashboard",      icon: LayoutDashboard },

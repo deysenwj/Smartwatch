@@ -65,6 +65,16 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
       setError("Semua kolom wajib diisi.");
       return;
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email.trim())) {
+      setError("Format email tidak valid.");
+      return;
+    }
+    const phoneRegex = /^[0-9+\-\s]{8,15}$/;
+    if (!phoneRegex.test(form.phone.trim())) {
+      setError("Nomor telepon tidak valid (minimal 8-15 digit/angka).");
+      return;
+    }
     if (form.password !== form.confirm) {
       setError("Konfirmasi kata sandi tidak cocok.");
       return;
@@ -277,7 +287,7 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
                 type="checkbox"
                 checked={agreed}
                 onChange={(e) => setAgreed(e.target.checked)}
-                className="w-4 h-4 mt-0.5 rounded border-slate-300 dark:border-slate-700 accent-indigo-650 text-indigo-650 focus:ring-indigo-500/20 shrink-0"
+                className="w-4 h-4 mt-0.5 rounded border-slate-300 dark:border-slate-700 accent-indigo-600 text-indigo-600 focus:ring-indigo-500/20 shrink-0"
               />
               <span className="text-sm text-slate-600 dark:text-slate-400">
                 Saya menyetujui{" "}

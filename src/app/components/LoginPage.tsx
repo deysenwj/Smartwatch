@@ -31,6 +31,11 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
       setError("Email dan kata sandi wajib diisi.");
       return;
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError("Format email tidak valid.");
+      return;
+    }
 
     setLoading(true);
 
@@ -199,7 +204,7 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
-                className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 accent-indigo-650 text-indigo-650 focus:ring-indigo-500/20"
+                className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 accent-indigo-600 text-indigo-600 focus:ring-indigo-500/20"
               />
               <span className="text-sm text-slate-600 dark:text-slate-400">
                 Ingat saya

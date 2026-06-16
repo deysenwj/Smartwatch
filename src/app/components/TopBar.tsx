@@ -49,10 +49,10 @@ export function TopBar({ title, onMenuOpen, isDark, onToggleDark, notifs, userIn
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuOpen}
-          className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-855 transition"
+          className="group md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-900 dark:hover:bg-slate-700 border border-slate-200/60 dark:border-slate-800 hover:border-slate-900 dark:hover:border-slate-600 transition-all duration-300"
           aria-label="Buka menu"
         >
-          <Menu className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+          <Menu className="w-5 h-5 text-slate-600 dark:text-slate-400 transition-all duration-300 transform group-hover:scale-110 group-hover:rotate-12 group-hover:text-white dark:group-hover:text-white" />
         </button>
         <h2 className="text-base md:text-lg font-bold text-slate-900 dark:text-white">{title}</h2>
       </div>
@@ -88,13 +88,13 @@ export function TopBar({ title, onMenuOpen, isDark, onToggleDark, notifs, userIn
             </button>
 
             {open && (
-              <div className="absolute left-4 right-4 md:left-auto md:right-0 top-20 md:top-12 w-auto md:w-80 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-850 rounded-2xl shadow-xl z-50 overflow-hidden">
+              <div className="absolute left-auto right-4 top-20 md:top-12 w-[calc(100vw-2rem)] sm:w-96 max-w-[380px] sm:max-w-none bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-850 rounded-2xl shadow-xl z-50 overflow-hidden">
                 {/* Dropdown header */}
-                <div className="flex items-center justify-between pl-6 pr-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between pl-5 pr-4 py-3.5 border-b border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Notifikasi</h3>
+                    <h3 className="text-[15px] sm:text-base font-bold text-slate-900 dark:text-white">Notifikasi</h3>
                     {unread > 0 && (
-                      <span className="px-1.5 py-0.5 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-[10px] font-bold rounded-full">
+                      <span className="px-1.5 py-0.5 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-[11px] font-bold rounded-full">
                         {unread} baru
                       </span>
                     )}
@@ -129,12 +129,12 @@ export function TopBar({ title, onMenuOpen, isDark, onToggleDark, notifs, userIn
                       <div
                         key={n.id}
                         onClick={() => !n.read && onMarkRead?.(n.id)}
-                        className={`flex items-start gap-4 pl-6 pr-4 py-3 transition cursor-pointer ${n.read ? "hover:bg-slate-55/40 dark:hover:bg-slate-800/20" : "bg-blue-50/60 dark:bg-blue-900/10 hover:bg-blue-50/80 dark:hover:bg-blue-900/20"}`}
+                        className={`flex items-start gap-4 pl-5 pr-4 py-3.5 transition cursor-pointer ${n.read ? "hover:bg-slate-55/40 dark:hover:bg-slate-800/20" : "bg-blue-50/60 dark:bg-blue-900/10 hover:bg-blue-50/80 dark:hover:bg-blue-900/20"}`}
                       >
-                        <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${color}`} />
+                        <Icon className={`w-[18px] h-[18px] mt-0.5 shrink-0 ${color}`} />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-slate-700 dark:text-slate-300 leading-snug">{n.text}</p>
-                          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{timeAgo(n.time)}</p>
+                          <p className="text-[14.5px] sm:text-[15px] text-slate-700 dark:text-slate-300 leading-normal">{n.text}</p>
+                          <p className="text-xs sm:text-[12.5px] text-slate-400 dark:text-slate-500 mt-1">{timeAgo(n.time)}</p>
                         </div>
                         {!n.read && <div className="w-1.5 h-1.5 bg-blue-500 rounded-full shrink-0 mt-1.5" />}
                       </div>
