@@ -15,10 +15,6 @@ interface Props {
   user: User;
 }
 
-function initials(name: string) {
-  return name.split(" ").slice(0, 2).map(w => w[0]).join("").toUpperCase();
-}
-
 export function Sidebar({ currentPage, onNavigate, onLogout, isOpen, onClose, user }: Props) {
   const [pendingCount, setPendingCount] = useState(0);
 
@@ -102,26 +98,6 @@ export function Sidebar({ currentPage, onNavigate, onLogout, isOpen, onClose, us
           })}
         </nav>
 
-        {/* User footer */}
-        <div className="px-3 py-4 border-t border-slate-200 dark:border-slate-700/60 shrink-0">
-          <div className="flex items-center gap-2.5 px-3 py-2.5 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/80 rounded-xl shadow-sm">
-            {user.avatarUrl ? (
-              <img
-                src={user.avatarUrl}
-                alt={user.name}
-                className="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200 dark:border-slate-750"
-              />
-            ) : (
-              <div className="w-8 h-8 bg-slate-900 dark:bg-slate-700 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
-                {initials(user.name)}
-              </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-slate-900 dark:text-white truncate leading-tight">{user.name}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 truncate leading-none mt-1">{user.email}</p>
-            </div>
-          </div>
-        </div>
       </aside>
     </>
   );
