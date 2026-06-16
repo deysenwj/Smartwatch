@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Mail,
   Lock,
@@ -6,9 +6,10 @@ import {
   EyeOff,
   Shield,
   AlertCircle,
+  X,
 } from "lucide-react";
-import { login, initStorage, type User } from "../lib/storage";
-import { hasSupabaseConfig, signInWithSupabase } from "../lib/supabase";
+import { login, initStorage, getUsers, updateUserProfile, type User } from "../lib/storage";
+import { hasSupabaseConfig, signInWithSupabase, sendSupabasePasswordReset } from "../lib/supabase";
 import systemLogo from "../../imports/system_logo_black.png";
 
 interface Props {
@@ -22,6 +23,34 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  // Forgot Password modal state
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotError, setForgotError] = useState("");
+  const [forgotSuccess, setForgotSuccess] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [step, setStep] = useState(1);
+  const [forgotLoading, setForgotLoading] = useState(false);
+
+  const handleCloseForgotModal = () => {
+    setShowForgotModal(false);
+    setForgotEmail("");
+    setForgotError("");
+    setForgotSuccess("");
+    setNewPassword("");
+    setStep(1);
+  };
+
+  // Load remembered email on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("remembered_email");
+    if (saved) {
+      setEmail(saved);
+      setRememberMe(true);
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,6 +69,12 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
     setLoading(true);
 
     try {
+      if (rememberMe) {
+        localStorage.setItem("remembered_email", email.trim());
+      } else {
+        localStorage.removeItem("remembered_email");
+      }
+
       if (hasSupabaseConfig()) {
         const user = await signInWithSupabase(email.trim(), password);
         onLogin(user);
@@ -81,7 +116,7 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
 
         <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800/80 overflow-hidden flex flex-col md:flex-row relative z-10">
           {/* Left panel */}
-          <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white flex flex-col justify-between p-8 md:p-10 pt-16 md:pt-10 md:w-1/2 relative overflow-hidden">
+          <div className="flex flex-col justify-between p-8 md:p-10 pt-16 md:pt-10 md:w-1/2 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white relative overflow-hidden">
             {/* Ambient light flare overlays */}
             <div className="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
@@ -177,6 +212,14 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
                 </label>
                 <button
                   type="button"
+                  onClick={() => {
+                    setForgotEmail("");
+                    setForgotError("");
+                    setForgotSuccess("");
+                    setNewPassword("");
+                    setStep(1);
+                    setShowForgotModal(true);
+                  }}
                   className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors"
                 >
                   Lupa?
@@ -211,9 +254,11 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
                 className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 accent-indigo-600 text-indigo-600 focus:ring-indigo-500/20"
               />
-              <span className="text-sm text-slate-600 dark:text-slate-400">
+              <span className="text-sm text-slate-650 dark:text-slate-400">
                 Ingat saya
               </span>
             </label>
@@ -239,6 +284,114 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
         </div>
       </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && (
+        <div className="fixed inset-0 bg-slate-900/60 dark:bg-slate-955/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-xl border border-slate-200/60 dark:border-slate-800/80 p-6 relative">
+            <button
+              type="button"
+              onClick={handleCloseForgotModal}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400">
+                <Shield className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                  Lupa Kata Sandi
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Atur ulang kata sandi akun Anda
+                </p>
+              </div>
+            </div>
+
+            {forgotError && (
+              <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 rounded-lg px-3 py-2.5 mb-4 text-xs">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{forgotError}</span>
+              </div>
+            )}
+
+            {forgotSuccess && (
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 rounded-lg px-3 py-2.5 mb-4 text-xs">
+                {forgotSuccess}
+              </div>
+            )}
+
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+              Kami akan mengirimkan link reset kata sandi ke email Anda. Klik link tersebut untuk mengatur kata sandi baru.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="nama@email.com"
+                  value={forgotEmail}
+                  onChange={(e) => {
+                    setForgotEmail(e.target.value);
+                    setForgotError("");
+                  }}
+                  className={inputCls}
+                />
+              </div>
+              <button
+                type="button"
+                disabled={forgotLoading}
+                onClick={async () => {
+                  if (!forgotEmail) {
+                    setForgotError("Email wajib diisi.");
+                    return;
+                  }
+                  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                  if (!emailRegex.test(forgotEmail.trim())) {
+                    setForgotError("Format email tidak valid.");
+                    return;
+                  }
+
+                  setForgotLoading(true);
+                  setForgotError("");
+                  setForgotSuccess("");
+                  try {
+                    if (hasSupabaseConfig()) {
+                      await sendSupabasePasswordReset(forgotEmail.trim());
+                      setForgotSuccess("Link reset kata sandi telah dikirim ke email Supabase Anda.");
+                      setTimeout(() => {
+                        handleCloseForgotModal();
+                      }, 3000);
+                      return;
+                    }
+
+                    const users = getUsers();
+                    const found = users.find(u => u.email === forgotEmail.trim());
+                    if (found) {
+                      setForgotError("Untuk akun lokal, gunakan halaman pengaturan untuk ubah kata sandi.");
+                    } else {
+                      setForgotError("Email tidak ditemukan dalam sistem.");
+                    }
+                  } catch (err) {
+                    setForgotError(err instanceof Error ? err.message : "Terjadi kesalahan saat mengirim email reset.");
+                  } finally {
+                    setForgotLoading(false);
+                  }
+                }}
+                className="w-full bg-[#131b2e] dark:bg-slate-700 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-[#1c2742] dark:hover:bg-slate-600 transition duration-200 shadow-sm active:scale-98 disabled:opacity-60"
+              >
+                {forgotLoading ? "Memproses..." : "Kirim Email Reset"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

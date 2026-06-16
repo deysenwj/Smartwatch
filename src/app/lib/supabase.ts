@@ -317,6 +317,42 @@ export async function signOutWithSupabase() {
   await supabase.auth.signOut();
 }
 
+export async function checkSupabaseEmailExists(email: string): Promise<boolean> {
+  if (!supabase) return false;
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("email", email)
+    .maybeSingle();
+  if (error) {
+    console.error("Error checking email in Supabase profiles:", error);
+    return false;
+  }
+  return Boolean(data);
+}
+
+export async function sendSupabasePasswordReset(email: string): Promise<void> {
+  if (!supabase) throw new Error("Supabase is not configured.");
+  // Use current origin so it works on localhost and production
+  const origin = window.location.origin;
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: origin + "/",
+  });
+  if (error) {
+    // Berikan pesan error yang lebih ramah pengguna
+    const msg = error.message || "";
+    if (msg.toLowerCase().includes("redirect")) {
+      throw new Error(
+        "URL pengalihan tidak diizinkan. Tambahkan '" + origin + "/' di Supabase Dashboard → Authentication → URL Configuration → Redirect URLs, lalu coba lagi."
+      );
+    }
+    if (msg.toLowerCase().includes("rate limit") || msg.toLowerCase().includes("too many")) {
+      throw new Error("Terlalu banyak permintaan reset dalam waktu singkat. Coba lagi beberapa menit kemudian.");
+    }
+    throw new Error("Gagal mengirim email reset: " + (error.message || "Kesalahan tidak diketahui"));
+  }
+}
+
 // ── Supabase Database Operations ───────────────────────────────────────────
 
 export async function getSupabaseUsers(): Promise<User[]> {

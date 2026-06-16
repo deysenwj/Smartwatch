@@ -142,7 +142,7 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
 
         <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800/80 overflow-hidden flex flex-col md:flex-row relative z-10">
           {/* Left panel */}
-          <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white flex flex-col justify-between p-8 md:p-10 pt-16 md:pt-10 md:w-1/2 relative overflow-hidden">
+          <div className="flex flex-col justify-between p-8 md:p-10 pt-16 md:pt-10 md:w-1/2 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white relative overflow-hidden">
             {/* Ambient light flare overlays */}
             <div className="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
