@@ -176,6 +176,11 @@ export function markAllRead(email: string) {
   localStorage.setItem(notifKey(email), JSON.stringify(list));
 }
 
+export function markNotificationRead(email: string, id: string) {
+  const list = getNotifications(email).map(n => n.id === id ? { ...n, read: true } : n);
+  localStorage.setItem(notifKey(email), JSON.stringify(list));
+}
+
 export function clearNotifications(email: string) {
   localStorage.setItem(notifKey(email), JSON.stringify([]));
 }

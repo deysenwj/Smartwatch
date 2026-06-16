@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
   initStorage, getCurrentUser, setCurrentUser,
-  getNotifications, markAllRead, clearNotifications,
+  getNotifications, markAllRead, markNotificationRead, clearNotifications,
   getChatMessages, addChatMessage, markChatRead, timeAgo,
   type User, type Notification, type ChatMessage,
 } from "./lib/storage";
@@ -18,7 +18,7 @@ import { AdminPage }    from "./components/AdminPage";
 
 import {
   signOutWithSupabase, hasSupabaseConfig, getSupabaseNotifications,
-  markAllSupabaseNotificationsRead, clearSupabaseNotifications,
+  markAllSupabaseNotificationsRead, markSupabaseNotificationRead, clearSupabaseNotifications,
   getSupabaseChatMessages, addSupabaseChatMessage, markSupabaseChatRead,
   supabase, type SupabaseChatMessage,
 } from "./lib/supabase";
@@ -267,6 +267,14 @@ export default function App() {
             }
             refreshNotifs();
           }}
+          onMarkRead={async (id: string) => {
+            if (hasSupabaseConfig()) {
+              await markSupabaseNotificationRead(id);
+            } else {
+              markNotificationRead(user.email, id);
+            }
+            refreshNotifs();
+          }}
           onClearNotifs={async () => {
             if (hasSupabaseConfig()) {
               await clearSupabaseNotifications(user.id || "");
@@ -313,6 +321,14 @@ export default function App() {
               }
               refreshNotifs();
             }}
+            onMarkRead={async (id: string) => {
+              if (hasSupabaseConfig()) {
+                await markSupabaseNotificationRead(id);
+              } else {
+                markNotificationRead(user.email, id);
+              }
+              refreshNotifs();
+            }}
             onClearNotifs={async () => {
               if (hasSupabaseConfig()) {
                 await clearSupabaseNotifications(user.id || "");
@@ -345,7 +361,7 @@ export default function App() {
         {/* Floating Customer Service Chat Widget */}
         <button
           onClick={() => setIsChatOpen(v => !v)}
-          className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-slate-800 hover:bg-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(0,0,0,0.2)] border border-slate-750/60 transition-all duration-300 hover:scale-105"
+          className="fixed sm:bottom-6 sm:right-6 right-4 bottom-6 z-40 w-14 h-14 bg-slate-800 hover:bg-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(0,0,0,0.2)] border border-slate-750/60 transition-all duration-300 hover:scale-105"
           title="Customer Service"
         >
           <Headphones className="w-6 h-6" />
@@ -357,7 +373,7 @@ export default function App() {
         </button>
 
         {isChatOpen && (
-          <div className="fixed bottom-24 right-6 z-40 w-96 max-w-[calc(100vw-2rem)] h-[480px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-[24px] shadow-2xl flex flex-col overflow-hidden transition-all duration-300 ease-out">
+          <div className="fixed sm:bottom-24 sm:right-6 right-4 bottom-24 left-4 sm:left-auto w-auto sm:w-96 h-[480px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-[24px] shadow-2xl flex flex-col overflow-hidden transition-all duration-300 ease-out">
             {/* Header */}
             <div className="px-5 py-4 bg-slate-800 border-b border-slate-700/50 flex items-center justify-between text-white">
               <div className="flex items-center gap-3">

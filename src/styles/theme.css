@@ -179,3 +179,170 @@
     line-height: 1.5;
   }
 }
+
+/* ── Apple Liquid Glass (Glassmorphism) for Nav & Overlay Frames Only (Preserves Readability) ── */
+
+/* 1. Glassmorphic Sidebar (Floating navigation pane) */
+aside, 
+.aside-container {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(20px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(190%) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+.dark aside,
+.dark .aside-container {
+  background: rgba(15, 23, 42, 0.82) !important;
+  backdrop-filter: blur(20px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(190%) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+/* 2. Glassmorphic Sticky Header (TopBar - blurs scrolled content beneath it) */
+header {
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(16px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(190%) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+.dark header {
+  background: rgba(15, 23, 42, 0.75) !important;
+  backdrop-filter: blur(16px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(190%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* 3. Glassmorphic Popovers & Dropdowns (Notification dropdown, menus) */
+.fixed.z-50, 
+.absolute.z-50,
+[class*="bg-white/98"],
+[class*="bg-white/80"] {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(24px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08) !important;
+}
+.dark .fixed.z-50, 
+.dark .absolute.z-50,
+.dark [class*="bg-white/98"],
+.dark [class*="bg-white/80"] {
+  background: rgba(20, 24, 38, 0.88) !important;
+  backdrop-filter: blur(24px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* 4. Glassmorphic Floating Chat Drawer */
+.fixed.bottom-24.right-6, 
+.fixed.sm\:bottom-24 {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(20px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(190%) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.08) !important;
+}
+.dark .fixed.bottom-24.right-6, 
+.dark .fixed.sm\:bottom-24 {
+  background: rgba(30, 41, 59, 0.55) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ── Micro-Interactions & Transitions ───────────────────────────────── */
+
+/* 1. Universal Active Button Scale (satisfying press feedback) */
+button:active:not(:disabled),
+.btn-interaction:active {
+  transform: scale(0.96) !important;
+}
+
+/* 2. Smooth Cards Hover Lift & Depth Shadow */
+.rounded-xl, .rounded-2xl {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, background 0.2s ease !important;
+}
+.rounded-xl:hover:not(button):not(input):not(textarea):not(select):not(span):not(a),
+.rounded-2xl:hover:not(button):not(input):not(textarea):not(select):not(span):not(a) {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.06) !important;
+}
+.dark .rounded-xl:hover:not(button):not(input):not(textarea):not(select):not(span):not(a),
+.dark .rounded-2xl:hover:not(button):not(input):not(textarea):not(select):not(span):not(a) {
+  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* 3. Bell Icon Ringing Effect on Hover */
+@keyframes bell-ring {
+  0% { transform: rotate(0); }
+  12.5% { transform: rotate(15deg); }
+  25% { transform: rotate(-12deg); }
+  37.5% { transform: rotate(8deg); }
+  50% { transform: rotate(-6deg); }
+  62.5% { transform: rotate(4deg); }
+  75% { transform: rotate(-2deg); }
+  100% { transform: rotate(0); }
+}
+button[title="Notifikasi"]:hover svg,
+button.relative:hover svg.lucide-bell {
+  animation: bell-ring 0.65s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* 4. Customer Service Toggle Button Pop */
+button[title="Customer Service"] {
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.2s ease !important;
+}
+button[title="Customer Service"]:hover {
+  transform: scale(1.1) translateY(-2px) !important;
+}
+
+/* 5. Smooth Slide Down & Fade In for Dropdowns */
+@keyframes popover-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+header .absolute.z-50, 
+header .fixed.z-50,
+.relative .fixed.z-50,
+.relative .absolute.z-50 {
+  animation: popover-enter 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: top right;
+}
+
+/* 6. Sidebar Link Hover Icon Micro-Interaction */
+aside nav button {
+  transition: background-color 0.2s ease, color 0.2s ease !important;
+}
+aside nav button svg {
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+aside nav button:hover svg {
+  transform: scale(1.15) rotate(-6deg);
+}
+
+/* 7. Input Glow focus feedback */
+input[type="text"], input[type="password"], input[type="tel"], textarea, select {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
+}
+
+/* 5. Ambient, Soft Page Background (A very subtle gradient on body that does not distract) */
+body {
+  background: radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.03) 0%, transparent 40%),
+              radial-gradient(circle at 100% 100%, rgba(236, 72, 153, 0.03) 0%, transparent 45%),
+              #f8fafc !important;
+}
+body.dark, .dark body {
+  background: radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.015) 0%, transparent 40%),
+              radial-gradient(circle at 100% 100%, rgba(236, 72, 153, 0.015) 0%, transparent 45%),
+              #0b0f19 !important;
+}
+
+

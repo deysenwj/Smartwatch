@@ -601,6 +601,17 @@ export async function markAllSupabaseNotificationsRead(
   if (error) throw error;
 }
 
+export async function markSupabaseNotificationRead(
+  id: string,
+): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase
+    .from("notifications")
+    .update({ read: true })
+    .eq("id", id);
+  if (error) throw error;
+}
+
 export async function clearSupabaseNotifications(
   userUUID: string,
 ): Promise<void> {

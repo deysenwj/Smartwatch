@@ -32,6 +32,7 @@ interface Props {
   onClearNotifs: () => void;
   onLogout: () => void;
   onSaved?: () => void;
+  onMarkRead?: (id: string) => void;
 }
 
 function initials(name: string) {
@@ -39,8 +40,8 @@ function initials(name: string) {
 }
 
 // ── Notification Dropdown ──────────────────────────────────────────────────
-function NotifDropdown({ notifs, onMarkAllRead, onClearNotifs }: {
-  notifs: Notification[]; onMarkAllRead: () => void; onClearNotifs: () => void;
+function NotifDropdown({ notifs, onMarkAllRead, onClearNotifs, onMarkRead }: {
+  notifs: Notification[]; onMarkAllRead: () => void; onClearNotifs: () => void; onMarkRead?: (id: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -68,7 +69,7 @@ function NotifDropdown({ notifs, onMarkAllRead, onClearNotifs }: {
       </button>
       {open && (
         <div className="fixed md:absolute left-4 right-4 md:left-auto md:right-0 top-16 md:top-12 w-auto md:w-80 bg-white/98 dark:bg-slate-900/98 backdrop-blur-md border border-slate-200/80 dark:border-slate-700/60 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] z-50 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700">
+          <div className="flex items-center justify-between pl-6 pr-4 py-3 border-b border-slate-100 dark:border-slate-700">
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold text-slate-900 dark:text-white">Notifikasi</h3>
               {unread > 0 && <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-[10px] font-bold rounded-full">{unread} baru</span>}
@@ -98,7 +99,11 @@ function NotifDropdown({ notifs, onMarkAllRead, onClearNotifs }: {
               const Icon  = TYPE_ICON[n.type] ?? Info;
               const color = TYPE_COLOR[n.type] ?? "text-blue-500";
               return (
-                <div key={n.id} className={`flex items-start gap-3 px-4 py-3 transition ${n.read ? "" : "bg-blue-50/50 dark:bg-blue-900/10"}`}>
+                <div
+                  key={n.id}
+                  onClick={() => !n.read && onMarkRead?.(n.id)}
+                  className={`flex items-start gap-4 pl-6 pr-4 py-3 transition cursor-pointer ${n.read ? "hover:bg-slate-50 dark:hover:bg-slate-800/40" : "bg-blue-50/50 dark:bg-blue-900/10 hover:bg-blue-50/80 dark:hover:bg-blue-900/20"}`}
+                >
                   <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${color}`} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-slate-700 dark:text-slate-300 leading-snug">{n.text}</p>
@@ -359,7 +364,7 @@ function ValidasiModal({ report, onClose, onUpdate }: {
 }
 
 // ── Main AdminPage ─────────────────────────────────────────────────────────
-export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark, onMarkAllRead, onClearNotifs, onLogout, onSaved }: Props) {
+export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark, onMarkAllRead, onClearNotifs, onLogout, onSaved, onMarkRead }: Props) {
   const [tab,         setTab]        = useState<AdminTab>("validasi");
   const [reports,     setReports]    = useState<Report[]>([]);
   const [users,       setUsers]      = useState<UserType[]>([]);
@@ -715,7 +720,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
               className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition">
               {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-500" />}
             </button>
-            <NotifDropdown notifs={notifs} onMarkAllRead={onMarkAllRead} onClearNotifs={onClearNotifs} />
+            <NotifDropdown notifs={notifs} onMarkAllRead={onMarkAllRead} onClearNotifs={onClearNotifs} onMarkRead={onMarkRead} />
             {user.avatarUrl ? (
               <img
                 src={user.avatarUrl}

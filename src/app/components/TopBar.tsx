@@ -14,6 +14,7 @@ interface Props {
   avatarUrl?: string;
   onMarkAllRead: () => void;
   onClearNotifs: () => void;
+  onMarkRead?: (id: string) => void;
 }
 
 const TYPE_ICON: Record<string, React.ElementType> = {
@@ -29,7 +30,7 @@ const TYPE_COLOR: Record<string, string> = {
   error:   "text-red-500",
 };
 
-export function TopBar({ title, onMenuOpen, isDark, onToggleDark, notifs, userInitials, userName, userRole, avatarUrl, onMarkAllRead, onClearNotifs }: Props) {
+export function TopBar({ title, onMenuOpen, isDark, onToggleDark, notifs, userInitials, userName, userRole, avatarUrl, onMarkAllRead, onClearNotifs, onMarkRead }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const unread = notifs.filter(n => !n.read).length;
@@ -89,7 +90,7 @@ export function TopBar({ title, onMenuOpen, isDark, onToggleDark, notifs, userIn
             {open && (
               <div className="fixed md:absolute left-4 right-4 md:left-auto md:right-0 top-20 md:top-12 w-auto md:w-80 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-850 rounded-2xl shadow-xl z-50 overflow-hidden">
                 {/* Dropdown header */}
-                <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between pl-6 pr-4 py-3 border-b border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-bold text-slate-900 dark:text-white">Notifikasi</h3>
                     {unread > 0 && (
@@ -127,7 +128,8 @@ export function TopBar({ title, onMenuOpen, isDark, onToggleDark, notifs, userIn
                     return (
                       <div
                         key={n.id}
-                        className={`flex items-start gap-3 px-4 py-3 transition ${n.read ? "" : "bg-blue-50/60 dark:bg-blue-900/10"}`}
+                        onClick={() => !n.read && onMarkRead?.(n.id)}
+                        className={`flex items-start gap-4 pl-6 pr-4 py-3 transition cursor-pointer ${n.read ? "hover:bg-slate-55/40 dark:hover:bg-slate-800/20" : "bg-blue-50/60 dark:bg-blue-900/10 hover:bg-blue-50/80 dark:hover:bg-blue-900/20"}`}
                       >
                         <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${color}`} />
                         <div className="flex-1 min-w-0">
