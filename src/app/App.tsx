@@ -25,7 +25,7 @@ type AuthPage = "login" | "register";
 type AppPage  = "dashboard" | "laporan" | "riwayat" | "settings";
 
 const PAGE_TITLES: Record<AppPage, string> = {
-  dashboard: "Dashboard",
+  dashboard: "Dashboard Overview",
   laporan:   "Buat Laporan",
   riwayat:   "Riwayat Laporan",
   settings:  "Pengaturan",
@@ -201,6 +201,7 @@ export default function App() {
             notifs={notifs}
             userInitials={initials(user.name)}
             userName={user.name}
+            userRole={user.role}
             avatarUrl={user.avatarUrl}
             onMarkAllRead={async () => {
               if (hasSupabaseConfig()) {
