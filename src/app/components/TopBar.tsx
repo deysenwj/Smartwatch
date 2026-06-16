@@ -87,7 +87,7 @@ export function TopBar({ title, onMenuOpen, isDark, onToggleDark, notifs, userIn
             </button>
 
             {open && (
-              <div className="absolute right-0 top-12 w-80 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-850 rounded-2xl shadow-xl z-50 overflow-hidden">
+              <div className="fixed md:absolute left-4 right-4 md:left-auto md:right-0 top-20 md:top-12 w-auto md:w-80 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-850 rounded-2xl shadow-xl z-50 overflow-hidden">
                 {/* Dropdown header */}
                 <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-2">

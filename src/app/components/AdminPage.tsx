@@ -67,7 +67,7 @@ function NotifDropdown({ notifs, onMarkAllRead, onClearNotifs }: {
         )}
       </button>
       {open && (
-        <div className="absolute right-0 top-12 w-80 max-w-[calc(100vw-2rem)] bg-white/98 dark:bg-slate-900/98 backdrop-blur-md border border-slate-200/80 dark:border-slate-700/60 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] z-50 overflow-hidden">
+        <div className="fixed md:absolute left-4 right-4 md:left-auto md:right-0 top-16 md:top-12 w-auto md:w-80 bg-white/98 dark:bg-slate-900/98 backdrop-blur-md border border-slate-200/80 dark:border-slate-700/60 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] z-50 overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700">
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold text-slate-900 dark:text-white">Notifikasi</h3>
