@@ -3,20 +3,23 @@ import {
   Watch, ClipboardCheck, Users, LogOut, X, Bell, Sun, Moon,
   Trash2, FileText, Clock, CheckCircle, XCircle, AlertCircle,
   ChevronRight, Menu, Search, Info, User, Calendar, MapPin,
-  TrendingUp, ShieldAlert, CheckCheck, Settings,
+  TrendingUp, ShieldAlert, CheckCheck, Settings, MessageSquare, Send, Headphones,
 } from "lucide-react";
 import {
   getReports, updateReport, getUsers, deleteUser as removeUser,
   addNotification, formatDate, STATUS_PILL, timeAgo,
-  type User as UserType, type Report, type Notification,
+  getChatMessages, addChatMessage, getChatThreads, markChatRead,
+  type User as UserType, type Report, type Notification, type ChatMessage, type ChatThread,
 } from "../lib/storage";
 import {
   hasSupabaseConfig, getSupabaseReports, getSupabaseUsers,
   updateSupabaseReport, deleteSupabaseUser, addSupabaseNotification,
+  getSupabaseChatMessages, addSupabaseChatMessage, markSupabaseChatRead, getSupabaseChatThreads,
+  type SupabaseChatMessage, type SupabaseChatThread,
 } from "../lib/supabase";
 import { SettingsPage } from "./SettingsPage";
 
-type AdminTab = "validasi" | "users" | "settings";
+type AdminTab = "validasi" | "users" | "chat" | "settings";
 type StatusFilter = "all" | Report["status"];
 
 interface Props {
@@ -129,10 +132,65 @@ function ValidasiModal({ report, onClose, onUpdate }: {
 }) {
   const [note, setNote]   = useState("");
   const [error, setError] = useState("");
+  const [confirmConfig, setConfirmConfig] = useState<{
+    title: string;
+    description: string;
+    icon: React.ElementType;
+    iconColor: string;
+    iconBg: string;
+    onConfirm: () => void;
+    confirmText: string;
+    isDestructive?: boolean;
+  } | null>(null);
 
   function submit(status: Report["status"]) {
     if (!note.trim()) { setError("Catatan wajib diisi sebelum mengambil tindakan."); return; }
-    onUpdate(report.id, status, note.trim());
+    
+    let title = "";
+    let description = "";
+    let icon = Clock;
+    let iconColor = "text-amber-500 dark:text-amber-400";
+    let iconBg = "bg-amber-50 dark:bg-amber-950/50";
+    let confirmText = "Proses";
+    let isDestructive = false;
+
+    if (status === "Selesai") {
+      title = "Setujui Laporan";
+      description = `Apakah Anda yakin ingin menyetujui laporan "${report.judul}" dan mengubah statusnya menjadi Selesai?`;
+      icon = CheckCircle;
+      iconColor = "text-emerald-600 dark:text-emerald-400";
+      iconBg = "bg-emerald-50 dark:bg-emerald-950/50";
+      confirmText = "Setujui";
+    } else if (status === "Ditolak") {
+      title = "Tolak Laporan";
+      description = `Apakah Anda yakin ingin menolak laporan "${report.judul}"?`;
+      icon = XCircle;
+      iconColor = "text-red-600 dark:text-red-400";
+      iconBg = "bg-red-50 dark:bg-red-950/50";
+      confirmText = "Tolak";
+      isDestructive = true;
+    } else {
+      title = "Proses Laporan";
+      description = `Apakah Anda yakin ingin memproses laporan "${report.judul}"? Status laporan akan diubah menjadi Diproses.`;
+      icon = Clock;
+      iconColor = "text-amber-500 dark:text-amber-400";
+      iconBg = "bg-amber-50 dark:bg-amber-950/50";
+      confirmText = "Proses";
+    }
+
+    setConfirmConfig({
+      title,
+      description,
+      icon,
+      iconColor,
+      iconBg,
+      confirmText,
+      isDestructive,
+      onConfirm: () => {
+        setConfirmConfig(null);
+        onUpdate(report.id, status, note.trim());
+      }
+    });
   }
 
   return (
@@ -259,13 +317,43 @@ function ValidasiModal({ report, onClose, onUpdate }: {
                 <Clock className="w-4 h-4" /> Proses
               </button>
             </div>
-            <button onClick={() => submit("Prioritas")}
-              className="w-full flex items-center justify-center gap-2 py-2 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm font-semibold transition">
-              <ShieldAlert className="w-4 h-4" /> Tandai Prioritas
-            </button>
           </div>
         </div>
       </div>
+      {/* Reusable Confirmation Modal */}
+      {confirmConfig && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[150] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm shadow-2xl p-6 flex flex-col items-center text-center space-y-4">
+            <div className={`w-12 h-12 ${confirmConfig.iconBg} ${confirmConfig.iconColor} rounded-full flex items-center justify-center`}>
+              <confirmConfig.icon className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">{confirmConfig.title}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">{confirmConfig.description}</p>
+            </div>
+            <div className="flex w-full gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setConfirmConfig(null)}
+                className="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-350 transition"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmConfig.onConfirm}
+                className={`flex-1 px-4 py-2.5 text-white rounded-xl text-xs font-semibold transition ${
+                  confirmConfig.isDestructive
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600"
+                }`}
+              >
+                {confirmConfig.confirmText}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -278,8 +366,29 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
   const [filter,      setFilter]     = useState<StatusFilter>("all");
   const [search,      setSearch]     = useState("");
   const [modal,       setModal]      = useState<Report | null>(null);
+  const [confirmConfig, setConfirmConfig] = useState<{
+    title: string;
+    description: string;
+    icon: React.ElementType;
+    iconColor: string;
+    iconBg: string;
+    onConfirm: () => void;
+    confirmText: string;
+    isDestructive?: boolean;
+  } | null>(null);
   const [sidebarOpen, setSidebar]    = useState(false);
   const [toast,       setToast]      = useState<{ msg: string; type: "success" | "error" } | null>(null);
+  // Chat admin state — support both localStorage and Supabase
+  const [chatThreads,      setChatThreads]      = useState<(ChatThread | SupabaseChatThread)[]>([]);
+  const [activeChatEmail,  setActiveChatEmail]  = useState<string | null>(null);
+  const [activeChatUUID,   setActiveChatUUID]   = useState<string | null>(null);
+  const [activeChatMsgs,   setActiveChatMsgs]   = useState<(ChatMessage | SupabaseChatMessage)[]>([]);
+  const [adminChatInput,   setAdminChatInput]   = useState("");
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Ref untuk menghindari stale closure di dalam setInterval
+  const activeChatEmailRef = useRef<string | null>(null);
+  const activeChatUUIDRef  = useRef<string | null>(null);
 
   async function refresh() {
     if (hasSupabaseConfig()) {
@@ -295,10 +404,38 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
       setReports(getReports().sort((a, b) => b.tanggalDibuat.localeCompare(a.tanggalDibuat)));
       setUsers(getUsers().filter(u => u.role === "user"));
     }
+    // Refresh chat threads
+    if (hasSupabaseConfig()) {
+      try {
+        const threads = await getSupabaseChatThreads();
+        setChatThreads(threads);
+      } catch (e) { console.error("chat threads error:", e); }
+    } else {
+      setChatThreads(getChatThreads());
+    }
   }
 
   useEffect(() => {
     refresh();
+    // Poll chat threads setiap 3 detik — gunakan ref untuk hindari stale closure
+    chatPollRef.current = setInterval(async () => {
+      if (hasSupabaseConfig()) {
+        const threads = await getSupabaseChatThreads();
+        setChatThreads(threads);
+        if (activeChatUUIDRef.current) {
+          const msgs = await getSupabaseChatMessages(activeChatUUIDRef.current);
+          setActiveChatMsgs(msgs);
+        }
+      } else {
+        setChatThreads(getChatThreads());
+        if (activeChatEmailRef.current) {
+          setActiveChatMsgs(getChatMessages(activeChatEmailRef.current));
+        }
+      }
+    }, 3000);
+    return () => {
+      if (chatPollRef.current) clearInterval(chatPollRef.current);
+    };
   }, []);
 
   function showToast(msg: string, type: "success" | "error" = "success") {
@@ -349,7 +486,22 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
   }
 
   async function handleDeleteUser(email: string) {
-    if (!confirm(`Hapus pengguna ${email}?\nSemua laporan mereka juga akan dihapus dan tindakan tidak dapat dibatalkan.`)) return;
+    setConfirmConfig({
+      title: "Hapus Pengguna",
+      description: `Apakah Anda yakin ingin menghapus pengguna "${email}"? Semua data laporan terkait juga akan dihapus secara permanen.`,
+      icon: Trash2,
+      iconColor: "text-red-600 dark:text-red-400",
+      iconBg: "bg-red-50 dark:bg-red-950/50",
+      confirmText: "Hapus",
+      isDestructive: true,
+      onConfirm: async () => {
+        setConfirmConfig(null);
+        await executeDeleteUser(email);
+      }
+    });
+  }
+
+  async function executeDeleteUser(email: string) {
     if (hasSupabaseConfig()) {
       try {
         const targetUser = users.find(u => u.email === email);
@@ -390,7 +542,6 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
     { key: "all",       label: "Semua",     count: total },
     { key: "Menunggu",  label: "Menunggu",  count: menunggu },
     { key: "Diproses",  label: "Diproses",  count: diproses },
-    { key: "Prioritas", label: "Prioritas", count: reports.filter(r => r.status === "Prioritas").length },
     { key: "Selesai",   label: "Selesai",   count: selesai },
     { key: "Ditolak",   label: "Ditolak",   count: ditolak },
   ];
@@ -398,11 +549,61 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
   const navItems: { key: AdminTab; label: string; icon: React.ElementType }[] = [
     { key: "validasi", label: "Validasi Laporan", icon: ClipboardCheck },
     { key: "users",    label: "Kelola Pengguna",  icon: Users },
+    { key: "chat",     label: "Chat Support",     icon: MessageSquare },
     { key: "settings", label: "Pengaturan",       icon: Settings },
   ];
 
+  const totalUnreadChat = chatThreads.reduce((s, t) => s + t.unread, 0);
+
+  function openChatThread(thread: ChatThread | SupabaseChatThread) {
+    const email = (thread as SupabaseChatThread).userEmail ?? (thread as ChatThread).userEmail;
+    const uuid  = (thread as SupabaseChatThread).userUUID  ?? null;
+    setActiveChatEmail(email);
+    setActiveChatUUID(uuid);
+    activeChatEmailRef.current = email;
+    activeChatUUIDRef.current  = uuid;
+
+    if (hasSupabaseConfig() && uuid) {
+      getSupabaseChatMessages(uuid).then(msgs => {
+        setActiveChatMsgs(msgs);
+        markSupabaseChatRead(uuid, "admin");
+        getSupabaseChatThreads().then(setChatThreads);
+      });
+    } else {
+      setActiveChatMsgs(getChatMessages(email));
+      markChatRead(email, "admin");
+      setChatThreads(getChatThreads());
+    }
+    setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+  }
+
+  async function handleAdminSendChat(e: React.FormEvent) {
+    e.preventDefault();
+    const text = adminChatInput.trim();
+    if (!text) return;
+
+    if (hasSupabaseConfig() && activeChatUUID) {
+      setAdminChatInput("");
+      await addSupabaseChatMessage(activeChatUUID, {
+        from_role: "admin",
+        sender_name: user.name,
+        text,
+      });
+      const msgs = await getSupabaseChatMessages(activeChatUUID);
+      setActiveChatMsgs(msgs);
+      const threads = await getSupabaseChatThreads();
+      setChatThreads(threads);
+    } else if (activeChatEmail) {
+      setAdminChatInput("");
+      addChatMessage(activeChatEmail, { from: "admin", senderName: user.name, text });
+      setActiveChatMsgs(getChatMessages(activeChatEmail));
+      setChatThreads(getChatThreads());
+    }
+    setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+  }
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
 
       {/* Toast */}
       {toast && (
@@ -461,6 +662,11 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                 }`}>
               <Icon className="w-4 h-4 shrink-0" />
               {label}
+              {key === "chat" && totalUnreadChat > 0 && (
+                <span className="ml-auto bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                  {totalUnreadChat}
+                </span>
+              )}
             </button>
           ))}
         </nav>
@@ -499,7 +705,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
             </button>
             <div>
               <h2 className="text-base md:text-lg font-bold text-slate-900 dark:text-white">
-                {tab === "validasi" ? "Validasi Laporan" : tab === "users" ? "Kelola Pengguna" : "Pengaturan"}
+                {tab === "validasi" ? "Validasi Laporan" : tab === "users" ? "Kelola Pengguna" : tab === "chat" ? "Chat Support" : "Pengaturan"}
               </h2>
             </div>
           </div>
@@ -733,6 +939,131 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
             </div>
           )}
 
+          {/* ════════ CHAT TAB ════════ */}
+          {tab === "chat" && (
+            <div className="flex gap-4 h-[calc(100vh-10rem)] min-h-[500px]">
+              {/* Thread list */}
+              <div className="w-64 shrink-0 bg-white dark:bg-slate-800 rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden flex flex-col">
+                <div className="px-4 py-3.5 border-b border-slate-100 dark:border-slate-700">
+                  <div className="flex items-center gap-2">
+                    <Headphones className="w-4 h-4 text-indigo-500" />
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Pesan Masuk</h3>
+                    {totalUnreadChat > 0 && (
+                      <span className="ml-auto bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{totalUnreadChat}</span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex-1 overflow-y-auto divide-y divide-slate-50 dark:divide-slate-700/50">
+                  {chatThreads.length === 0 ? (
+                    <div className="py-10 text-center">
+                      <MessageSquare className="w-8 h-8 text-slate-200 dark:text-slate-600 mx-auto mb-2" />
+                      <p className="text-xs text-slate-400">Belum ada pesan</p>
+                    </div>
+                  ) : chatThreads.map(t => (
+                    <button
+                      key={t.userEmail}
+                      onClick={() => openChatThread(t)}
+                      className={`w-full text-left px-4 py-3 transition hover:bg-slate-50 dark:hover:bg-slate-700/30 ${
+                        activeChatEmail === t.userEmail ? "bg-indigo-50 dark:bg-indigo-900/20" : ""
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 bg-slate-900 dark:bg-slate-600 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                          {initials(t.userName)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{t.userName}</p>
+                            {t.unread > 0 && (
+                              <span className="w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center shrink-0 ml-1">{t.unread}</span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-slate-400 truncate mt-0.5">{t.lastMessage}</p>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Chat panel */}
+              <div className="flex-1 bg-white dark:bg-slate-800 rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden flex flex-col">
+                {!activeChatEmail ? (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
+                    <MessageSquare className="w-12 h-12 text-slate-200 dark:text-slate-600 mb-3" />
+                    <p className="text-sm font-semibold text-slate-400">Pilih percakapan</p>
+                    <p className="text-xs text-slate-300 dark:text-slate-600 mt-1">Klik nama pengguna di sebelah kiri untuk mulai membalas</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Chat header */}
+                    <div className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3 bg-gradient-to-r from-indigo-600 to-indigo-500">
+                      <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-[11px] font-bold shrink-0">
+                        {initials(chatThreads.find(t => t.userEmail === activeChatEmail)?.userName || "U")}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-white">{chatThreads.find(t => t.userEmail === activeChatEmail)?.userName}</p>
+                        <p className="text-[10px] text-indigo-200">{activeChatEmail}</p>
+                      </div>
+                    </div>
+
+                    {/* Messages */}
+                    <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/50 dark:bg-slate-900/20">
+                      {activeChatMsgs.length === 0 ? (
+                        <div className="h-full flex items-center justify-center">
+                          <p className="text-xs text-slate-400">Belum ada pesan dalam percakapan ini</p>
+                        </div>
+                      ) : activeChatMsgs.map(msg => {
+                        const role = (msg as any).from_role ?? (msg as any).from;
+                        const timestamp = (msg as any).created_at ?? (msg as any).time;
+                        const senderName = (msg as any).sender_name ?? (msg as any).senderName;
+
+                        return (
+                          <div key={msg.id} className={`flex ${role === "admin" ? "justify-end" : "justify-start"}`}>
+                            {role === "user" && (
+                              <div className="w-6 h-6 bg-slate-300 dark:bg-slate-600 rounded-full flex items-center justify-center text-slate-700 dark:text-slate-200 text-[9px] font-bold shrink-0 mr-2 mt-0.5">
+                                {initials(senderName || "")}
+                              </div>
+                            )}
+                            <div className={`max-w-[70%] ${
+                              role === "admin"
+                                ? "bg-indigo-600 text-white rounded-2xl rounded-br-sm"
+                                : "bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-700 rounded-2xl rounded-bl-sm"
+                            } px-3 py-2 shadow-sm`}>
+                              <p className="text-xs leading-relaxed">{msg.text}</p>
+                              <p className={`text-[9px] mt-1 ${role === "admin" ? "text-indigo-200" : "text-slate-400"}`}>
+                                {timeAgo(timestamp)}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <div ref={chatEndRef} />
+                    </div>
+
+                    {/* Input */}
+                    <form onSubmit={handleAdminSendChat} className="flex items-center gap-2 p-3 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800">
+                      <input
+                        type="text"
+                        value={adminChatInput}
+                        onChange={e => setAdminChatInput(e.target.value)}
+                        placeholder="Balas pesan..."
+                        className="flex-1 text-xs px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                      />
+                      <button
+                        type="submit"
+                        disabled={!adminChatInput.trim()}
+                        className="w-8 h-8 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white rounded-xl flex items-center justify-center transition shrink-0"
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                      </button>
+                    </form>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* ════════ SETTINGS TAB ════════ */}
           {tab === "settings" && (
             <SettingsPage
@@ -746,6 +1077,41 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
           )}
         </main>
       </div>
+
+      {/* Reusable Confirmation Modal */}
+      {confirmConfig && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm shadow-2xl p-6 flex flex-col items-center text-center space-y-4">
+            <div className={`w-12 h-12 ${confirmConfig.iconBg} ${confirmConfig.iconColor} rounded-full flex items-center justify-center`}>
+              <confirmConfig.icon className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">{confirmConfig.title}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">{confirmConfig.description}</p>
+            </div>
+            <div className="flex w-full gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setConfirmConfig(null)}
+                className="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-350 transition"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmConfig.onConfirm}
+                className={`flex-1 px-4 py-2.5 text-white rounded-xl text-xs font-semibold transition ${
+                  confirmConfig.isDestructive
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600"
+                }`}
+              >
+                {confirmConfig.confirmText}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

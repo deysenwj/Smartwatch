@@ -677,3 +677,114 @@ export async function uploadSupabaseAvatar(file: File): Promise<string> {
 
   return publicUrlData.publicUrl;
 }
+
+// ── Supabase Chat Functions ─────────────────────────────────────────────────
+
+export interface SupabaseChatMessage {
+  id: string;
+  user_id: string;
+  from_role: "user" | "admin";
+  sender_name: string;
+  text: string;
+  read: boolean;
+  created_at: string;
+}
+
+export interface SupabaseChatThread {
+  userUUID: string;
+  userEmail: string;
+  userName: string;
+  lastMessage: string;
+  lastTime: string;
+  unread: number;
+}
+
+/** Ambil semua pesan chat untuk satu user (by UUID) */
+export async function getSupabaseChatMessages(userUUID: string): Promise<SupabaseChatMessage[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("chat_messages")
+    .select("*")
+    .eq("user_id", userUUID)
+    .order("created_at", { ascending: true });
+  if (error) {
+    console.error("getSupabaseChatMessages error:", error);
+    return [];
+  }
+  return (data || []) as SupabaseChatMessage[];
+}
+
+/** Kirim pesan chat baru */
+export async function addSupabaseChatMessage(
+  userUUID: string,
+  msg: { from_role: "user" | "admin"; sender_name: string; text: string }
+): Promise<SupabaseChatMessage | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("chat_messages")
+    .insert([{ user_id: userUUID, ...msg, read: false }])
+    .select()
+    .single();
+  if (error) {
+    console.error("addSupabaseChatMessage error:", error);
+    return null;
+  }
+  return data as SupabaseChatMessage;
+}
+
+/** Mark pesan sebagai terbaca berdasarkan siapa yang membaca */
+export async function markSupabaseChatRead(
+  userUUID: string,
+  readBy: "user" | "admin"
+): Promise<void> {
+  if (!supabase) return;
+  // readBy="user"  → mark pesan dari admin sebagai terbaca
+  // readBy="admin" → mark pesan dari user sebagai terbaca
+  const senderToMark = readBy === "user" ? "admin" : "user";
+  const { error } = await supabase
+    .from("chat_messages")
+    .update({ read: true })
+    .eq("user_id", userUUID)
+    .eq("from_role", senderToMark)
+    .eq("read", false);
+  if (error) console.error("markSupabaseChatRead error:", error);
+}
+
+/** Ambil semua thread chat (khusus admin) */
+export async function getSupabaseChatThreads(): Promise<SupabaseChatThread[]> {
+  if (!supabase) return [];
+  // Ambil semua pesan, digroup per user_id
+  const { data, error } = await supabase
+    .from("chat_messages")
+    .select("*, profiles(id, full_name, email)")
+    .order("created_at", { ascending: false });
+  if (error) {
+    console.error("getSupabaseChatThreads error:", error);
+    return [];
+  }
+
+  const threadsMap = new Map<string, SupabaseChatThread>();
+  for (const msg of (data || []) as any[]) {
+    const uid = msg.user_id;
+    if (!threadsMap.has(uid)) {
+      const profile = Array.isArray(msg.profiles) ? msg.profiles[0] : msg.profiles;
+      threadsMap.set(uid, {
+        userUUID: uid,
+        userEmail: profile?.email || uid,
+        userName: profile?.full_name || uid,
+        lastMessage: msg.text,
+        lastTime: msg.created_at,
+        unread: 0,
+      });
+    }
+    // Hitung unread dari user (belum dibaca admin)
+    if (msg.from_role === "user" && !msg.read) {
+      const t = threadsMap.get(uid)!;
+      t.unread += 1;
+    }
+  }
+
+  return Array.from(threadsMap.values())
+    .sort((a, b) => b.lastTime.localeCompare(a.lastTime));
+}
+

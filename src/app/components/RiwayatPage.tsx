@@ -197,6 +197,16 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
   const [search,     setSearch]     = useState("");
   const [delConfirm, setDelConfirm] = useState(false);
   const [showEdit,   setShowEdit]   = useState(false);
+  const [confirmConfig, setConfirmConfig] = useState<{
+    title: string;
+    description: string;
+    icon: React.ElementType;
+    iconColor: string;
+    iconBg: string;
+    onConfirm: () => void;
+    confirmText: string;
+    isDestructive?: boolean;
+  } | null>(null);
 
   async function refresh() {
     if (hasSupabaseConfig()) {
@@ -244,10 +254,26 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
     } else {
       deleteReport(report.id);
     }
-    setDelConfirm(false);
     setSelectedId(null);
     await refresh();
     onRefreshNotifs();
+  }
+
+  function handleDeleteClick() {
+    if (!report) return;
+    setConfirmConfig({
+      title: "Hapus Laporan",
+      description: `Apakah Anda yakin ingin menghapus laporan "${report.judul}"? Tindakan ini tidak dapat dibatalkan.`,
+      icon: AlertCircle,
+      iconColor: "text-red-600 dark:text-red-400",
+      iconBg: "bg-red-50 dark:bg-red-950/50",
+      confirmText: "Hapus",
+      isDestructive: true,
+      onConfirm: async () => {
+        setConfirmConfig(null);
+        await handleDelete();
+      }
+    });
   }
 
   async function handleEdit(patch: Partial<Report>) {
@@ -279,7 +305,7 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
           <EditModal report={report} onClose={() => setShowEdit(false)} onSave={handleEdit} />
         )}
 
-        <div className="p-4 md:p-8 max-w-4xl space-y-4 md:space-y-5">
+        <div className="flex-1 overflow-y-auto p-6 md:p-10 pb-28 md:pb-10 custom-scrollbar max-w-4xl mx-auto w-full space-y-6">
           <button
             onClick={() => { setSelectedId(null); setDelConfirm(false); setShowEdit(false); }}
             className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition"
@@ -374,31 +400,12 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
             <Timeline status={report.status} notes={report.catatan} />
           </div>
 
-          {/* Delete confirm */}
-          {delConfirm && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0" />
-              <p className="text-sm text-red-700 dark:text-red-400 flex-1">
-                Yakin hapus laporan ini? Tindakan tidak dapat dibatalkan.
-              </p>
-              <div className="flex gap-2 shrink-0">
-                <button onClick={() => setDelConfirm(false)} className="px-3 py-1.5 border border-red-200 dark:border-red-700 rounded-lg text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-white dark:hover:bg-red-900/20 transition">
-                  Batal
-                </button>
-                <button onClick={handleDelete} className="px-4 py-1.5 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 transition">
-                  Ya, Hapus
-                </button>
-              </div>
-            </div>
-          )}
-
           {/* Action bar */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1">
             {/* Left: destructive actions */}
             <button
-              onClick={() => setDelConfirm(true)}
-              disabled={delConfirm}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-lg text-sm font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 transition disabled:opacity-40 w-full sm:w-auto"
+              onClick={handleDeleteClick}
+              className="flex items-center justify-center gap-2 px-4 py-2.5 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-lg text-sm font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 transition w-full sm:w-auto"
             >
               <Trash2 className="w-4 h-4" /> Hapus Laporan
             </button>
@@ -437,7 +444,7 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
 
   // ── List view ────────────────────────────────────────────────────────────
   return (
-    <div className="p-4 md:p-8 max-w-5xl space-y-4 md:space-y-5">
+    <div className="flex-1 overflow-y-auto p-6 md:p-10 pb-28 md:pb-10 custom-scrollbar max-w-5xl mx-auto w-full space-y-6">
       <div>
         <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Riwayat Laporan</h1>
         <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">
@@ -554,6 +561,41 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
           </button>
         ))}
       </div>
+
+      {/* Reusable Confirmation Modal */}
+      {confirmConfig && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm shadow-2xl p-6 flex flex-col items-center text-center space-y-4">
+            <div className={`w-12 h-12 ${confirmConfig.iconBg} ${confirmConfig.iconColor} rounded-full flex items-center justify-center`}>
+              <confirmConfig.icon className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">{confirmConfig.title}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">{confirmConfig.description}</p>
+            </div>
+            <div className="flex w-full gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setConfirmConfig(null)}
+                className="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-350 transition"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmConfig.onConfirm}
+                className={`flex-1 px-4 py-2.5 text-white rounded-xl text-xs font-semibold transition ${
+                  confirmConfig.isDestructive
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600"
+                }`}
+              >
+                {confirmConfig.confirmText}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

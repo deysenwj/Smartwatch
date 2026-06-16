@@ -229,3 +229,75 @@ export const STATUS_PILL: Record<string, string> = {
   Selesai:  "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400",
   Ditolak:  "bg-slate-100 text-slate-500 dark:bg-slate-700/60 dark:text-slate-400",
 };
+
+// ── Chat ───────────────────────────────────────────────────────────────────
+
+export interface ChatMessage {
+  id: string;
+  from: "user" | "admin";
+  senderName: string;
+  text: string;
+  time: string;
+  read: boolean;
+}
+
+const chatKey = (userEmail: string) => `chat_${userEmail}`;
+
+export function getChatMessages(userEmail: string): ChatMessage[] {
+  return JSON.parse(localStorage.getItem(chatKey(userEmail)) || "[]");
+}
+
+export function addChatMessage(userEmail: string, msg: Omit<ChatMessage, "id" | "time" | "read">): ChatMessage {
+  const msgs = getChatMessages(userEmail);
+  const newMsg: ChatMessage = {
+    ...msg,
+    id: Date.now().toString(),
+    time: new Date().toISOString(),
+    read: msg.from === "admin" ? false : true,
+  };
+  localStorage.setItem(chatKey(userEmail), JSON.stringify([...msgs, newMsg]));
+  return newMsg;
+}
+
+export function markChatRead(userEmail: string, readBy: "user" | "admin" = "user") {
+  // readBy="user" → mark pesan dari admin sebagai terbaca (user sudah baca balasan admin)
+  // readBy="admin" → mark pesan dari user sebagai terbaca (admin sudah baca pesan user)
+  const senderToMark = readBy === "user" ? "admin" : "user";
+  const msgs = getChatMessages(userEmail).map(m =>
+    m.from === senderToMark ? { ...m, read: true } : m
+  );
+  localStorage.setItem(chatKey(userEmail), JSON.stringify(msgs));
+}
+
+export interface ChatThread {
+  userEmail: string;
+  userName: string;
+  lastMessage: string;
+  lastTime: string;
+  unread: number;
+}
+
+export function getChatThreads(): ChatThread[] {
+  const threads: ChatThread[] = [];
+  const localUsers = getUsers(); // sebagai fallback untuk nama
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key || !key.startsWith("chat_")) continue;
+    const userEmail = key.replace("chat_", "");
+    const msgs = getChatMessages(userEmail);
+    if (msgs.length === 0) continue;
+    const last = msgs[msgs.length - 1];
+    const unread = msgs.filter(m => m.from === "user" && !m.read).length;
+    const localUser = localUsers.find(u => u.email === userEmail);
+    threads.push({
+      userEmail,
+      userName: localUser?.name || userEmail,
+      lastMessage: last.text,
+      lastTime: last.time,
+      unread,
+    });
+  }
+
+  return threads.sort((a, b) => b.lastTime.localeCompare(a.lastTime));
+}

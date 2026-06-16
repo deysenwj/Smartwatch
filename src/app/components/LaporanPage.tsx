@@ -31,8 +31,17 @@ export function LaporanPage({ user, onNavigate, onSubmitted }: Props) {
   const [loading,   setLoading]   = useState(false);
   const [error,     setError]     = useState("");
   const [file,      setFile]      = useState<File | null>(null);
+  const [confirmConfig, setConfirmConfig] = useState<{
+    title: string;
+    description: string;
+    icon: React.ElementType;
+    iconColor: string;
+    iconBg: string;
+    onConfirm: () => void;
+    confirmText: string;
+  } | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     if (!judul.trim())             { setError("Judul laporan wajib diisi."); return; }
@@ -40,6 +49,21 @@ export function LaporanPage({ user, onNavigate, onSubmitted }: Props) {
     if (!lokasi.trim())            { setError("Lokasi kejadian wajib diisi."); return; }
     if (!tanggal)                  { setError("Tanggal kejadian wajib diisi."); return; }
 
+    setConfirmConfig({
+      title: "Kirim Laporan Baru",
+      description: `Apakah Anda yakin ingin mengirim laporan "${judul.trim()}"? Laporan Anda akan ditinjau oleh tim admin segera.`,
+      icon: Send,
+      iconColor: "text-indigo-600 dark:text-indigo-400",
+      iconBg: "bg-indigo-50 dark:bg-indigo-950/50",
+      confirmText: "Kirim",
+      onConfirm: () => {
+        setConfirmConfig(null);
+        executeSubmit();
+      }
+    });
+  }
+
+  async function executeSubmit() {
     setLoading(true);
 
     if (hasSupabaseConfig()) {
@@ -90,7 +114,7 @@ export function LaporanPage({ user, onNavigate, onSubmitted }: Props) {
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-3xl">
+    <div className="flex-1 overflow-y-auto p-6 md:p-10 pb-28 md:pb-10 custom-scrollbar max-w-3xl mx-auto w-full space-y-6">
       <button onClick={() => onNavigate("dashboard")}
         className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white mb-5 transition">
         <ArrowLeft className="w-4 h-4" /> Kembali ke Dashboard
@@ -229,6 +253,37 @@ export function LaporanPage({ user, onNavigate, onSubmitted }: Props) {
           </button>
         </div>
       </form>
+
+      {/* Reusable Confirmation Modal */}
+      {confirmConfig && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm shadow-2xl p-6 flex flex-col items-center text-center space-y-4">
+            <div className={`w-12 h-12 ${confirmConfig.iconBg} ${confirmConfig.iconColor} rounded-full flex items-center justify-center`}>
+              <confirmConfig.icon className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">{confirmConfig.title}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">{confirmConfig.description}</p>
+            </div>
+            <div className="flex w-full gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setConfirmConfig(null)}
+                className="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-350 transition"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmConfig.onConfirm}
+                className="flex-1 px-4 py-2.5 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white rounded-xl text-xs font-semibold transition"
+              >
+                {confirmConfig.confirmText}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

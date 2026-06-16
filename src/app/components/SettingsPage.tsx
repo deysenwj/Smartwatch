@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Lock, Bell, Smartphone, ChevronRight, AlertTriangle, LogOut, CheckCircle, Eye, EyeOff, Camera } from "lucide-react";
+import { User, Lock, Bell, Smartphone, ChevronRight, AlertTriangle, LogOut, CheckCircle, Eye, EyeOff, Camera, X } from "lucide-react";
 import { getSettings, saveSettings, updateUserProfile, type User as UserType } from "../lib/storage";
 import { hasSupabaseConfig, updateSupabaseProfile, updateSupabasePassword, uploadSupabaseAvatar } from "../lib/supabase";
 
@@ -17,8 +17,8 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: () =
       role="switch"
       aria-checked={checked}
       aria-label={label}
-      className={`relative inline-flex items-center w-11 h-6 rounded-full transition-colors shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500/20
-        ${checked ? "bg-indigo-650" : "bg-slate-300 dark:bg-slate-600"}`}
+      className={`relative inline-flex items-center w-11 h-6 rounded-full transition-colors shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500/20
+        ${checked ? "bg-slate-900 dark:bg-slate-700" : "bg-slate-300 dark:bg-slate-600"}`}
     >
       <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 ${checked ? "translate-x-5" : "translate-x-0"}`} />
     </button>
@@ -43,6 +43,16 @@ const cardCls  = "bg-white dark:bg-slate-800 border border-slate-200 dark:border
 
 export function SettingsPage({ user, onLogout, onSaved }: Props) {
   const isAdmin = user.role === "admin";
+  const [confirmConfig, setConfirmConfig] = useState<{
+    title: string;
+    description: string;
+    icon: React.ElementType;
+    iconColor: string;
+    iconBg: string;
+    onConfirm: () => void;
+    confirmText: string;
+    isDestructive?: boolean;
+  } | null>(null);
   const [name,       setName]      = useState(user.name);
   const [phone,      setPhone]     = useState(user.phone);
   const [pwOld,      setPwOld]     = useState("");
@@ -64,6 +74,12 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
   const [savingPro,  setSavingPro] = useState(false);
   const [savingPw,   setSavingPw]  = useState(false);
 
+  const isProfileChanged =
+    name.trim() !== user.name ||
+    phone.trim() !== user.phone ||
+    settings.pushNotif !== (user.pushNotif ?? false) ||
+    avatarFile !== null;
+
   useEffect(() => {
     setName(user.name);
     setPhone(user.phone);
@@ -78,9 +94,26 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
     setTimeout(() => setToast(null), 3500);
   }
 
-  async function handleSaveProfile(e: React.FormEvent) {
+  function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) { showMsg("Nama tidak boleh kosong.", "error"); return; }
+    if (!isProfileChanged) return;
+
+    setConfirmConfig({
+      title: "Simpan Perubahan",
+      description: "Apakah Anda yakin ingin menyimpan perubahan pada profil Anda?",
+      icon: User,
+      iconColor: "text-indigo-600 dark:text-indigo-400",
+      iconBg: "bg-indigo-50 dark:bg-indigo-950/50",
+      confirmText: "Simpan",
+      onConfirm: async () => {
+        setConfirmConfig(null);
+        await saveProfileData();
+      }
+    });
+  }
+
+  async function saveProfileData() {
     setSavingPro(true);
     
     try {
@@ -133,8 +166,9 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
     }
   }
 
-  async function handleChangePassword(e: React.FormEvent) {
+  function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
+    if (!pwOld || !pwNew || !pwConfirm) return;
     if (!pwOld)                      { showMsg("Kata sandi lama wajib diisi.", "error"); return; }
     
     // Bypass local password verification if Supabase is active
@@ -147,6 +181,21 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
     if (pwNew.length < 6)            { showMsg("Kata sandi baru minimal 6 karakter.", "error"); return; }
     if (pwNew !== pwConfirm)         { showMsg("Konfirmasi kata sandi tidak cocok.", "error"); return; }
     
+    setConfirmConfig({
+      title: "Ubah Kata Sandi",
+      description: "Apakah Anda yakin ingin mengubah kata sandi akun Anda?",
+      icon: Lock,
+      iconColor: "text-amber-600 dark:text-amber-400",
+      iconBg: "bg-amber-50 dark:bg-amber-950/50",
+      confirmText: "Ubah",
+      onConfirm: async () => {
+        setConfirmConfig(null);
+        await changePasswordData();
+      }
+    });
+  }
+
+  async function changePasswordData() {
     setSavingPw(true);
     try {
       if (hasSupabaseConfig()) {
@@ -167,7 +216,7 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-3xl space-y-4 md:space-y-5">
+    <div className="flex-1 overflow-y-auto p-6 md:p-10 pb-28 md:pb-10 custom-scrollbar max-w-3xl mx-auto w-full space-y-6">
       <div>
         <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Pengaturan Akun</h1>
         <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">Kelola informasi profil dan preferensi Anda</p>
@@ -279,8 +328,8 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
         </div>
 
         <div className="flex justify-end mt-5">
-          <button type="submit" disabled={savingPro}
-            className="px-6 py-2.5 bg-slate-900 dark:bg-slate-700 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 dark:hover:bg-slate-600 transition disabled:opacity-60">
+          <button type="submit" disabled={savingPro || !isProfileChanged}
+            className="px-6 py-2.5 bg-slate-900 dark:bg-slate-700 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 dark:hover:bg-slate-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
             {savingPro ? "Menyimpan…" : "Simpan Perubahan"}
           </button>
         </div>
@@ -346,8 +395,8 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
             </div>
 
             <div className="flex justify-end">
-              <button type="submit" disabled={savingPw}
-                className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-slate-700 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 dark:hover:bg-slate-600 transition disabled:opacity-60">
+              <button type="submit" disabled={savingPw || !pwOld || !pwNew || !pwConfirm}
+                className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-slate-700 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 dark:hover:bg-slate-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
                 <ChevronRight className="w-4 h-4" />
                 {savingPw ? "Mengubah…" : "Ubah Kata Sandi"}
               </button>
@@ -356,22 +405,68 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
         </div>
       )}
 
-      {/* ── Danger zone ── */}
-      <div className="bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900/60 rounded-xl p-4 md:p-6">
-        <div className="flex items-center gap-2 mb-2">
-          <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
-          <h2 className="text-sm md:text-base font-bold text-red-700 dark:text-red-400">Zona Berbahaya</h2>
-        </div>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-          Keluar dari sesi aktif saat ini. Anda harus masuk kembali untuk mengakses akun.
-        </p>
+      {/* ── Logout Button ── */}
+      <div className="flex justify-start">
         <button
-          onClick={onLogout}
-          className="flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 transition"
+          type="button"
+          onClick={handleLogoutClick}
+          className="flex items-center gap-2 px-4 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/30 dark:hover:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200/40 dark:border-red-900/30 rounded-xl text-sm font-semibold transition hover:scale-[1.02] active:scale-[0.98] duration-200 cursor-pointer shrink-0"
         >
-          <LogOut className="w-4 h-4" /> Keluar dari Akun
+          <LogOut className="w-4 h-4" />
+          <span>Keluar Akun</span>
         </button>
       </div>
+
+      {/* Reusable Confirmation Modal */}
+      {confirmConfig && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm shadow-2xl p-6 flex flex-col items-center text-center space-y-4">
+            <div className={`w-12 h-12 ${confirmConfig.iconBg} ${confirmConfig.iconColor} rounded-full flex items-center justify-center`}>
+              <confirmConfig.icon className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">{confirmConfig.title}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">{confirmConfig.description}</p>
+            </div>
+            <div className="flex w-full gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setConfirmConfig(null)}
+                className="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-350 transition"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmConfig.onConfirm}
+                className={`flex-1 px-4 py-2.5 text-white rounded-xl text-xs font-semibold transition ${
+                  confirmConfig.isDestructive
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600"
+                }`}
+              >
+                {confirmConfig.confirmText}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
+
+  function handleLogoutClick() {
+    setConfirmConfig({
+      title: "Keluar Akun",
+      description: "Apakah Anda yakin ingin keluar dari akun Anda?",
+      icon: LogOut,
+      iconColor: "text-red-600 dark:text-red-400",
+      iconBg: "bg-red-50 dark:bg-red-950/50",
+      confirmText: "Keluar",
+      isDestructive: true,
+      onConfirm: () => {
+        setConfirmConfig(null);
+        onLogout();
+      }
+    });
+  }
 }
