@@ -681,16 +681,6 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
           ))}
         </nav>
 
-        {/* Footer */}
-        <div className="px-3 py-3 border-t border-slate-800 shrink-0">
-          <button
-            onClick={onLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all"
-          >
-            <LogOut className="w-4 h-4 shrink-0" />
-            <span>Keluar</span>
-          </button>
-        </div>
       </aside>
 
       {/* ── Main content ── */}
@@ -820,9 +810,20 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                         </td>
                         <td className="px-5 py-3.5">
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-[10px] font-bold text-slate-500 dark:text-slate-400 shrink-0">
-                              {initials(r.userName)}
-                            </div>
+                            {(() => {
+                              const matchUser = users.find(u => u.email === r.userId || (r.userUUID && u.id === r.userUUID));
+                              return matchUser?.avatarUrl ? (
+                                <img
+                                  src={matchUser.avatarUrl}
+                                  alt={r.userName}
+                                  className="w-6 h-6 rounded-full object-cover shrink-0 border border-slate-200 dark:border-slate-750"
+                                />
+                              ) : (
+                                <div className="w-6 h-6 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-[10px] font-bold text-slate-500 dark:text-slate-400 shrink-0">
+                                  {initials(r.userName)}
+                                </div>
+                              );
+                            })()}
                             <span className="text-sm text-slate-600 dark:text-slate-400 truncate">{r.userName}</span>
                           </div>
                         </td>
@@ -910,9 +911,17 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                           className={`border-b border-slate-50 dark:border-slate-700/50 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-700/20 transition ${i % 2 === 0 ? "" : "bg-slate-50/30 dark:bg-slate-700/10"}`}>
                           <td className="px-5 py-3.5">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-slate-900 dark:bg-slate-700 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
-                                {initials(u.name)}
-                              </div>
+                              {u.avatarUrl ? (
+                                <img
+                                  src={u.avatarUrl}
+                                  alt={u.name}
+                                  className="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200 dark:border-slate-700"
+                                />
+                              ) : (
+                                <div className="w-8 h-8 bg-slate-900 dark:bg-slate-700 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
+                                  {initials(u.name)}
+                                </div>
+                              )}
                               <span className="text-sm font-semibold text-slate-900 dark:text-white">{u.name}</span>
                             </div>
                           </td>
@@ -970,9 +979,17 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 bg-slate-900 dark:bg-slate-600 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0">
-                          {initials(t.userName)}
-                        </div>
+                        {t.avatarUrl ? (
+                          <img
+                            src={t.avatarUrl}
+                            alt={t.userName}
+                            className="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200 dark:border-slate-750"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 bg-slate-900 dark:bg-slate-600 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                            {initials(t.userName)}
+                          </div>
+                        )}
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between">
                             <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{t.userName}</p>
@@ -1011,9 +1028,20 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                       >
                         <ChevronLeft className="w-5 h-5" />
                       </button>
-                      <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white text-[11px] font-bold shrink-0 border border-white/10">
-                        {initials(chatThreads.find(t => t.userEmail === activeChatEmail)?.userName || "U")}
-                      </div>
+                      {(() => {
+                        const thread = chatThreads.find(t => t.userEmail === activeChatEmail);
+                        return thread?.avatarUrl ? (
+                          <img
+                            src={thread.avatarUrl}
+                            alt={thread.userName}
+                            className="w-8 h-8 rounded-full object-cover shrink-0 border border-white/20"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white text-[11px] font-bold shrink-0 border border-white/10">
+                            {initials(thread?.userName || "U")}
+                          </div>
+                        );
+                      })()}
                       <div>
                         <p className="text-sm font-bold text-white">{chatThreads.find(t => t.userEmail === activeChatEmail)?.userName}</p>
                         <p className="text-[10px] text-slate-400">{activeChatEmail}</p>
@@ -1033,11 +1061,20 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
 
                         return (
                           <div key={msg.id} className={`flex ${role === "admin" ? "justify-end" : "justify-start"}`}>
-                            {role === "user" && (
-                              <div className="w-6 h-6 bg-slate-350 dark:bg-slate-600 rounded-full flex items-center justify-center text-slate-700 dark:text-slate-200 text-[9px] font-bold shrink-0 mr-2 mt-0.5">
-                                {initials(senderName || "")}
-                              </div>
-                            )}
+                            {role === "user" && (() => {
+                              const activeThread = chatThreads.find(t => t.userEmail === activeChatEmail);
+                              return activeThread?.avatarUrl ? (
+                                <img
+                                  src={activeThread.avatarUrl}
+                                  alt={senderName}
+                                  className="w-6 h-6 rounded-full object-cover shrink-0 mr-2 mt-0.5 border border-slate-200 dark:border-slate-700"
+                                />
+                              ) : (
+                                <div className="w-6 h-6 bg-slate-350 dark:bg-slate-600 rounded-full flex items-center justify-center text-slate-700 dark:text-slate-200 text-[9px] font-bold shrink-0 mr-2 mt-0.5">
+                                  {initials(senderName || "")}
+                                </div>
+                              );
+                            })()}
                             <div className={`max-w-[70%] ${
                               role === "admin"
                                 ? "bg-slate-900 dark:bg-slate-950 text-white rounded-2xl rounded-br-sm border border-slate-800 dark:border-slate-800/80"

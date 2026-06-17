@@ -370,6 +370,7 @@ export async function getSupabaseUsers(): Promise<User[]> {
     password: "", // Password is secure in Supabase Auth, not in profiles
     role: (p.role as AppRole) || "user",
     createdAt: p.created_at || new Date().toISOString(),
+    avatarUrl: p.avatar_url || "",
   }));
 }
 
@@ -744,6 +745,7 @@ export interface SupabaseChatThread {
   lastMessage: string;
   lastTime: string;
   unread: number;
+  avatarUrl?: string;
 }
 
 /** Ambil semua pesan chat untuk satu user (by UUID) */
@@ -803,7 +805,7 @@ export async function getSupabaseChatThreads(): Promise<SupabaseChatThread[]> {
   // Ambil semua pesan, digroup per user_id
   const { data, error } = await supabase
     .from("chat_messages")
-    .select("*, profiles(id, full_name, email)")
+    .select("*, profiles(id, full_name, email, avatar_url)")
     .order("created_at", { ascending: false });
   if (error) {
     console.error("getSupabaseChatThreads error:", error);
@@ -822,6 +824,7 @@ export async function getSupabaseChatThreads(): Promise<SupabaseChatThread[]> {
         lastMessage: msg.text,
         lastTime: msg.created_at,
         unread: 0,
+        avatarUrl: profile?.avatar_url || "",
       });
     }
     // Hitung unread dari user (belum dibaca admin)

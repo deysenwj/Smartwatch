@@ -279,6 +279,7 @@ export interface ChatThread {
   lastMessage: string;
   lastTime: string;
   unread: number;
+  avatarUrl?: string;
 }
 
 export function getChatThreads(): ChatThread[] {
@@ -300,6 +301,7 @@ export function getChatThreads(): ChatThread[] {
       lastMessage: last.text,
       lastTime: last.time,
       unread,
+      avatarUrl: localUser?.avatarUrl || "",
     });
   }
 
