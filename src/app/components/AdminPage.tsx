@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   ClipboardCheck, Users, LogOut, X, Bell, Sun, Moon,
   Trash2, FileText, Clock, CheckCircle, XCircle, AlertCircle,
-  ChevronRight, Menu, Search, Info, User, Calendar, MapPin,
+  ChevronRight, ChevronLeft, Menu, Search, Info, User, Calendar, MapPin,
   TrendingUp, ShieldAlert, CheckCheck, Settings, MessageSquare, Send, Headphones,
 } from "lucide-react";
 import systemLogo from "../../imports/system_logo_black.png";
@@ -634,18 +634,18 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
       {sidebarOpen && <div className="fixed inset-0 bg-black/50 z-30 md:hidden" onClick={() => setSidebar(false)} />}
 
       {/* ── Sidebar (dark) ── */}
-      <aside className={`fixed top-0 left-0 h-screen w-60 bg-slate-900 flex flex-col z-40 transition-transform duration-300
+      <aside className={`admin-sidebar fixed top-0 left-0 h-screen w-60 bg-[#07090f] flex flex-col z-40 transition-transform duration-300
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}>
 
         {/* Logo */}
         <div className="flex items-center justify-between px-5 h-16 border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+            <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
               <img src={systemLogo} alt="Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <p className="font-bold text-sm text-white leading-tight">Smartwatch</p>
-              <p className="text-[11px] text-slate-500 leading-tight">Admin Panel</p>
+              <p className="text-[11px] text-slate-400 leading-tight">Admin Panel</p>
             </div>
           </div>
           <button onClick={() => setSidebar(false)} className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-800 transition">
@@ -655,7 +655,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
 
         {/* Menunggu badge */}
         {menunggu > 0 && (
-          <div className="mx-4 mt-4 px-3 py-2.5 bg-indigo-500/10 border border-indigo-500/20 rounded-lg flex items-center gap-2.5">
+          <div className="mx-4 mt-4 px-3 py-2.5 bg-indigo-500/15 border border-indigo-500/30 rounded-lg flex items-center gap-2.5">
             <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse shrink-0" />
             <p className="text-xs text-indigo-300 font-semibold flex-1">{menunggu} laporan menunggu validasi</p>
           </div>
@@ -665,15 +665,15 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
         <nav className="flex-1 px-3 py-4 space-y-0.5">
           {navItems.map(({ key, label, icon: Icon }) => (
             <button key={key} onClick={() => { setTab(key); setSidebar(false); }}
-              className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition text-left
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left
                 ${tab === key
-                  ? "bg-white/10 text-white"
-                  : "text-slate-400 hover:bg-white/5 hover:text-white"
+                  ? "bg-white/15 text-white font-semibold shadow-inner"
+                  : "text-slate-300 hover:bg-white/8 hover:text-white"
                 }`}>
-              <Icon className="w-4 h-4 shrink-0" />
-              {label}
+              <Icon className={`w-4 h-4 shrink-0 ${tab === key ? "text-indigo-400" : "text-slate-400"}`} />
+              <span className="flex-1">{label}</span>
               {key === "chat" && totalUnreadChat > 0 && (
-                <span className="ml-auto bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                <span className="bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
                   {totalUnreadChat}
                 </span>
               )}
@@ -681,25 +681,15 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
           ))}
         </nav>
 
-        {/* User footer */}
-        <div className="px-3 py-4 border-t border-slate-850 shrink-0">
-          <div className="flex items-center gap-2.5 px-3 py-2.5 mb-1 bg-slate-800/40 border border-slate-800/80 rounded-xl shadow-sm">
-            {user.avatarUrl ? (
-              <img
-                src={user.avatarUrl}
-                alt={user.name}
-                className="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-700"
-              />
-            ) : (
-              <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
-                {initials(user.name)}
-              </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-white truncate leading-tight">{user.name}</p>
-              <p className="text-xs text-slate-500 truncate leading-none mt-1">{user.email}</p>
-            </div>
-          </div>
+        {/* Footer */}
+        <div className="px-3 py-3 border-t border-slate-800 shrink-0">
+          <button
+            onClick={onLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all"
+          >
+            <LogOut className="w-4 h-4 shrink-0" />
+            <span>Keluar</span>
+          </button>
         </div>
       </aside>
 
@@ -951,15 +941,15 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
 
           {/* ════════ CHAT TAB ════════ */}
           {tab === "chat" && (
-            <div className="flex gap-4 h-[calc(100vh-10rem)] min-h-[500px]">
+            <div className="flex flex-col md:flex-row gap-4 h-[calc(100vh-10rem)] min-h-[500px]">
               {/* Thread list */}
-              <div className="w-64 shrink-0 bg-white dark:bg-slate-800 rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden flex flex-col">
+              <div className={`w-full md:w-64 md:shrink-0 bg-white dark:bg-slate-800 rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden flex flex-col ${activeChatEmail ? "hidden md:flex" : "flex"}`}>
                 <div className="px-4 py-3.5 border-b border-slate-100 dark:border-slate-700">
                   <div className="flex items-center gap-2">
-                    <Headphones className="w-4 h-4 text-indigo-500" />
+                    <Headphones className="w-4 h-4 text-slate-550 dark:text-slate-400" />
                     <h3 className="text-sm font-bold text-slate-900 dark:text-white">Pesan Masuk</h3>
                     {totalUnreadChat > 0 && (
-                      <span className="ml-auto bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{totalUnreadChat}</span>
+                      <span className="ml-auto bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-[10px] font-bold px-1.5 py-0.5 rounded-full">{totalUnreadChat}</span>
                     )}
                   </div>
                 </div>
@@ -974,7 +964,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                       key={t.userEmail}
                       onClick={() => openChatThread(t)}
                       className={`w-full text-left px-4 py-3 transition hover:bg-slate-50 dark:hover:bg-slate-700/30 ${
-                        activeChatEmail === t.userEmail ? "bg-indigo-50 dark:bg-indigo-900/20" : ""
+                        activeChatEmail === t.userEmail ? "bg-slate-100 dark:bg-slate-700/50 border-l-2 border-slate-900 dark:border-slate-400" : ""
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
@@ -985,7 +975,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                           <div className="flex items-center justify-between">
                             <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{t.userName}</p>
                             {t.unread > 0 && (
-                              <span className="w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center shrink-0 ml-1">{t.unread}</span>
+                              <span className="w-4 h-4 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-[9px] font-bold rounded-full flex items-center justify-center shrink-0 ml-1">{t.unread}</span>
                             )}
                           </div>
                           <p className="text-[10px] text-slate-400 truncate mt-0.5">{t.lastMessage}</p>
@@ -997,7 +987,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
               </div>
 
               {/* Chat panel */}
-              <div className="flex-1 bg-white dark:bg-slate-800 rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden flex flex-col">
+              <div className={`flex-1 bg-white dark:bg-slate-800 rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden flex flex-col ${!activeChatEmail ? "hidden md:flex" : "flex"}`}>
                 {!activeChatEmail ? (
                   <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
                     <MessageSquare className="w-12 h-12 text-slate-200 dark:text-slate-600 mb-3" />
@@ -1006,14 +996,25 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                   </div>
                 ) : (
                   <>
-                    {/* Chat header */}
-                    <div className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3 bg-gradient-to-r from-indigo-600 to-indigo-500">
-                      <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-[11px] font-bold shrink-0">
+                    {/* Chat header (Dark themed instead of blue/purple gradient) */}
+                    <div className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-700 flex items-center gap-3 bg-slate-900 dark:bg-slate-950">
+                      <button
+                        onClick={() => {
+                          setActiveChatEmail(null);
+                          setActiveChatUUID(null);
+                          activeChatEmailRef.current = null;
+                          activeChatUUIDRef.current = null;
+                        }}
+                        className="md:hidden mr-1 text-slate-400 hover:text-white hover:bg-white/10 p-1.5 rounded-lg transition"
+                      >
+                        <ChevronLeft className="w-5 h-5" />
+                      </button>
+                      <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white text-[11px] font-bold shrink-0 border border-white/10">
                         {initials(chatThreads.find(t => t.userEmail === activeChatEmail)?.userName || "U")}
                       </div>
                       <div>
                         <p className="text-sm font-bold text-white">{chatThreads.find(t => t.userEmail === activeChatEmail)?.userName}</p>
-                        <p className="text-[10px] text-indigo-200">{activeChatEmail}</p>
+                        <p className="text-[10px] text-slate-400">{activeChatEmail}</p>
                       </div>
                     </div>
 
@@ -1031,17 +1032,17 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                         return (
                           <div key={msg.id} className={`flex ${role === "admin" ? "justify-end" : "justify-start"}`}>
                             {role === "user" && (
-                              <div className="w-6 h-6 bg-slate-300 dark:bg-slate-600 rounded-full flex items-center justify-center text-slate-700 dark:text-slate-200 text-[9px] font-bold shrink-0 mr-2 mt-0.5">
+                              <div className="w-6 h-6 bg-slate-350 dark:bg-slate-600 rounded-full flex items-center justify-center text-slate-700 dark:text-slate-200 text-[9px] font-bold shrink-0 mr-2 mt-0.5">
                                 {initials(senderName || "")}
                               </div>
                             )}
                             <div className={`max-w-[70%] ${
                               role === "admin"
-                                ? "bg-indigo-600 text-white rounded-2xl rounded-br-sm"
+                                ? "bg-slate-900 dark:bg-slate-950 text-white rounded-2xl rounded-br-sm border border-slate-800 dark:border-slate-800/80"
                                 : "bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-700 rounded-2xl rounded-bl-sm"
                             } px-3 py-2 shadow-sm`}>
                               <p className="text-xs leading-relaxed">{msg.text}</p>
-                              <p className={`text-[9px] mt-1 ${role === "admin" ? "text-indigo-200" : "text-slate-400"}`}>
+                              <p className={`text-[9px] mt-1 ${role === "admin" ? "text-slate-400" : "text-slate-400"}`}>
                                 {timeAgo(timestamp)}
                               </p>
                             </div>
@@ -1052,18 +1053,18 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                     </div>
 
                     {/* Input */}
-                    <form onSubmit={handleAdminSendChat} className="flex items-center gap-2 p-3 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800">
+                    <form onSubmit={handleAdminSendChat} className="flex items-center gap-2 p-3 border-t border-slate-100 dark:border-slate-750/70 bg-white dark:bg-slate-850">
                       <input
                         type="text"
                         value={adminChatInput}
                         onChange={e => setAdminChatInput(e.target.value)}
                         placeholder="Balas pesan..."
-                        className="flex-1 text-xs px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                        className="flex-1 text-xs px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition"
                       />
                       <button
                         type="submit"
                         disabled={!adminChatInput.trim()}
-                        className="w-8 h-8 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white rounded-xl flex items-center justify-center transition shrink-0"
+                        className="w-8 h-8 bg-slate-900 hover:bg-slate-800 dark:bg-slate-950 dark:hover:bg-slate-900 disabled:opacity-40 text-white rounded-xl flex items-center justify-center transition shrink-0"
                       >
                         <Send className="w-3.5 h-3.5" />
                       </button>

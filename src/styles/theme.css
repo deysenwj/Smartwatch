@@ -183,19 +183,24 @@
 /* ── Apple Liquid Glass (Glassmorphism) for Nav & Overlay Frames Only (Preserves Readability) ── */
 
 /* 1. Glassmorphic Sidebar (Floating navigation pane) */
-aside, 
-.aside-container {
+aside:not(.admin-sidebar), 
+.aside-container:not(.admin-sidebar) {
   background: rgba(255, 255, 255, 0.82) !important;
   backdrop-filter: blur(20px) saturate(190%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(190%) !important;
   border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
 }
-.dark aside,
-.dark .aside-container {
+.dark aside:not(.admin-sidebar),
+.dark .aside-container:not(.admin-sidebar) {
   background: rgba(15, 23, 42, 0.82) !important;
   backdrop-filter: blur(20px) saturate(190%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(190%) !important;
   border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+.admin-sidebar {
+  background: #07090f !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: none !important;
 }
 
 /* 2. Glassmorphic Sticky Header (TopBar - blurs scrolled content beneath it) */

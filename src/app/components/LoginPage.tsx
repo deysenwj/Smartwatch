@@ -4,7 +4,6 @@ import {
   Lock,
   Eye,
   EyeOff,
-  Shield,
   AlertCircle,
   X,
 } from "lucide-react";
@@ -131,15 +130,10 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
             </div>
 
             <div className="space-y-6 mt-8 md:mt-0 relative z-10">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center shrink-0">
-                  <Shield className="w-5 h-5 text-indigo-300" />
-                </div>
-                <h2 className="text-2xl md:text-3xl font-bold leading-snug">
-                  Laporkan,
-                  <br className="hidden md:block" /> Pantau, Selesaikan.
-                </h2>
-              </div>
+              <h2 className="text-2xl md:text-3xl font-bold leading-snug">
+                Laporkan,
+                <br className="hidden md:block" /> Pantau, Selesaikan.
+              </h2>
               <p className="text-slate-300 text-sm leading-relaxed">
                 Platform transparan untuk menyampaikan pengaduan hukum Anda secara
                 aman dan terstruktur.
@@ -150,8 +144,8 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
                   ["24/7", "Akses"],
                 ].map(([v, l]) => (
                   <div key={l}>
-                    <p className="text-xl font-bold text-indigo-300">{v}</p>
-                    <p className="text-xs text-slate-400 mt-0.5">{l}</p>
+                    <p className="text-xl font-bold text-white">{v}</p>
+                    <p className="text-xs text-white/80 mt-0.5">{l}</p>
                   </div>
                 ))}
               </div>
@@ -297,18 +291,13 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
               <X className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400">
-                <Shield className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Lupa Kata Sandi
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Atur ulang kata sandi akun Anda
-                </p>
-              </div>
+            <div className="mb-4">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                Lupa Kata Sandi
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Atur ulang kata sandi akun Anda
+              </p>
             </div>
 
             {forgotError && (
