@@ -731,13 +731,13 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
         </header>
 
         {/* ── Page content ── */}
-        <main className="flex-1 p-4 md:p-8 space-y-6 max-w-7xl w-full">
+        <main className="flex-1 p-6 md:p-10 pb-28 md:pb-10 custom-scrollbar max-w-7xl mx-auto w-full space-y-6">
 
           {/* ════════ VALIDASI TAB ════════ */}
           {tab === "validasi" && (
             <>
               {/* Stats row */}
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
                 {[
                   { label: "Total",    val: total,    icon: FileText,    border: "border border-slate-200 dark:border-slate-800",       num: "text-slate-900 dark:text-white",         icon_bg: "bg-slate-50 dark:bg-slate-700/50",     icon_c: "text-slate-500 dark:text-slate-400" },
                   { label: "Menunggu", val: menunggu,  icon: Clock,       border: "border border-indigo-100 dark:border-indigo-950/45",  num: "text-indigo-700 dark:text-indigo-300",    icon_bg: "bg-indigo-50 dark:bg-indigo-900/40",    icon_c: "text-indigo-500 dark:text-indigo-400" },
@@ -745,14 +745,16 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                   { label: "Selesai",  val: selesai,   icon: CheckCircle, border: "border border-emerald-100 dark:border-emerald-950/45",num:"text-emerald-700 dark:text-emerald-300", icon_bg: "bg-emerald-50 dark:bg-emerald-900/40",  icon_c: "text-emerald-500 dark:text-emerald-400" },
                   { label: "Ditolak",  val: ditolak,   icon: XCircle,     border: "border border-red-100 dark:border-red-950/45",        num: "text-red-700 dark:text-red-300",          icon_bg: "bg-red-50 dark:bg-red-900/40",          icon_c: "text-red-500 dark:text-red-400" },
                 ].map(({ label, val, icon: Icon, border, num, icon_bg, icon_c }) => (
-                  <div key={label} className={`bg-white dark:bg-slate-800 rounded-xl p-4 ${border} hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-all duration-350`}>
-                    <div className="flex items-center justify-between mb-3">
-                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">{label}</p>
-                      <div className={`w-7 h-7 ${icon_bg} rounded-lg flex items-center justify-center`}>
-                        <Icon className={`w-3.5 h-3.5 ${icon_c}`} />
+                  <div key={label} className={`bg-white dark:bg-slate-800 rounded-[24px] p-5 border border-slate-100 dark:border-slate-800/80 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between`}>
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-[11px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-widest">{label}</p>
+                        <div className={`w-8 h-8 ${icon_bg} rounded-xl flex items-center justify-center`}>
+                          <Icon className={`w-4 h-4 ${icon_c}`} />
+                        </div>
                       </div>
                     </div>
-                    <p className={`text-2xl font-bold ${num}`}>{val}</p>
+                    <p className={`text-2xl sm:text-[32px] font-bold mt-2 ${num}`}>{val}</p>
                   </div>
                 ))}
               </div>
@@ -785,7 +787,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
               </div>
 
               {/* Table (desktop) */}
-              <div className="hidden md:block bg-white dark:bg-slate-800 rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden">
+              <div className="hidden md:block bg-white dark:bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-800/80 overflow-hidden shadow-sm">
                 <div className="px-6 py-3.5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
                   <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                     {filteredReports.length} laporan
@@ -853,7 +855,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                     <p className="text-sm text-slate-400">Tidak ada laporan ditemukan</p>
                   </div>
                 ) : filteredReports.map(r => (
-                  <div key={r.id} className="bg-white dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 rounded-xl p-4">
+                  <div key={r.id} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800/80 rounded-[24px] p-5 shadow-sm hover:shadow-md transition-all">
                     <div className="flex items-start justify-between gap-2 mb-3">
                       <div className="min-w-0 flex-1">
                         <p className="font-mono text-[11px] font-bold text-slate-400 dark:text-slate-500 mb-1">{r.id}</p>
@@ -874,7 +876,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
 
           {/* ════════ USERS TAB ════════ */}
           {tab === "users" && (
-            <div className="bg-white dark:bg-slate-800 rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-800/80 overflow-hidden shadow-sm">
               <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
                 <div>
                   <h3 className="font-bold text-slate-900 dark:text-white">Daftar Pengguna</h3>
@@ -943,7 +945,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
           {tab === "chat" && (
             <div className="flex flex-col md:flex-row gap-4 h-[calc(100vh-10rem)] min-h-[500px]">
               {/* Thread list */}
-              <div className={`w-full md:w-64 md:shrink-0 bg-white dark:bg-slate-800 rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden flex flex-col ${activeChatEmail ? "hidden md:flex" : "flex"}`}>
+              <div className={`w-full md:w-64 md:shrink-0 bg-white dark:bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-800/80 overflow-hidden flex flex-col shadow-sm ${activeChatEmail ? "hidden md:flex" : "flex"}`}>
                 <div className="px-4 py-3.5 border-b border-slate-100 dark:border-slate-700">
                   <div className="flex items-center gap-2">
                     <Headphones className="w-4 h-4 text-slate-550 dark:text-slate-400" />
@@ -987,7 +989,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
               </div>
 
               {/* Chat panel */}
-              <div className={`flex-1 bg-white dark:bg-slate-800 rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden flex flex-col ${!activeChatEmail ? "hidden md:flex" : "flex"}`}>
+              <div className={`flex-1 bg-white dark:bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-800/80 overflow-hidden flex flex-col shadow-sm ${!activeChatEmail ? "hidden md:flex" : "flex"}`}>
                 {!activeChatEmail ? (
                   <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
                     <MessageSquare className="w-12 h-12 text-slate-200 dark:text-slate-600 mb-3" />
