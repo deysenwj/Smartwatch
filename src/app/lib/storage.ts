@@ -208,6 +208,15 @@ export function updateUserProfile(email: string, patch: Partial<User>) {
   if (cur?.email === email) setCurrentUser({ ...cur, ...patch });
 }
 
+export function updateLocalPassword(email: string, password: string) {
+  const users = getUsers();
+  const i = users.findIndex(u => u.email === email);
+  if (i >= 0) {
+    users[i] = { ...users[i], password };
+    saveUsers(users);
+  }
+}
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 const MONTHS = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
