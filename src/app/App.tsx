@@ -3,6 +3,7 @@ import {
   initStorage, getCurrentUser, setCurrentUser,
   getNotifications, markAllRead, markNotificationRead, clearNotifications,
   getChatMessages, addChatMessage, markChatRead, timeAgo,
+  addNotification,
   type User, type Notification, type ChatMessage,
 } from "./lib/storage";
 
@@ -77,7 +78,21 @@ export default function App() {
     }
   }, []);
 
-  // Poll chat messages
+  const refreshNotifs = useCallback(async () => {
+    if (!user) return;
+    if (hasSupabaseConfig()) {
+      try {
+        const list = await getSupabaseNotifications(user.id || "");
+        setNotifs(list);
+      } catch (err) {
+        console.error("Gagal memuat notifikasi dari Supabase:", err);
+      }
+    } else {
+      setNotifs(getNotifications(user.email));
+    }
+  }, [user]);
+
+  // Poll chat messages & notifications for user
   useEffect(() => {
     if (!user || user.role === "admin") {
       if (chatPollRef.current) {
@@ -88,8 +103,10 @@ export default function App() {
     }
 
     loadChat();
+    refreshNotifs();
     chatPollRef.current = setInterval(() => {
       loadChat();
+      refreshNotifs();
     }, 3000);
 
     return () => {
@@ -98,7 +115,7 @@ export default function App() {
         chatPollRef.current = null;
       }
     };
-  }, [user, loadChat]);
+  }, [user, loadChat, refreshNotifs]);
 
   // Scroll to bottom
   useEffect(() => {
@@ -156,19 +173,7 @@ export default function App() {
 
   useEffect(() => { localStorage.setItem("theme", isDark ? "dark" : "light"); }, [isDark]);
 
-  const refreshNotifs = useCallback(async () => {
-    if (!user) return;
-    if (hasSupabaseConfig()) {
-      try {
-        const list = await getSupabaseNotifications(user.id || "");
-        setNotifs(list);
-      } catch (err) {
-        console.error("Gagal memuat notifikasi dari Supabase:", err);
-      }
-    } else {
-      setNotifs(getNotifications(user.email));
-    }
-  }, [user]);
+
 
   useEffect(() => {
     refreshNotifs();

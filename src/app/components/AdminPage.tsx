@@ -159,7 +159,7 @@ function ValidasiModal({ report, onClose, onUpdate }: {
     isDestructive?: boolean;
   } | null>(null);
 
-  async function submitAction() {
+  async function submitAction(chosenType: string) {
     if (!note.trim()) { setError("Catatan wajib diisi sebelum mengambil tindakan."); return; }
 
     let status: Report["status"] = "Diproses";
@@ -168,12 +168,12 @@ function ValidasiModal({ report, onClose, onUpdate }: {
     let title = "Konfirmasi Tindakan";
     let description = `Apakah Anda yakin ingin memproses laporan "${report.judul}"?`;
     let icon = Clock;
-    let iconColor = "text-slate-500 dark:text-slate-400";
-    let iconBg = "bg-slate-50 dark:bg-slate-800/60";
-    let confirmText = "Kirim";
+    let iconColor = "text-amber-500";
+    let iconBg = "bg-amber-50 dark:bg-amber-950/20";
+    let confirmText = "Proses";
     let isDestructive = false;
 
-    if (actionType === "Selesai") {
+    if (chosenType === "Selesai") {
       status = "Selesai";
       title = "Setujui Laporan";
       description = `Apakah Anda yakin ingin menyetujui laporan "${report.judul}" dan mengubah statusnya menjadi Selesai?`;
@@ -181,7 +181,7 @@ function ValidasiModal({ report, onClose, onUpdate }: {
       iconColor = "text-emerald-500";
       iconBg = "bg-emerald-50 dark:bg-emerald-950/20";
       confirmText = "Setujui";
-    } else if (actionType === "Ditolak") {
+    } else if (chosenType === "Ditolak") {
       status = "Ditolak";
       title = "Tolak Laporan";
       description = `Apakah Anda yakin ingin menolak laporan "${report.judul}"?`;
@@ -190,7 +190,7 @@ function ValidasiModal({ report, onClose, onUpdate }: {
       iconBg = "bg-red-50 dark:bg-red-950/20";
       confirmText = "Tolak";
       isDestructive = true;
-    } else if (actionType === "MintaData") {
+    } else if (chosenType === "MintaData") {
       status = "Diproses";
       noteStatus = "Meminta Data Tambahan";
       title = "Minta Data Tambahan";
@@ -199,9 +199,9 @@ function ValidasiModal({ report, onClose, onUpdate }: {
       iconColor = "text-blue-500";
       iconBg = "bg-blue-50 dark:bg-blue-950/20";
       confirmText = "Minta Data";
-    } else if (actionType.startsWith("Disposisi_")) {
+    } else if (chosenType.startsWith("Disposisi_")) {
       status = "Diproses";
-      const agency = actionType.replace("Disposisi_", "").replace("SatpolPP", "Satpol PP").replace("Instansi", "Instansi Terkait");
+      const agency = chosenType.replace("Disposisi_", "").replace("SatpolPP", "Satpol PP").replace("Instansi", "Instansi Terkait");
       noteStatus = `Disposisi: ${agency}`;
       title = `Disposisi Ke ${agency}`;
       description = `Apakah Anda yakin ingin mendisposisikan laporan "${report.judul}" ke ${agency}? Status laporan akan menjadi Diproses.`;
@@ -376,25 +376,19 @@ function ValidasiModal({ report, onClose, onUpdate }: {
           <div className="px-6 py-5 space-y-4">
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Tindakan Validasi / Status Baru <span className="text-red-500">*</span>
+                Tindak Lanjut / Disposisi <span className="font-normal text-slate-400 dark:text-slate-500">(Khusus untuk tombol Proses Laporan)</span>
               </label>
               <select
                 value={actionType}
                 onChange={(e) => setActionType(e.target.value)}
                 className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition"
               >
-                <optgroup label="Status Standard">
-                  <option value="Diproses">Proses Laporan (Diproses)</option>
-                  <option value="Selesai">Setujui Laporan (Selesai)</option>
-                  <option value="Ditolak">Tolak Laporan (Ditolak)</option>
-                </optgroup>
-                <optgroup label="Tindakan Khusus">
-                  <option value="MintaData">Minta Data Tambahan (Diproses)</option>
-                  <option value="Disposisi_Polisi">Disposisi Ke Polisi (Diproses)</option>
-                  <option value="Disposisi_SatpolPP">Disposisi Ke Satpol PP (Diproses)</option>
-                  <option value="Disposisi_Kejaksaan">Disposisi Ke Kejaksaan (Diproses)</option>
-                  <option value="Disposisi_Instansi">Disposisi Ke Instansi Terkait (Diproses)</option>
-                </optgroup>
+                <option value="Diproses">Standar (Diproses)</option>
+                <option value="MintaData">Minta Data Tambahan (Diproses)</option>
+                <option value="Disposisi_Polisi">Disposisi Ke Polisi (Diproses)</option>
+                <option value="Disposisi_SatpolPP">Disposisi Ke Satpol PP (Diproses)</option>
+                <option value="Disposisi_Kejaksaan">Disposisi Ke Kejaksaan (Diproses)</option>
+                <option value="Disposisi_Instansi">Disposisi Ke Instansi Terkait (Diproses)</option>
               </select>
             </div>
 
@@ -462,23 +456,43 @@ function ValidasiModal({ report, onClose, onUpdate }: {
             </div>
 
             {/* Action buttons */}
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 pt-2">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => submitAction("Ditolak")}
+                  disabled={loading}
+                  className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition disabled:opacity-60 flex items-center justify-center gap-1.5"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Tolak
+                </button>
+                <button
+                  type="button"
+                  onClick={() => submitAction(actionType)}
+                  disabled={loading}
+                  className="flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-semibold transition disabled:opacity-60 flex items-center justify-center gap-1.5"
+                >
+                  <Clock className="w-4 h-4" />
+                  Proses
+                </button>
+                <button
+                  type="button"
+                  onClick={() => submitAction("Selesai")}
+                  disabled={loading}
+                  className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold transition disabled:opacity-60 flex items-center justify-center gap-1.5"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  Terima
+                </button>
+              </div>
               <button
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="flex-1 py-2.5 border border-slate-300 dark:border-slate-750 text-slate-700 dark:text-slate-350 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+                className="w-full py-2 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 rounded-lg text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition"
               >
                 Batal
-              </button>
-              <button
-                type="button"
-                onClick={submitAction}
-                disabled={loading}
-                className="flex-1.5 py-2.5 bg-slate-900 hover:bg-slate-850 dark:bg-slate-100 dark:hover:bg-slate-200 text-white dark:text-slate-900 rounded-lg text-sm font-semibold transition disabled:opacity-60 flex items-center justify-center gap-1.5"
-              >
-                <CheckCircle className="w-4 h-4" />
-                {loading ? "Mengirim..." : "Kirim Tindakan"}
               </button>
             </div>
           </div>
@@ -593,19 +607,27 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
     }
   }
 
+  const onRefreshNotifsRef = useRef(onRefreshNotifs);
+  useEffect(() => {
+    onRefreshNotifsRef.current = onRefreshNotifs;
+  }, [onRefreshNotifs]);
+
   useEffect(() => {
     refresh();
-    // Poll chat threads setiap 3 detik — gunakan ref untuk hindari stale closure
+    // Poll chat threads, reports, users, & notifications setiap 3 detik — gunakan ref untuk hindari stale closure
     chatPollRef.current = setInterval(async () => {
+      // Poll notifications
+      onRefreshNotifsRef.current();
+
+      // Poll reports, users, and chat threads
+      await refresh();
+
       if (hasSupabaseConfig()) {
-        const threads = await getSupabaseChatThreads();
-        setChatThreads(threads);
         if (activeChatUUIDRef.current) {
           const msgs = await getSupabaseChatMessages(activeChatUUIDRef.current);
           setActiveChatMsgs(msgs);
         }
       } else {
-        setChatThreads(getChatThreads());
         if (activeChatEmailRef.current) {
           setActiveChatMsgs(getChatMessages(activeChatEmailRef.current));
         }

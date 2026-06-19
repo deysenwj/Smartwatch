@@ -87,6 +87,22 @@ ALTER TABLE notifications
   FOREIGN KEY (user_id) REFERENCES public.profiles(id)
   ON DELETE CASCADE;
 
+-- 3b. Fungsi RPC untuk mengirim notifikasi ke Admin (SECURITY DEFINER untuk melewati batasan RLS & Profiles)
+CREATE OR REPLACE FUNCTION public.notify_admins(notification_text TEXT, notification_type TEXT DEFAULT 'info')
+RETURNS void AS $$
+DECLARE
+  admin_rec RECORD;
+BEGIN
+  FOR admin_rec IN 
+    SELECT id FROM public.profiles 
+    WHERE role = 'admin' OR email = 'admin@smartwatch.go.id' OR email LIKE 'admin@%'
+  LOOP
+    INSERT INTO public.notifications (user_id, text, type, read)
+    VALUES (admin_rec.id, notification_text, notification_type, false);
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- Backfill data pengguna yang sudah terlanjur mendaftar sebelumnya agar masuk ke profiles
 INSERT INTO public.profiles (id, email, full_name, role)
 SELECT id, email, COALESCE(raw_user_meta_data->>'full_name', email), COALESCE(raw_user_meta_data->>'role', 'user')

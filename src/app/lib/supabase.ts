@@ -842,6 +842,18 @@ export async function getSupabaseChatThreads(): Promise<SupabaseChatThread[]> {
 export async function notifyAdmins(text: string, type: Notification["type"] = "info") {
   if (!supabase) return;
   try {
+    // 1. Coba panggil RPC notify_admins (keamanan SECURITY DEFINER bypass RLS)
+    const { error: rpcError } = await supabase.rpc("notify_admins", {
+      notification_text: text,
+      notification_type: type,
+    });
+    if (!rpcError) {
+      console.log("Notifikasi admin berhasil dikirim via RPC.");
+      return;
+    }
+
+    // 2. Fallback jika RPC tidak ditemukan/terinstall
+    console.warn("RPC notify_admins tidak ditemukan atau error, melakukan fallback client-side...");
     const { data: admins, error } = await supabase
       .from("profiles")
       .select("id")
