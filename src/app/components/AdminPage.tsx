@@ -1203,12 +1203,12 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                 </div>
               </div>
 
-              {/* Secondary Filters - Fixed width inputs to prevent overflow */}
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 p-3 sm:p-4 rounded-2xl shadow-sm overflow-x-hidden">
-                <div className="w-full sm:w-auto sm:flex-1 min-w-0">
-                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Kategori</label>
+              {/* Secondary Filters - Grid layout for precise alignment and balanced spacing */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 p-4 rounded-2xl shadow-sm">
+                <div className="min-w-0">
+                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Kategori</label>
                   <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}
-                    className="w-full px-2 sm:px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition">
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition">
                     <option value="all">Semua</option>
                     <option value="Siber">Siber</option>
                     <option value="Penipuan">Penipuan</option>
@@ -1218,17 +1218,15 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                     <option value="Lainnya">Lainnya</option>
                   </select>
                 </div>
-                <div className="flex gap-2 sm:gap-2 w-full sm:w-auto sm:flex-1 min-w-0">
-                  <div className="w-1/2 min-w-0">
-                    <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Mulai</label>
-                    <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
-                      className="w-full px-1 sm:px-2 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[10px] sm:text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition" />
-                  </div>
-                  <div className="w-1/2 min-w-0">
-                    <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Selesai</label>
-                    <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
-                      className="w-full px-1 sm:px-2 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[10px] sm:text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition" />
-                  </div>
+                <div className="min-w-0">
+                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Mulai</label>
+                  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition" />
+                </div>
+                <div className="min-w-0">
+                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Selesai</label>
+                  <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition" />
                 </div>
               </div>
 
