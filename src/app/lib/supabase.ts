@@ -183,8 +183,8 @@ export async function signUpWithSupabase(
 
     if (error) throw error;
     return data;
-  } catch (err: any) {
-    const errMsg = err?.message || "";
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : "";
     if (
       errMsg.toLowerCase().includes("already registered") ||
       errMsg.toLowerCase().includes("already exists") ||
@@ -226,7 +226,7 @@ export async function signUpWithSupabase(
           await supabase.auth.signOut();
           throw err;
         }
-      } catch (innerErr: any) {
+      } catch (innerErr: unknown) {
         console.error("Gagal memulihkan profil saat registrasi ulang:", innerErr);
         throw innerErr;
       }
@@ -261,8 +261,8 @@ export async function signUpAdminWithSupabase(
 
     if (error) throw error;
     return data;
-  } catch (err: any) {
-    const errMsg = err?.message || "";
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : "";
     if (
       errMsg.toLowerCase().includes("already registered") ||
       errMsg.toLowerCase().includes("already exists") ||

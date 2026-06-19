@@ -376,9 +376,9 @@ export function DashboardPage({ user, onNavigate, onViewReport, isDark = false }
                   <table className="w-full text-left">
                     <thead>
                       <tr className="bg-slate-50/50 dark:bg-slate-900/30 border-b border-slate-100 dark:border-slate-800">
-                        <th className="px-8 py-5 font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider text-[11px]">Detail Laporan</th>
-                        <th className="px-8 py-5 font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider text-[11px]">Kategori</th>
-                        <th className="px-8 py-5 font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider text-[11px]">Status</th>
+                        <th className="px-8 py-5 font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[11px]">Detail Laporan</th>
+                        <th className="px-8 py-5 font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[11px]">Kategori</th>
+                        <th className="px-8 py-5 font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[11px]">Status</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -390,17 +390,17 @@ export function DashboardPage({ user, onNavigate, onViewReport, isDark = false }
                         >
                           <td className="px-8 py-5">
                             <div className="flex flex-col gap-1">
-                              <span className="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-650 dark:group-hover:text-indigo-400 transition-colors">
+                              <span className="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                                 {r.judul}
                               </span>
-                              <span className="text-[11px] text-slate-400 dark:text-slate-550 font-mono">
+                              <span className="text-[11px] text-slate-400 dark:text-slate-500 font-mono">
                                 {r.id.substring(0, 8)}...
                               </span>
                             </div>
                           </td>
                           <td className="px-8 py-5">
                             <div className="flex flex-col">
-                              <span className="text-xs font-bold text-slate-650 dark:text-slate-400">
+                              <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
                                 {r.kategori}
                               </span>
                               <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
@@ -437,7 +437,7 @@ export function DashboardPage({ user, onNavigate, onViewReport, isDark = false }
                           </span>
                         </div>
                         <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{r.judul}</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-450 mt-1">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                           {r.kategori} · {formatDate(r.tanggalDibuat)}
                         </p>
                       </div>

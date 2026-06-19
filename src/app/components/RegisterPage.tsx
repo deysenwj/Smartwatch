@@ -187,7 +187,7 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
           <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
             Buat Akun Baru
           </h3>
-          <p className="text-slate-550 dark:text-slate-400 text-sm mb-6">
+          <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
             Lengkapi data diri Anda di bawah ini
           </p>
 

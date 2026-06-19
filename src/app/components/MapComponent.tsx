@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Map, Search, Loader2, MapPin, Navigation } from "lucide-react";
+import { Loader2, MapPin, Navigation } from "lucide-react";
 
 // Helper to load Leaflet script & stylesheet from CDN dynamically
 function loadLeaflet(): Promise<any> {
@@ -113,7 +113,7 @@ export function MapPicker({ value, onChange }: MapPickerProps) {
     };
   }, []);
 
-  const reverseGeocode = async (latitude: number, longitude: number, LInstance: any) => {
+  const reverseGeocode = async (latitude: number, longitude: number, _LInstance: any) => {
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
@@ -202,7 +202,7 @@ export function MapPicker({ value, onChange }: MapPickerProps) {
           <button
             type="submit"
             disabled={loading}
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-slate-900 hover:bg-slate-850 dark:bg-slate-700 dark:hover:bg-slate-650 text-white rounded-lg text-xs font-semibold transition"
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-lg text-xs font-semibold transition"
           >
             Cari
           </button>
@@ -211,7 +211,7 @@ export function MapPicker({ value, onChange }: MapPickerProps) {
           type="button"
           onClick={handleGetCurrentLocation}
           title="Gunakan lokasi saya saat ini"
-          className="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-750 dark:text-slate-300 rounded-lg flex items-center justify-center transition border border-slate-200 dark:border-slate-700 shrink-0"
+          className="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg flex items-center justify-center transition border border-slate-200 dark:border-slate-700 shrink-0"
         >
           <Navigation className="w-4 h-4" />
         </button>

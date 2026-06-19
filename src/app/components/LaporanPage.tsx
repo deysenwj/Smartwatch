@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { ArrowLeft, MapPin, Calendar, CloudUpload, Send, Wifi, BadgeDollarSign, PackageOpen, Swords, ShieldAlert, MoreHorizontal, X, LogOut } from "lucide-react";
-import { addReport, addNotification, type User } from "../lib/storage";
-import { hasSupabaseConfig, addSupabaseReport, addSupabaseNotification, uploadSupabaseFile, notifyAdmins } from "../lib/supabase";
+import { ArrowLeft, Calendar, CloudUpload, Send, Wifi, BadgeDollarSign, PackageOpen, Swords, ShieldAlert, MoreHorizontal, X } from "lucide-react";
+import { addReport, addNotification, type User, getUsers } from "../lib/storage";
+import { hasSupabaseConfig, addSupabaseReport, addSupabaseNotification, uploadSupabaseFile, notifyAdmins, getSupabaseUsers } from "../lib/supabase";
 import { MapPicker } from "./MapComponent";
 
 type Page = "dashboard" | "laporan" | "riwayat" | "settings";
@@ -115,9 +115,26 @@ export function LaporanPage({ user, onNavigate, onSubmitted }: Props) {
         buktiName:       file ? file.name : undefined,
       });
       addNotification(user.email, `Laporan "${report.judul}" (${report.id}) berhasil dikirim dan menunggu validasi admin.`, "success");
-      addNotification("admin@smartwatch.go.id", `Laporan baru masuk: "${report.judul}" (${report.id}) dari ${user.name}.`, "info");
-      setLoading(false);
-      onSubmitted();
+      // Notify all admins dynamically in local mode
+      (async () => {
+        try {
+          // Try Supabase first
+          if (hasSupabaseConfig()) {
+            const admins = await getSupabaseUsers();
+            const adminIds = admins.filter(a => a.role === 'admin' && a.id).map(a => a.id!);
+            await Promise.all(adminIds.map(id => addSupabaseNotification(id, `Laporan baru masuk: "${report.judul}" (${report.id}) dari ${user.name}.`, "info")));
+          } else {
+            // Fallback to local storage profiles
+            const users = getUsers();
+            const adminEmails = users.filter(u => u.role === 'admin').map(u => u.email);
+            adminEmails.forEach(email => addNotification(email, `Laporan baru masuk: "${report.judul}" (${report.id}) dari ${user.name}.`, "info"));
+          }
+        } catch (e) {
+          console.error('Failed to send admin notifications:', e);
+        }
+        setLoading(false);
+        onSubmitted();
+      })();
     }, 500);
   }
 
@@ -148,7 +165,7 @@ export function LaporanPage({ user, onNavigate, onSubmitted }: Props) {
                 className={`flex flex-col items-center gap-2 py-3 md:py-4 px-2 rounded-xl border text-center transition-all duration-200
                   ${category === key
                     ? "border-slate-900 dark:border-slate-200 bg-slate-50 dark:bg-slate-700/50 shadow-sm font-semibold"
-                    : "border-slate-200 dark:border-slate-700/80 hover:border-slate-350 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/30"
+                    : "border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/30"
                   }`}>
                 <Icon className={`w-5 h-5 ${category === key ? "text-slate-900 dark:text-slate-100" : "text-slate-400 dark:text-slate-500"}`} />
                 <span className="text-xs md:text-sm font-medium text-slate-700 dark:text-slate-300">{key}</span>
@@ -218,7 +235,7 @@ export function LaporanPage({ user, onNavigate, onSubmitted }: Props) {
           />
           <div
             onClick={() => document.getElementById("fileInput")?.click()}
-            className="border border-dashed border-slate-300 dark:border-slate-600 rounded-xl py-8 md:py-10 text-center hover:border-slate-450 dark:hover:border-slate-400 hover:bg-slate-50/40 dark:hover:bg-slate-700/10 transition duration-200 cursor-pointer group"
+            className="border border-dashed border-slate-300 dark:border-slate-600 rounded-xl py-8 md:py-10 text-center hover:border-slate-400 dark:hover:border-slate-400 hover:bg-slate-50/40 dark:hover:bg-slate-700/10 transition duration-200 cursor-pointer group"
           >
             <CloudUpload className="w-7 h-7 md:w-8 md:h-8 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 mx-auto transition-transform duration-200 group-hover:scale-105" />
             {file ? (
@@ -270,7 +287,7 @@ export function LaporanPage({ user, onNavigate, onSubmitted }: Props) {
               <button
                 type="button"
                 onClick={() => setConfirmConfig(null)}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -287,7 +304,7 @@ export function LaporanPage({ user, onNavigate, onSubmitted }: Props) {
               <button
                 type="button"
                 onClick={() => setConfirmConfig(null)}
-                className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-350 transition"
+                className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition"
               >
                 Batal
               </button>

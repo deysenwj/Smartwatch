@@ -7,7 +7,7 @@ import {
   AlertCircle,
   X,
 } from "lucide-react";
-import { login, initStorage, getUsers, updateUserProfile, updateLocalPassword, type User } from "../lib/storage";
+import { login, initStorage, getUsers, updateLocalPassword, type User } from "../lib/storage";
 import { hasSupabaseConfig, signInWithSupabase, sendSupabasePasswordReset, supabase } from "../lib/supabase";
 import { sendOtpViaResend } from "../lib/resend";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "./ui/input-otp";
@@ -294,7 +294,7 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
             <button
               type="button"
               onClick={handleCloseForgotModal}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-slate-350 transition-colors"
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -331,7 +331,7 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-355 mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                       Email
                     </label>
                     <input
@@ -476,7 +476,7 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
 
                   <button
                     type="button"
-                    className="text-xs font-semibold text-indigo-650 dark:text-indigo-400 hover:underline mt-2"
+                    className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline mt-2"
                     onClick={() => {
                       setStep(1);
                       setOtpCode("");
@@ -498,7 +498,7 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                       Kata Sandi Baru
                     </label>
                     <div className="relative">

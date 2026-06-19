@@ -88,7 +88,7 @@ export function TopBar({ title, onMenuOpen, isDark, onToggleDark, notifs, userIn
             </button>
 
             {open && (
-              <div className="absolute left-auto right-4 top-20 md:top-12 w-[calc(100vw-2rem)] sm:w-96 max-w-[380px] sm:max-w-none bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-850 rounded-2xl shadow-xl z-50 overflow-hidden">
+              <div className="absolute left-auto right-4 top-20 md:top-12 w-[calc(100vw-2rem)] sm:w-96 max-w-[380px] sm:max-w-none bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden">
                 {/* Dropdown header */}
                 <div className="flex items-center justify-between pl-5 pr-4 py-3.5 border-b border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-2">
@@ -102,7 +102,7 @@ export function TopBar({ title, onMenuOpen, isDark, onToggleDark, notifs, userIn
                   <div className="flex items-center gap-0.5">
                     {unread > 0 && (
                       <button onClick={onMarkAllRead} title="Tandai semua dibaca"
-                        className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition text-slate-400 hover:text-slate-600 dark:hover:text-slate-350">
+                        className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
                         <CheckCheck className="w-3.5 h-3.5" />
                       </button>
                     )}
@@ -116,7 +116,7 @@ export function TopBar({ title, onMenuOpen, isDark, onToggleDark, notifs, userIn
                 </div>
 
                 {/* Notification list */}
-                <div className="max-h-[340px] overflow-y-auto divide-y divide-slate-55 dark:divide-slate-800/60">
+                <div className="max-h-[340px] overflow-y-auto divide-y divide-slate-50 dark:divide-slate-800/60">
                   {notifs.length === 0 ? (
                     <div className="py-12 text-center">
                       <Bell className="w-8 h-8 text-slate-200 dark:text-slate-700 mx-auto mb-2" />
@@ -129,7 +129,7 @@ export function TopBar({ title, onMenuOpen, isDark, onToggleDark, notifs, userIn
                       <div
                         key={n.id}
                         onClick={() => !n.read && onMarkRead?.(n.id)}
-                        className={`flex items-start gap-4 pl-5 pr-4 py-3.5 transition cursor-pointer ${n.read ? "hover:bg-slate-55/40 dark:hover:bg-slate-800/20" : "bg-blue-50/60 dark:bg-blue-900/10 hover:bg-blue-50/80 dark:hover:bg-blue-900/20"}`}
+                        className={`flex items-start gap-4 pl-5 pr-4 py-3.5 transition cursor-pointer ${n.read ? "hover:bg-slate-50/40 dark:hover:bg-slate-800/20" : "bg-blue-50/60 dark:bg-blue-900/10 hover:bg-blue-50/80 dark:hover:bg-blue-900/20"}`}
                       >
                         <Icon className={`w-[18px] h-[18px] mt-0.5 shrink-0 ${color}`} />
                         <div className="flex-1 min-w-0">
@@ -150,7 +150,7 @@ export function TopBar({ title, onMenuOpen, isDark, onToggleDark, notifs, userIn
         <div className="flex items-center gap-3 pl-8 border-l border-slate-200 dark:border-slate-800">
           <div className="text-right hidden sm:block">
             <p className="text-xs font-bold text-slate-900 dark:text-white">{userName}</p>
-            <p className="text-[10px] text-slate-550 dark:text-slate-400 font-medium capitalize">{userRole || "User"}</p>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium capitalize">{userRole || "User"}</p>
           </div>
           <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-white dark:border-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 shadow-sm flex items-center justify-center bg-slate-100 dark:bg-slate-800 shrink-0">
             {avatarUrl ? (

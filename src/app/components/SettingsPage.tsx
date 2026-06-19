@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Lock, Bell, Smartphone, ChevronRight, AlertTriangle, LogOut, CheckCircle, Eye, EyeOff, Camera, X } from "lucide-react";
+import { User, Lock, Bell, ChevronRight, AlertTriangle, LogOut, CheckCircle, Eye, EyeOff, Camera, X } from "lucide-react";
 import { getSettings, saveSettings, updateUserProfile, type User as UserType } from "../lib/storage";
 import { hasSupabaseConfig, updateSupabaseProfile, updateSupabasePassword, uploadSupabaseAvatar } from "../lib/supabase";
 
@@ -410,7 +410,7 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
         <button
           type="button"
           onClick={handleLogoutClick}
-          className="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full text-sm font-semibold text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-850 hover:text-slate-950 dark:hover:text-white transition hover:scale-[1.01] active:scale-[0.99] duration-150 cursor-pointer shrink-0"
+          className="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full text-sm font-semibold text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white transition hover:scale-[1.01] active:scale-[0.99] duration-150 cursor-pointer shrink-0"
         >
           <LogOut className="w-4 h-4 text-slate-500 dark:text-slate-400" />
           <span>Keluar</span>
@@ -430,7 +430,7 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
               <button
                 type="button"
                 onClick={() => setConfirmConfig(null)}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -447,7 +447,7 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
               <button
                 type="button"
                 onClick={() => setConfirmConfig(null)}
-                className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-350 transition"
+                className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition"
               >
                 Batal
               </button>

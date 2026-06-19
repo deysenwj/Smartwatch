@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import {
-  Search, ChevronRight, ArrowLeft, Image, Music, FileText,
+  Search, ChevronRight, ArrowLeft, FileText,
   Download, Trash2, AlertCircle, Pencil, Send, X, Printer,
-  Inbox, Clock, CheckCircle, ShieldAlert, XCircle, LogOut,
+  Inbox, CheckCircle, LogOut,
   Video,
 } from "lucide-react";
 import {
@@ -241,7 +241,6 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
   const [selectedId, setSelectedId] = useState<string | null>(initialDetailId);
   const [filter,     setFilter]     = useState("Semua");
   const [search,     setSearch]     = useState("");
-  const [delConfirm, setDelConfirm] = useState(false);
   const [showEdit,   setShowEdit]   = useState(false);
   const [toast,      setToast]      = useState<{ msg: string; type: "success" | "error" } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -385,7 +384,7 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
 
         <div className="flex-1 overflow-y-auto p-6 md:p-10 pb-28 md:pb-10 custom-scrollbar max-w-4xl mx-auto w-full space-y-6">
           <button
-            onClick={() => { setSelectedId(null); setDelConfirm(false); setShowEdit(false); }}
+            onClick={() => { setSelectedId(null); setShowEdit(false); }}
             className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition print:hidden"
           >
             <ArrowLeft className="w-4 h-4" /> Kembali ke Riwayat
@@ -433,7 +432,7 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
               <h2 className="text-sm md:text-base font-bold text-slate-900 dark:text-white mb-4">Riwayat Catatan Admin</h2>
               <div className="space-y-3">
                 {allNotes.map((n, i) => (
-                  <div key={i} className={`px-4 py-3 rounded-lg border-l-2 text-sm
+                  <div key={`${n.at}-${i}`} className={`px-4 py-3 rounded-lg border-l-2 text-sm
                     ${n.status === "Selesai"
                       ? "bg-emerald-50 dark:bg-emerald-900/10 border-emerald-400"
                       : n.status === "Ditolak"
@@ -446,11 +445,11 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
                     }`}>
                     <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
                       {n.status.startsWith("Disposisi:") ? (
-                        <span className="px-2 py-0.5 bg-indigo-100 text-indigo-750 dark:bg-indigo-900/30 dark:text-indigo-300 text-[10px] font-bold rounded">
+                        <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 text-[10px] font-bold rounded">
                           Didisposisikan Ke {n.status.replace("Disposisi: ", "")}
                         </span>
                       ) : n.status === "Meminta Data Tambahan" ? (
-                        <span className="px-2 py-0.5 bg-blue-100 text-blue-755 dark:bg-blue-900/30 dark:text-blue-350 text-[10px] font-bold rounded">
+                        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-[10px] font-bold rounded">
                           Permintaan Data Tambahan
                         </span>
                       ) : (
@@ -529,7 +528,7 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
             <button
               onClick={handleDeleteClick}
               disabled={isDeleting}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm font-semibold text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-850 hover:text-slate-950 dark:hover:text-white transition w-full sm:w-auto disabled:opacity-50"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm font-semibold text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white transition w-full sm:w-auto disabled:opacity-50"
             >
               <Trash2 className="w-4 h-4 text-slate-500 dark:text-slate-400" /> {isDeleting ? "Menghapus..." : "Hapus Laporan"}
             </button>
@@ -583,7 +582,7 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
                 <button
                   type="button"
                   onClick={() => setConfirmConfig(null)}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-55 dark:hover:bg-slate-800 transition"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -601,7 +600,7 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
                   type="button"
                   disabled={isDeleting}
                   onClick={() => setConfirmConfig(null)}
-                  className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-350 transition disabled:opacity-50"
+                  className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition disabled:opacity-50"
                 >
                   Batal
                 </button>
@@ -766,7 +765,7 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
               <button
                 type="button"
                 onClick={() => setConfirmConfig(null)}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-350 hover:bg-slate-55 dark:hover:bg-slate-800 transition"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -784,7 +783,7 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
                 type="button"
                 disabled={isDeleting}
                 onClick={() => setConfirmConfig(null)}
-                className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-350 transition disabled:opacity-50"
+                className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition disabled:opacity-50"
               >
                 Batal
               </button>

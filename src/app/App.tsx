@@ -372,7 +372,7 @@ export default function App() {
         {/* Floating Customer Service Chat Widget */}
         <button
           onClick={() => setIsChatOpen(v => !v)}
-          className="fixed sm:bottom-6 sm:right-6 right-4 bottom-6 z-40 w-14 h-14 bg-slate-800 hover:bg-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(0,0,0,0.2)] border border-slate-750/60 transition-all duration-300 hover:scale-105"
+          className="fixed sm:bottom-6 sm:right-6 right-4 bottom-6 z-40 w-14 h-14 bg-slate-800 hover:bg-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(0,0,0,0.2)] border border-slate-700/60 transition-all duration-300 hover:scale-105"
           title="Customer Service"
         >
           <Headphones className="w-6 h-6" />
@@ -389,7 +389,7 @@ export default function App() {
             <div className="px-5 py-4 bg-slate-800 border-b border-slate-700/50 flex items-center justify-between text-white">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center">
-                  <Headphones className="w-4 h-4 text-slate-350" />
+                  <Headphones className="w-4 h-4 text-slate-300" />
                 </div>
                 <div>
                   <p className="text-sm font-bold">Layanan Pelanggan</p>
@@ -411,8 +411,8 @@ export default function App() {
             <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50 dark:bg-slate-900/20 custom-scrollbar">
               {chatMessages.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center p-6">
-                  <MessageSquare className="w-10 h-10 text-slate-300 dark:text-slate-655 mb-3" />
-                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-450">Belum ada pesan</p>
+                  <MessageSquare className="w-10 h-10 text-slate-300 dark:text-slate-600 mb-3" />
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Belum ada pesan</p>
                   <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
                     Hubungi tim administrasi kami jika Anda memiliki kendala seputar laporan hukum Anda.
                   </p>
@@ -420,8 +420,7 @@ export default function App() {
               ) : (
                 chatMessages.map(msg => {
                   const role = (msg as any).from_role ?? (msg as any).from;
-                  const senderName = (msg as any).sender_name ?? (msg as any).senderName;
-                  const timestamp = (msg as any).created_at ?? (msg as any).time;
+                  const timestamp = (msg as any).created_at ?? (msg as any).time ?? "";
 
                   return (
                     <div key={msg.id} className={`flex ${role === "user" ? "justify-end" : "justify-start"}`}>
@@ -448,7 +447,7 @@ export default function App() {
             </div>
 
             {/* Input Form */}
-            <form onSubmit={handleSendChat} className="flex items-center gap-2 p-3 border-t border-slate-100 dark:border-slate-750/70 bg-white dark:bg-slate-800">
+            <form onSubmit={handleSendChat} className="flex items-center gap-2 p-3 border-t border-slate-100 dark:border-slate-700/70 bg-white dark:bg-slate-800">
               <input
                 type="text"
                 value={chatInput}
@@ -459,7 +458,7 @@ export default function App() {
               <button
                 type="submit"
                 disabled={!chatInput.trim()}
-                className="w-9 h-9 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-white rounded-xl flex items-center justify-center transition shrink-0 border border-slate-750/60"
+                className="w-9 h-9 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-white rounded-xl flex items-center justify-center transition shrink-0 border border-slate-700/60"
               >
                 <Send className="w-3.5 h-3.5" />
               </button>
