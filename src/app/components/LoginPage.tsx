@@ -36,6 +36,7 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
   const [generatedOtp, setGeneratedOtp] = useState("");
   const [otpCode, setOtpCode] = useState("");
   const [forgotLoading, setForgotLoading] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
 
   const handleCloseForgotModal = () => {
     setShowForgotModal(false);
@@ -45,6 +46,7 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
     setNewPassword("");
     setGeneratedOtp("");
     setOtpCode("");
+    setShowNewPw(false);
     setStep(1);
   };
 
@@ -499,16 +501,29 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-350 mb-1.5">
                       Kata Sandi Baru
                     </label>
-                    <input
-                      type="password"
-                      placeholder="Minimal 6 karakter"
-                      value={newPassword}
-                      onChange={(e) => {
-                        setNewPassword(e.target.value);
-                        setForgotError("");
-                      }}
-                      className={inputCls}
-                    />
+                    <div className="relative">
+                      <input
+                        type={showNewPw ? "text" : "password"}
+                        placeholder="Minimal 6 karakter"
+                        value={newPassword}
+                        onChange={(e) => {
+                          setNewPassword(e.target.value);
+                          setForgotError("");
+                        }}
+                        className={`${inputCls} pr-10`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPw((v) => !v)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                      >
+                        {showNewPw ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                   <button
                     type="button"
@@ -526,23 +541,18 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
                           });
                           if (updateErr) throw updateErr;
 
-                          setForgotSuccess("Kata sandi berhasil diperbarui! Anda masuk secara otomatis...");
+                          // Keluar dari Supabase agar pengguna wajib login ulang
+                          await supabase.auth.signOut();
+
+                          setForgotSuccess("Kata sandi berhasil diperbarui! Silakan masuk kembali dengan kata sandi baru.");
                           
-                          // Dapatkan info user yang masuk untuk otomatis login di App
-                          setTimeout(async () => {
-                            try {
-                              const loggedInUser = await signInWithSupabase(forgotEmail.trim(), newPassword);
-                              onLogin(loggedInUser);
-                              handleCloseForgotModal();
-                            } catch (loginErr) {
-                              // Fallback jika auto-login gagal, tutup saja modal dan biarkan login biasa
-                              handleCloseForgotModal();
-                            }
-                          }, 2000);
+                          setTimeout(() => {
+                            handleCloseForgotModal();
+                          }, 3000);
                         } else {
                           // Ubah password Lokal
                           updateLocalPassword(forgotEmail.trim(), newPassword);
-                          setForgotSuccess("Kata sandi berhasil diubah! Mengalihkan ke halaman masuk...");
+                          setForgotSuccess("Kata sandi berhasil diubah! Silakan masuk kembali dengan kata sandi baru.");
                           setTimeout(() => {
                             handleCloseForgotModal();
                           }, 2500);
