@@ -1,147 +1,133 @@
-# Panduan Lengkap Integrasi Resend.com, Supabase, dan Vercel
+# Panduan Lengkap Integrasi Resend.com, Supabase, dan Vercel (Domain: smartwatchindonesia.my.id)
 
-Panduan ini menjelaskan cara mengonfigurasi dan menghubungkan **Resend.com** (sebagai layanan email SMTP/API), **Supabase** (sebagai backend autentikasi), dan **Vercel** (sebagai platform hosting frontend) agar fitur lupa password dengan OTP 6-digit berjalan secara nyata dan aman.
-
----
-
-## 🛠️ BAGIAN 1: Konfigurasi Resend.com
-
-Resend digunakan untuk mengirim email OTP. Di sini kita akan menyiapkan SMTP credentials dan verifikasi domain.
-
-### 1. Dapatkan SMTP Credentials
-1. Buka [Resend.com](https://resend.com) dan buat akun (atau masuk ke akun Anda).
-2. Pergi ke menu **Settings** di sebelah kiri, lalu pilih tab **SMTP**.
-3. Klik **Create SMTP Service** (jika belum ada).
-4. Catat informasi penting berikut untuk digunakan di Supabase nanti:
-   * **Host**: `smtp.resend.com`
-   * **Port**: `587` (atau `465`)
-   * **Username**: `resend`
-   * **Password**: *Kata sandi SMTP yang dihasilkan oleh Resend*
-
-### 2. Verifikasi Domain Anda (Agar Bisa Kirim ke Pengguna Umum)
-Secara bawaan (mode Sandbox), Resend hanya mengizinkan pengiriman email ke email pemilik akun. Untuk dapat mengirim email ke pengguna umum (gmail, yahoo, dll.):
-1. Buka menu **Domains** di sebelah kiri dashboard Resend.
-2. Klik **Add Domain**.
-3. Masukkan nama domain kustom Anda (misal: `smartwatchindonesia.my.id`).
-4. Resend akan memberikan **3 DNS Records** (tipe TXT dan MX) berisi nama (host) dan nilai (value) untuk DKIM dan SPF.
-5. Masuk ke panel DNS hosting tempat Anda membeli domain (misal: Cloudflare, Niagahoster, Domainesia, dll.).
-6. Tambahkan 3 DNS Record tersebut pada konfigurasi DNS domain Anda.
-7. Kembali ke Resend, lalu klik **Verify**. Tunggu beberapa saat hingga statusnya berubah menjadi **Verified**.
-
-### 3. Dapatkan API Key Resend (Untuk Autentikasi API)
-1. Pilih menu **API Keys** di sebelah kiri.
-2. Klik **Create API Key**. Beri nama (misal: `Vercel Prod Key`), atur permission menjadi **Full Access**.
-3. Klik **Add** dan salin kunci API yang muncul (format: `re_xxxxxxxxxxxx`). *Kunci ini hanya akan muncul sekali.*
+Panduan ini berisi langkah-langkah urut dari awal untuk menghubungkan **GitHub**, **Resend.com** (menggunakan domain `smartwatchindonesia.my.id`), **Supabase**, dan **Vercel** agar fitur lupa password dengan OTP 8-digit dapat berjalan dengan sukses untuk seluruh pengguna umum.
 
 ---
 
-## 🔒 BAGIAN 2: Konfigurasi Supabase Auth (Menghubungkan ke Resend SMTP)
+## 📦 TAHAP 1: Konfigurasi di Resend.com & DNS Hosting
 
-Supabase bertugas mengelola session keamanan dan mereset password. Kita akan menghubungkan Supabase dengan server SMTP Resend agar email Supabase dikirim menggunakan Resend.
+Langkah pertama adalah mendaftarkan domain baru Anda ke Resend dan memasukkan DNS record-nya di provider domain Anda agar email pengiriman Anda disetujui.
 
-### 1. Aktifkan Custom SMTP di Supabase
-1. Masuk ke [Supabase Dashboard](https://supabase.com).
-2. Pilih proyek **Smartwatch** Anda.
-3. Pergi ke **Project Settings** (ikon gerigi di kiri bawah) -> pilih menu **Auth**.
-4. Gulir ke bawah hingga Anda menemukan bagian **SMTP Settings** (Custom SMTP Provider).
-5. Aktifkan (toggle) **Enable Custom SMTP**.
-6. Isi kolom dengan data SMTP yang didapat dari **Resend** (Bagian 1):
-   * **Sender Email**: *Masukkan email domain terverifikasi Anda* (misal: `otp@smartwatchindonesia.my.id` atau `onboarding@resend.dev` sebagai fallback).
+### 1. Daftarkan Domain Anda di Resend
+1. Masuk ke dashboard **[Resend.com](https://resend.com)**.
+2. Di menu sebelah kiri, klik **Domains**.
+3. Klik tombol **Add Domain**.
+4. Ketik domain Anda: `smartwatchindonesia.my.id`
+5. Klik **Add**.
+6. Resend akan menampilkan tabel berisi **3 baris DNS Records** (2 tipe TXT untuk DKIM, dan 1 tipe MX). *Biarkan halaman ini tetap terbuka.*
+
+### 2. Tambahkan DNS Records ke DNS Manager Domain Anda
+1. Buka tab baru di browser Anda, lalu login ke **Member Area** penyedia tempat Anda membeli domain (misal: Domainesia / Niagahoster).
+2. Pergi ke bagian **Layanan Saya** -> klik **Domain** -> cari menu **Manage DNS** (atau **DNS Management** / **Zone Editor**).
+3. Tambahkan 3 baris record dari Resend tadi satu per satu:
+   * **Record 1 (Tipe TXT)**:
+     * **Type**: `TXT`
+     * **Host/Name**: *Salin kolom Name/Host dari Resend* (biasanya diawali `resend._domainkey...`)
+     * **Value/TXT Data**: *Salin kolom Value dari Resend*
+     * Klik **Save/Add**.
+   * **Record 2 (Tipe TXT)**:
+     * **Type**: `TXT`
+     * **Host/Name**: `@` (atau biarkan kosong/isi dengan nama domain Anda jika tidak bisa diisi `@`)
+     * **Value/TXT Data**: *Salin kolom Value dari Resend*
+     * Klik **Save/Add**.
+   * **Record 3 (Tipe MX)**:
+     * **Type**: `MX`
+     * **Host/Name**: `@` (atau biarkan kosong jika tidak bisa diisi `@`)
+     * **Value/Points To**: *Salin kolom Value dari Resend* (biasanya `feedback.resend.com`)
+     * **Priority** (jika diminta): `10`
+     * Klik **Save/Add**.
+4. Setelah ketiga record tersimpan, kembali ke halaman **Resend Domains** dan klik **Verify** di bagian kanan atas hingga statusnya berubah menjadi hijau **"Verified"**.
+
+### 3. Buat API Key di Resend
+1. Klik menu **API Keys** di sebelah kiri dashboard Resend.
+2. Klik **Create API Key**.
+3. Isi pop-up pengisian dengan:
+   * **Name**: `Smartwatch Prod Key`
+   * **Permission**: Pilih **`Full Access`**
+   * **Domain**: Pilih **`All Domains`** (atau pilih `smartwatchindonesia.my.id`)
+4. Klik **Add**, lalu langsung **Copy (Salin)** API Key yang muncul (berformat `re_xxxxxxxxxxxx`).
+
+---
+
+## ⚡ TAHAP 2: Konfigurasi Custom SMTP di Supabase
+
+Langkah ini menyambungkan Supabase Anda ke server email Resend.
+
+1. Masuk ke **[Supabase Dashboard](https://supabase.com)** dan pilih proyek Anda.
+2. Di sidebar kiri paling bawah, klik **Project Settings** (ikon roda gigi ⚙️) -> pilih menu **Auth**.
+3. Gulir ke bawah hingga bagian **SMTP Settings** (Custom SMTP Provider).
+4. Aktifkan (toggle) **Enable Custom SMTP**.
+5. Isi kolom-kolomnya dengan data berikut secara presisi:
+   * **Sender Email**: `otp@smartwatchindonesia.my.id`
    * **Sender Name**: `Smartwatch Indonesia`
    * **SMTP Host**: `smtp.resend.com`
    * **SMTP Port**: `587`
-   * **SMTP Username**: `resend`
-   * **SMTP Password**: *SMTP password yang didapat dari Resend*
-7. Klik **Save** di bagian bawah.
+   * **SMTP Username**: `resend` *(Ketik tulisan 'resend' biasa)*
+   * **SMTP Password**: *(Tempel API Key `re_xxxxxxxxxxxx` yang Anda salin pada Tahap 1.3)*
+6. Klik **Save** di bagian paling bawah.
 
-### 2. Konfigurasi Template Email "Reset Password" Menjadi Kode OTP 6-Digit
-Secara default, Supabase mengirimkan tautan link pemulihan. Untuk mengubahnya menjadi kode OTP 6-digit:
-1. Di halaman pengaturan **Auth** Supabase, gulir ke atas ke bagian **Email Templates**.
+---
+
+## 📝 TAHAP 3: Ubah Template Reset Password di Supabase
+
+Langkah ini membuat isi email pemulihan berisi kode OTP 8-digit.
+
+1. Masih di halaman **Auth** Supabase, gulir ke atas ke bagian **Email Templates**.
 2. Pilih tab **Reset Password**.
-3. Ubah kolom **Message** (Body Email) agar menampilkan token 6-digit. Anda harus menggunakan placeholder `{{ .Token }}`. Contoh isi email:
+3. Ubah kolom **Message** (isi email) menjadi HTML berikut:
    ```html
    <h2>Atur Ulang Kata Sandi Smartwatch</h2>
    <p>Halo,</p>
-   <p>Gunakan kode OTP berikut untuk mengatur ulang kata sandi akun Anda:</p>
-   <div style="font-size: 24px; font-weight: bold; background: #f3f4f6; padding: 10px 20px; display: inline-block; letter-spacing: 4px; border-radius: 6px;">
+   <p>Gunakan kode OTP 8-digit berikut untuk mengatur ulang kata sandi akun Anda:</p>
+   <div style="font-size: 24px; font-weight: bold; background: #f3f4f6; padding: 12px 24px; display: inline-block; letter-spacing: 4px; border-radius: 6px; color: #1f2937;">
      {{ .Token }}
    </div>
-   <p>Kode ini hanya berlaku selama 5 menit. Jangan bagikan kode ini kepada siapapun.</p>
+   <p>Kode ini berlaku selama 5 menit. Jangan bagikan kode ini kepada siapapun.</p>
    ```
 4. Klik **Save**.
 
 ---
 
-## 🚀 BAGIAN 3: Konfigurasi Vercel (Deployment & Environment)
+## 🌐 TAHAP 4: Konfigurasi Environment Variables di Vercel
 
-Vercel menampung frontend React Vite Anda. Kita perlu mendaftarkan semua variabel lingkungan (environment variables) di Vercel agar kode React dapat berkomunikasi dengan Supabase dan Resend API.
+Daftarkan variabel lingkungan agar web Anda di Vercel bisa berkomunikasi dengan Supabase dan Resend secara langsung.
 
-### 1. Daftarkan Environment Variables di Vercel
-1. Masuk ke akun [Vercel.com](https://vercel.com) dan pilih proyek **Smartwatch** Anda.
-2. Klik tab **Settings** di menu atas.
-3. Pilih menu **Environment Variables** di kolom sebelah kiri.
-4. Tambahkan variabel-variabel berikut:
+1. Masuk ke **[Vercel.com](https://vercel.com)** dan pilih proyek **Smartwatch** Anda.
+2. Klik tab **Settings** di menu atas -> klik menu **Environment Variables** di kiri.
+3. Gunakan form **Add Environment Variable** untuk menambahkan 4 variabel berikut satu per satu:
 
-| Key | Value | Keterangan |
+| Key (Kunci) | Value (Nilai) | Cara Mendapatkan Nilai |
 | :--- | :--- | :--- |
-| `VITE_SUPABASE_URL` | `https://cegoyvlmyzxgpznyqlos.supabase.co` | URL API Supabase Anda |
-| `VITE_SUPABASE_ANON_KEY` | `eyJhbGciOiJIUzI1NiIsInR5c...` | Anon Key Supabase Anda |
-| `VITE_RESEND_API_KEY` | `re_xxxxxxxxxxxx` | API Key asli dari Resend.com |
-| `VITE_RESEND_FROM_EMAIL` | `Smartwatch OTP <otp@domain-anda.com>` | Email pengirim berdomain terverifikasi |
+| `VITE_SUPABASE_URL` | *URL Supabase Anda* | Salin dari Supabase -> Settings -> API -> Project URL |
+| `VITE_SUPABASE_ANON_KEY` | *Anon Key Supabase Anda* | Salin dari Supabase -> Settings -> API -> `anon` `public` |
+| `VITE_RESEND_API_KEY` | `re_xxxxxxxxxxxx` | API Key Resend yang disalin dari **Tahap 1.3** |
+| `VITE_RESEND_FROM_EMAIL` | `Smartwatch OTP <otp@smartwatchindonesia.my.id>` | Tulis persis seperti ini agar terkirim dari domain baru Anda |
 
-5. Pastikan centang opsi untuk **Production**, **Preview**, dan **Development**, lalu klik **Save** untuk masing-masing variabel.
-
-### 2. Lakukan Deploy Ulang (Redeploy)
-Karena Vite menyisipkan variabel lingkungan ke dalam kode JavaScript pada saat proses kompilasi (Build), Anda harus membangun ulang proyek Anda agar Vercel mendeteksi perubahan ini:
-1. Klik tab **Deployments** pada dashboard proyek Vercel Anda.
-2. Klik tombol **tiga titik (...)** pada deployment terbaru Anda di daftar.
-3. Pilih opsi **Redeploy**.
-4. Tunggu hingga proses build selesai (biasanya 1-2 menit).
+4. Klik **Add** untuk menyimpan masing-masing variabel.
+5. Setelah semuanya tersimpan di daftar bawah, masuk ke tab **Deployments** -> klik tombol **tiga titik (...)** di kanan deployment terbaru -> pilih **Redeploy**.
 
 ---
 
-## 🔄 BAGIAN 4: Alur Kerja Sistem di Sisi Pengguna (Frontend React)
+## 🔄 TAHAP 5: Git Push untuk Memperbarui Kode Versi Terbaru
 
-Setelah konfigurasi di atas selesai, begini alur yang terjadi di balik layar saat pengguna mereset password:
+Kirim pembaruan kode visual (fitur penglihatan mata password & paksa re-login) ke GitHub agar Vercel mendeteksi perubahan.
 
-```mermaid
-sequenceDiagram
-    actor User as Pengguna (Browser)
-    participant App as Frontend (React/Vite)
-    participant SB as Supabase Auth
-    participant RS as Resend SMTP/API
+1. Jalankan perintah ini di terminal proyek Anda:
+   ```powershell
+   git add .
+   git commit -m "feat: implementasi final reset password otp dengan domain smartwatchindonesia.my.id"
+   git push origin main
+   ```
+2. Vercel akan memproses pembangunan otomatis secara instan.
 
-    %% Langkah 1
-    User->>App: Input Email & Klik "Kirim OTP"
-    alt Menggunakan Supabase Auth
-        App->>SB: Memanggil resetPasswordForEmail(email)
-        SB->>RS: Kirim Email via Resend SMTP
-        RS->>User: Email berisi Kode OTP 6-Digit (Token)
-    else Mode Lokal (localStorage)
-        App->>App: Generate 6-Digit OTP Acak
-        App->>RS: HTTP POST ke Resend API (Kirim email)
-        RS->>User: Email berisi Kode OTP 6-Digit (Simulasi/Asli)
-    end
-    App->>User: Pindah ke Langkah 2 (Form input OTP)
+---
 
-    %% Langkah 2
-    User->>App: Input 6-Digit OTP & Klik "Verifikasi OTP"
-    alt Menggunakan Supabase Auth
-        App->>SB: Memanggil verifyOtp(email, token, type: 'recovery')
-        SB->>App: Kembalikan Session (User otomatis Login)
-    else Mode Lokal (localStorage)
-        App->>App: Cocokkan otpCode === generatedOtp
-    end
-    App->>User: OTP Valid, Pindah ke Langkah 3 (Input Password Baru)
+## 🧪 TAHAP 6: Pengujian Fitur Lupa Password
 
-    %% Langkah 3
-    User->>App: Input Password Baru & Klik "Simpan"
-    alt Menggunakan Supabase Auth
-        App->>SB: Memanggil updateUser({ password: newPassword })
-        SB->>App: Update Sukses
-        App->>User: Otomatis masuk ke dashboard
-    else Mode Lokal (localStorage)
-        App->>App: updateLocalPassword(email, newPassword)
-        App->>User: Password diganti, silakan login ulang
-    end
-```
+1. Kunjungi link produksi website Anda yang dihasilkan oleh Vercel.
+2. Di halaman login, klik **Lupa?**.
+3. Masukkan email terdaftar Anda (bisa email umum seperti Gmail teman Anda/email pribadi Anda), lalu klik **Kirim Kode OTP**.
+4. Periksa kotak masuk email tersebut. Anda akan menerima email OTP 8-digit resmi dari pengirim `otp@smartwatchindonesia.my.id`.
+5. Masukkan kode 8-digit tersebut di website, lalu klik **Verifikasi**.
+6. Ketikkan kata sandi baru Anda (Gunakan tombol **Ikon Mata** untuk mengecek kata sandi Anda), lalu klik **Simpan Kata Sandi Baru**.
+7. Sistem akan menyimpan kata sandi baru, mengeluarkan sesi Anda, menutup modal, dan meminta Anda untuk **Login Ulang secara manual** demi keamanan akun Anda!
