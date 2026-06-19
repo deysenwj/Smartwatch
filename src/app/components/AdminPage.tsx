@@ -640,8 +640,8 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
         {/* Logo */}
         <div className="flex items-center justify-between px-5 h-16 border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center shrink-0 overflow-hidden shadow-md ring-1 ring-white/20">
-              <img src={systemLogo} alt="Logo" className="w-[80%] h-[80%] object-contain" />
+            <div className="w-9 h-9 flex items-center justify-center shrink-0 overflow-hidden">
+              <img src={systemLogo} alt="Logo" className="w-full h-full object-contain" />
             </div>
             <div>
               <p className="font-bold text-sm text-white leading-tight">Smartwatch</p>

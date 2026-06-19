@@ -117,13 +117,13 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
       <div className="relative w-full max-w-4xl mt-8 z-10">
         
         {/* Floating Logo: top center, circular, half-inside/half-outside */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center overflow-hidden shadow-2xl border-4 border-slate-100 dark:border-slate-800 ring-2 ring-slate-200/50 dark:ring-slate-700/30">
-          <img src={systemLogo} alt="Logo" className="w-[75%] h-[75%] object-contain" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-24 h-24 bg-[#020c25] rounded-full flex items-center justify-center overflow-hidden shadow-2xl border-4 border-white dark:border-slate-900 ring-2 ring-slate-200/50 dark:ring-slate-700/30">
+          <img src={systemLogo} alt="Logo" className="w-[85%] h-[85%] object-contain" />
         </div>
 
         <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800/80 overflow-hidden flex flex-col md:flex-row relative z-10">
           {/* Left panel */}
-          <div className="flex flex-col justify-between p-8 md:p-10 pt-16 md:pt-10 md:w-1/2 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-955 text-white relative overflow-hidden">
+          <div className="flex flex-col justify-between p-8 md:p-10 pt-16 md:pt-10 md:w-1/2 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white relative overflow-hidden">
             {/* Ambient light flare overlays */}
             <div className="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
@@ -289,7 +289,7 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
 
       {/* Forgot Password Modal */}
       {showForgotModal && (
-        <div className="fixed inset-0 bg-slate-900/60 dark:bg-slate-955/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+        <div className="fixed inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
           <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-xl border border-slate-200/60 dark:border-slate-800/80 p-6 relative transition-all duration-300">
             <button
               type="button"
