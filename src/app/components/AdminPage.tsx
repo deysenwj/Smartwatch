@@ -965,6 +965,23 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
           ))}
         </nav>
 
+        {/* Admin Profile - Bottom of sidebar */}
+        <div className="p-3 border-t border-slate-800 shrink-0">
+          <div className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/5 transition cursor-pointer">
+            {user.avatarUrl ? (
+              <img src={user.avatarUrl} alt={user.name} className="w-9 h-9 rounded-full object-cover shrink-0 border border-slate-700" />
+            ) : (
+              <div className="w-9 h-9 bg-indigo-500 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0 border border-slate-600">
+                {initials(user.name)}
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-white truncate">{user.name}</p>
+              <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
+            </div>
+          </div>
+        </div>
+
       </aside>
 
       {/* ── Main content ── */}
@@ -1186,28 +1203,31 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                 </div>
               </div>
 
-              {/* Secondary Filters - Responsive: stack on mobile, 3-col on desktop */}
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 p-3 sm:p-4 rounded-2xl shadow-sm">
-                <div className="w-full sm:w-auto sm:flex-1">
+              {/* Secondary Filters - Fixed width inputs to prevent overflow */}
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 p-3 sm:p-4 rounded-2xl shadow-sm overflow-x-hidden">
+                <div className="w-full sm:w-auto sm:flex-1 min-w-0">
                   <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Kategori</label>
                   <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}
                     className="w-full px-2 sm:px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition">
                     <option value="all">Semua</option>
-                    {uniqueCategories.map(c => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
+                    <option value="Siber">Siber</option>
+                    <option value="Penipuan">Penipuan</option>
+                    <option value="Pencurian">Pencurian</option>
+                    <option value="Kekerasan">Kekerasan</option>
+                    <option value="Ketertiban">Ketertiban</option>
+                    <option value="Lainnya">Lainnya</option>
                   </select>
                 </div>
-                <div className="flex gap-2 sm:gap-3 w-full sm:w-auto sm:flex-1">
-                  <div className="flex-1 min-w-0">
+                <div className="flex gap-2 sm:gap-2 w-full sm:w-auto sm:flex-1 min-w-0">
+                  <div className="w-1/2 min-w-0">
                     <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Mulai</label>
                     <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
-                      className="w-full px-2 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition" />
+                      className="w-full px-1 sm:px-2 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[10px] sm:text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition" />
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="w-1/2 min-w-0">
                     <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Selesai</label>
                     <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
-                      className="w-full px-2 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition" />
+                      className="w-full px-1 sm:px-2 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[10px] sm:text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition" />
                   </div>
                 </div>
               </div>
