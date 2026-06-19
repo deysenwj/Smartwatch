@@ -117,7 +117,7 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
       <div className="relative w-full max-w-4xl mt-8 z-10">
         
         {/* Floating Logo: top center, circular, half-inside/half-outside */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-24 h-24 bg-white rounded-full flex items-center justify-center overflow-hidden shadow-xl border-4 border-slate-50 dark:border-slate-950">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-24 h-24 bg-[#0d1b3e] rounded-full flex items-center justify-center overflow-hidden shadow-xl border-4 border-slate-50 dark:border-slate-950">
           <img src={systemLogo} alt="Logo" className="w-full h-full object-cover" />
         </div>
 
