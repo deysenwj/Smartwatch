@@ -966,23 +966,6 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
           ))}
         </nav>
 
-        {/* Admin Profile - Bottom of sidebar */}
-        <div className="p-3 border-t border-slate-800 shrink-0">
-          <div className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/5 transition cursor-pointer">
-            {user.avatarUrl ? (
-              <img src={user.avatarUrl} alt={user.name} className="w-9 h-9 rounded-full object-cover shrink-0 border border-slate-700" />
-            ) : (
-              <div className="w-9 h-9 bg-indigo-500 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0 border border-slate-600">
-                {initials(user.name)}
-              </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-white truncate">{user.name}</p>
-              <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
-            </div>
-          </div>
-        </div>
-
       </aside>
 
       {/* ── Main content ── */}
