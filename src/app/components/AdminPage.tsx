@@ -1203,9 +1203,9 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                 </div>
               </div>
 
-              {/* Secondary Filters - Grid layout for precise alignment and balanced spacing */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 p-4 rounded-2xl shadow-sm">
-                <div className="min-w-0">
+              {/* Secondary Filters - Separate category and horizontal date filters with precise alignment */}
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 p-4 rounded-2xl shadow-sm">
+                <div className="w-full md:w-72">
                   <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Kategori</label>
                   <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition">
@@ -1218,15 +1218,18 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                     <option value="Lainnya">Lainnya</option>
                   </select>
                 </div>
-                <div className="min-w-0">
-                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Mulai</label>
-                  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition" />
-                </div>
-                <div className="min-w-0">
-                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Selesai</label>
-                  <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition" />
+                <div className="w-full md:w-auto flex flex-row items-end gap-3">
+                  <div className="flex-1 md:w-44">
+                    <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Mulai</label>
+                    <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition" />
+                  </div>
+                  <div className="pb-2 text-slate-400 dark:text-slate-500 text-xs font-semibold shrink-0">s/d</div>
+                  <div className="flex-1 md:w-44">
+                    <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Selesai</label>
+                    <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition" />
+                  </div>
                 </div>
               </div>
 
