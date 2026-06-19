@@ -555,8 +555,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
   const [filter,      setFilter]     = useState<StatusFilter>("all");
   const [search,      setSearch]     = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
-  const [startDate,      setStartDate]      = useState<string>("");
-  const [endDate,        setEndDate]        = useState<string>("");
+  const [filterSelesai,  setFilterSelesai]  = useState<string>("all");
   const [modal,       setModal]      = useState<Report | null>(null);
   const [confirmConfig, setConfirmConfig] = useState<{
     title: string;
@@ -811,16 +810,18 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
     const matchesStatus = filter === "all" || r.status === filter;
     const matchesCategory = filterCategory === "all" || r.kategori === filterCategory;
     
-    let matchesDate = true;
-    const dateVal = r.tanggalKejadian || r.tanggalDibuat.split("T")[0];
-    if (startDate && dateVal < startDate) matchesDate = false;
-    if (endDate && dateVal > endDate) matchesDate = false;
+    let matchesSelesai = true;
+    if (filterSelesai === "selesai") {
+      matchesSelesai = r.status === "Selesai";
+    } else if (filterSelesai === "belum") {
+      matchesSelesai = r.status !== "Selesai";
+    }
 
     const matchesSearch = !search || r.judul.toLowerCase().includes(search.toLowerCase())
       || r.id.toLowerCase().includes(search.toLowerCase())
       || r.userName.toLowerCase().includes(search.toLowerCase());
 
-    return matchesStatus && matchesCategory && matchesDate && matchesSearch;
+    return matchesStatus && matchesCategory && matchesSelesai && matchesSearch;
   });
 
   const uniqueCategories = Array.from(new Set(reports.map(r => r.kategori).filter(Boolean)));
@@ -1203,13 +1204,13 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                 </div>
               </div>
 
-              {/* Secondary Filters - Separate category and horizontal date filters with precise alignment */}
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 p-4 rounded-2xl shadow-sm">
-                <div className="w-full md:w-72">
+              {/* Secondary Filters - Category and Finished/Unfinished Status Filters */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 p-4 rounded-2xl shadow-sm">
+                <div className="min-w-0">
                   <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Kategori</label>
                   <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition">
-                    <option value="all">Semua</option>
+                    <option value="all">Semua Kategori</option>
                     <option value="Siber">Siber</option>
                     <option value="Penipuan">Penipuan</option>
                     <option value="Pencurian">Pencurian</option>
@@ -1218,18 +1219,14 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                     <option value="Lainnya">Lainnya</option>
                   </select>
                 </div>
-                <div className="w-full md:w-auto flex flex-row items-end gap-3">
-                  <div className="flex-1 md:w-44">
-                    <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Mulai</label>
-                    <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition" />
-                  </div>
-                  <div className="pb-2 text-slate-400 dark:text-slate-500 text-xs font-semibold shrink-0">s/d</div>
-                  <div className="flex-1 md:w-44">
-                    <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Selesai</label>
-                    <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition" />
-                  </div>
+                <div className="min-w-0">
+                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Status Laporan</label>
+                  <select value={filterSelesai} onChange={e => setFilterSelesai(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition">
+                    <option value="all">Semua Status (Selesai & Belum Selesai)</option>
+                    <option value="selesai">Selesai</option>
+                    <option value="belum">Belum Selesai</option>
+                  </select>
                 </div>
               </div>
 
