@@ -136,8 +136,8 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
       <div className="relative w-full max-w-4xl mt-8 z-10">
         
         {/* Floating Logo: top center, circular, half-inside/half-outside */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-24 h-24 bg-white rounded-full flex items-center justify-center overflow-hidden shadow-2xl border-4 border-white ring-2 ring-slate-200/60 dark:ring-slate-600/40">
-          <img src={systemLogo} alt="Logo" className="w-[85%] h-[85%] object-contain" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-24 h-24 bg-[#0d1b3e] rounded-full flex items-center justify-center overflow-hidden shadow-2xl border-4 border-[#0d1b3e] ring-2 ring-indigo-400/30 dark:ring-indigo-500/20">
+          <img src={systemLogo} alt="Logo" className="w-full h-full object-cover" />
         </div>
 
         <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800/80 overflow-hidden flex flex-col md:flex-row relative z-10">
