@@ -377,15 +377,15 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
                             return;
                           }
 
-                          // Generate 6-digit OTP
-                          const otp = Math.floor(100000 + Math.random() * 900000).toString();
+                          // Generate 8-digit OTP
+                          const otp = Math.floor(10000000 + Math.random() * 90000000).toString();
                           setGeneratedOtp(otp);
 
                           const res = await sendOtpViaResend(forgotEmail.trim(), otp);
                           if (res.isSimulated) {
                             setForgotSuccess("Kode OTP berhasil dikirim (Simulasi). Silakan cek Console browser Anda!");
                           } else {
-                            setForgotSuccess("Kode OTP 6-digit berhasil dikirim ke email Anda via Resend.");
+                            setForgotSuccess("Kode OTP 8-digit berhasil dikirim ke email Anda via Resend.");
                           }
                           setStep(2);
                         }
@@ -406,13 +406,13 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
             {step === 2 && (
               <>
                 <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
-                  Masukkan kode verifikasi OTP 6 digit yang telah dikirim ke <span className="font-semibold text-slate-800 dark:text-slate-200">{forgotEmail}</span>.
+                  Masukkan kode verifikasi OTP 8 digit yang telah dikirim ke <span className="font-semibold text-slate-800 dark:text-slate-200">{forgotEmail}</span>.
                 </p>
 
                 <div className="space-y-4 flex flex-col items-center">
                   <div className="flex flex-col items-center justify-center w-full py-2">
                     <InputOTP
-                      maxLength={6}
+                      maxLength={8}
                       value={otpCode}
                       onChange={(val) => {
                         setOtpCode(val);
@@ -426,13 +426,15 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
                         <InputOTPSlot index={3} />
                         <InputOTPSlot index={4} />
                         <InputOTPSlot index={5} />
+                        <InputOTPSlot index={6} />
+                        <InputOTPSlot index={7} />
                       </InputOTPGroup>
                     </InputOTP>
                   </div>
 
                   <button
                     type="button"
-                    disabled={otpCode.length < 6 || forgotLoading}
+                    disabled={(otpCode.length !== 6 && otpCode.length !== 8) || forgotLoading}
                     onClick={async () => {
                       setForgotLoading(true);
                       setForgotError("");
