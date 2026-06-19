@@ -3,11 +3,13 @@ import {
   Search, ChevronRight, ArrowLeft, Image, Music, FileText,
   Download, Trash2, AlertCircle, Pencil, Send, X, Printer,
   Inbox, Clock, CheckCircle, ShieldAlert, XCircle, LogOut,
+  Video,
 } from "lucide-react";
 import {
   getUserReports, deleteReport, updateReport, formatDate,
   STATUS_PILL, type User, type Report,
 } from "../lib/storage";
+import { MapViewer } from "./MapComponent";
 import {
   hasSupabaseConfig, getSupabaseUserReports, deleteSupabaseReport,
   updateSupabaseReport,
@@ -93,15 +95,60 @@ function Timeline({ status, notes }: { status: string; notes: Report["catatan"] 
                       ? "bg-red-50 dark:bg-red-900/20 border-red-400 text-red-700 dark:text-red-400"
                       : "bg-amber-50 dark:bg-amber-900/20 border-amber-400 text-amber-700 dark:text-amber-400"
                   }`}>
-                  <span className="font-semibold">Catatan admin: </span>{lastNote.text}
+                  <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                    {lastNote.status.startsWith("Disposisi:") ? (
+                      <span className="px-1.5 py-0.5 bg-indigo-100/60 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 text-[9px] font-bold rounded">
+                        Disposisi Ke {lastNote.status.replace("Disposisi: ", "")}
+                      </span>
+                    ) : lastNote.status === "Meminta Data Tambahan" ? (
+                      <span className="px-1.5 py-0.5 bg-blue-100/60 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 text-[9px] font-bold rounded animate-pulse">
+                        Minta Data Tambahan
+                      </span>
+                    ) : null}
+                  </div>
+                  <p><span className="font-semibold">Catatan admin: </span>{lastNote.text}</p>
+                  {lastNote.buktiUrl && (
+                    <div className="mt-1.5 flex flex-wrap gap-2">
+                      <a
+                        href={lastNote.buktiUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+                      >
+                        {lastNote.buktiName?.toLowerCase().endsWith(".mp4") ? (
+                          <Video className="w-3 h-3 shrink-0" />
+                        ) : (
+                          <FileText className="w-3 h-3 shrink-0" />
+                        )}
+                        <span className="truncate max-w-[200px]">{lastNote.buktiName || "lampiran_tindakan"}</span>
+                      </a>
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* Ditolak marker */}
               {status === "Ditolak" && i === 1 && (
                 <div className="mt-2 px-3 py-2 rounded-lg text-xs bg-red-50 dark:bg-red-900/20 border-l-2 border-red-400 text-red-700 dark:text-red-400">
-                  <span className="font-semibold">Laporan ditolak. </span>
-                  {lastNote ? lastNote.text : "Hubungi admin untuk informasi lebih lanjut."}
+                  <p><span className="font-semibold">Laporan ditolak. </span>
+                  {lastNote ? lastNote.text : "Hubungi admin untuk informasi lebih lanjut."}</p>
+                  {lastNote?.buktiUrl && (
+                    <div className="mt-1.5 flex flex-wrap gap-2">
+                      <a
+                        href={lastNote.buktiUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-700 dark:text-red-400 hover:underline"
+                      >
+                        {lastNote.buktiName?.toLowerCase().endsWith(".mp4") ? (
+                          <Video className="w-3 h-3 shrink-0" />
+                        ) : (
+                          <FileText className="w-3 h-3 shrink-0" />
+                        )}
+                        <span className="truncate max-w-[200px]">{lastNote.buktiName || "lampiran_tindakan"}</span>
+                      </a>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -364,12 +411,12 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
               { label: "Kategori",         value: report.kategori },
-              { label: "Lokasi",           value: report.lokasi || "—" },
+              { label: "Lokasi",           value: (report.lokasi || "—").split(" | ")[0] },
               { label: "Tanggal Kejadian", value: report.tanggalKejadian ? formatDate(report.tanggalKejadian) : "—" },
             ].map(({ label, value }) => (
               <div key={label} className={`${cardCls} px-4 py-3`}>
                 <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 dark:text-slate-500 mb-1">{label}</p>
-                <p className="text-sm font-semibold text-slate-900 dark:text-white">{value}</p>
+                <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{value}</p>
               </div>
             ))}
           </div>
@@ -391,9 +438,45 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
                       ? "bg-emerald-50 dark:bg-emerald-900/10 border-emerald-400"
                       : n.status === "Ditolak"
                         ? "bg-red-50 dark:bg-red-900/10 border-red-400"
-                        : "bg-amber-50 dark:bg-amber-900/10 border-amber-300"
+                        : n.status.startsWith("Disposisi:")
+                          ? "bg-indigo-50 dark:bg-indigo-900/10 border-indigo-400"
+                          : n.status === "Meminta Data Tambahan"
+                            ? "bg-blue-50 dark:bg-blue-900/10 border-blue-400"
+                            : "bg-amber-50 dark:bg-amber-900/10 border-amber-300"
                     }`}>
+                    <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
+                      {n.status.startsWith("Disposisi:") ? (
+                        <span className="px-2 py-0.5 bg-indigo-100 text-indigo-750 dark:bg-indigo-900/30 dark:text-indigo-300 text-[10px] font-bold rounded">
+                          Didisposisikan Ke {n.status.replace("Disposisi: ", "")}
+                        </span>
+                      ) : n.status === "Meminta Data Tambahan" ? (
+                        <span className="px-2 py-0.5 bg-blue-100 text-blue-755 dark:bg-blue-900/30 dark:text-blue-350 text-[10px] font-bold rounded">
+                          Permintaan Data Tambahan
+                        </span>
+                      ) : (
+                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded ${n.status === "Selesai" ? "bg-emerald-100 text-emerald-700" : n.status === "Ditolak" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
+                          {n.status}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-slate-700 dark:text-slate-300">{n.text}</p>
+                    {n.buktiUrl && (
+                      <div className="mt-1.5 mb-1 flex flex-wrap gap-2">
+                        <a
+                          href={n.buktiUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+                        >
+                          {n.buktiName?.toLowerCase().endsWith(".mp4") ? (
+                            <Video className="w-3.5 h-3.5 shrink-0" />
+                          ) : (
+                            <FileText className="w-3.5 h-3.5 shrink-0" />
+                          )}
+                          <span className="truncate max-w-[250px]">{n.buktiName || "lampiran_tindakan"}</span>
+                        </a>
+                      </div>
+                    )}
                     <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{n.by} · {formatDate(n.at)} · Status diubah ke <strong>{n.status}</strong></p>
                   </div>
                 ))}
@@ -412,7 +495,11 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
                   rel="noopener noreferrer"
                   className="flex flex-col items-center justify-center w-28 h-28 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl gap-2 cursor-pointer hover:border-slate-400 dark:hover:border-slate-400 transition"
                 >
-                  <FileText className="w-5 h-5 text-slate-400" />
+                  {report.buktiName?.toLowerCase().endsWith(".mp4") ? (
+                    <Video className="w-5 h-5 text-slate-400" />
+                  ) : (
+                    <FileText className="w-5 h-5 text-slate-400" />
+                  )}
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 text-center px-2 leading-tight truncate max-w-full">
                     {report.buktiName || "bukti_lampiran"}
                   </p>
@@ -422,6 +509,13 @@ export function RiwayatPage({ user, initialDetailId = null, onRefreshNotifs }: P
               <p className="text-xs text-slate-400 dark:text-slate-500">Tidak ada lampiran bukti.</p>
             )}
           </div>
+
+          {/* Location Map */}
+          {report.lokasi && (
+            <div className={`${cardCls} px-4 md:px-6 py-4 md:py-5`}>
+              <MapViewer locationStr={report.lokasi} />
+            </div>
+          )}
 
           {/* Timeline */}
           <div className={`${cardCls} px-4 md:px-6 py-4 md:py-5`}>

@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { ArrowLeft, MapPin, Calendar, CloudUpload, Send, Scale, AlertTriangle, CreditCard, Landmark, FileCheck, MoreHorizontal, X, LogOut } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, CloudUpload, Send, Wifi, BadgeDollarSign, PackageOpen, Swords, ShieldAlert, MoreHorizontal, X, LogOut } from "lucide-react";
 import { addReport, addNotification, type User } from "../lib/storage";
-import { hasSupabaseConfig, addSupabaseReport, addSupabaseNotification, uploadSupabaseFile } from "../lib/supabase";
+import { hasSupabaseConfig, addSupabaseReport, addSupabaseNotification, uploadSupabaseFile, notifyAdmins } from "../lib/supabase";
+import { MapPicker } from "./MapComponent";
 
 type Page = "dashboard" | "laporan" | "riwayat" | "settings";
 
@@ -12,18 +13,18 @@ interface Props {
 }
 
 const CATEGORIES = [
-  { key: "Hukum",     icon: Scale },
-  { key: "Korupsi",   icon: AlertTriangle },
-  { key: "Pungli",    icon: CreditCard },
-  { key: "Agraria",   icon: Landmark },
-  { key: "Perizinan", icon: FileCheck },
-  { key: "Lainnya",   icon: MoreHorizontal },
+  { key: "Siber",        icon: Wifi },
+  { key: "Penipuan",     icon: BadgeDollarSign },
+  { key: "Pencurian",    icon: PackageOpen },
+  { key: "Kekerasan",    icon: Swords },
+  { key: "Ketertiban",   icon: ShieldAlert },
+  { key: "Lainnya",      icon: MoreHorizontal },
 ];
 
 const inputCls = "w-full min-w-0 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition";
 
 export function LaporanPage({ user, onNavigate, onSubmitted }: Props) {
-  const [category,  setCategory]  = useState("Hukum");
+  const [category,  setCategory]  = useState("Siber");
   const [judul,     setJudul]     = useState("");
   const [deskripsi, setDeskripsi] = useState("");
   const [lokasi,    setLokasi]    = useState("");
@@ -86,6 +87,11 @@ export function LaporanPage({ user, onNavigate, onSubmitted }: Props) {
           bukti_name: uploaded?.name || undefined,
         });
         await addSupabaseNotification(user.id || "", `Laporan "${report.judul}" (${report.id}) berhasil dikirim dan menunggu validasi admin.`, "success");
+        try {
+          await notifyAdmins(`Laporan baru masuk: "${report.judul}" (${report.id}) dari ${user.name}.`, "info");
+        } catch (adminNotifErr) {
+          console.error("Gagal mengirim notifikasi baru ke admin di Supabase:", adminNotifErr);
+        }
         setLoading(false);
         onSubmitted();
       } catch (err) {
@@ -109,6 +115,7 @@ export function LaporanPage({ user, onNavigate, onSubmitted }: Props) {
         buktiName:       file ? file.name : undefined,
       });
       addNotification(user.email, `Laporan "${report.judul}" (${report.id}) berhasil dikirim dan menunggu validasi admin.`, "success");
+      addNotification("admin@smartwatch.go.id", `Laporan baru masuk: "${report.judul}" (${report.id}) dari ${user.name}.`, "info");
       setLoading(false);
       onSubmitted();
     }, 500);
@@ -169,19 +176,10 @@ export function LaporanPage({ user, onNavigate, onSubmitted }: Props) {
         </section>
 
         {/* Location & Date */}
-        <section className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 md:p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <section className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 md:p-6 space-y-4">
+          <div className="grid grid-cols-1 gap-4">
             <div className="min-w-0">
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Lokasi Kejadian</label>
-              <div className="relative">
-                <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                <input type="text" placeholder="Alamat / nama instansi"
-                  value={lokasi} onChange={e => setLokasi(e.target.value)}
-                  className={`${inputCls} pl-10`} />
-              </div>
-            </div>
-            <div className="min-w-0">
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Tanggal Kejadian</label>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Tanggal Kejadian <span className="text-red-500">*</span></label>
               <div className="relative overflow-hidden rounded-lg">
                 <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
                 <input type="date" style={{ minWidth: 0 }}
@@ -189,6 +187,10 @@ export function LaporanPage({ user, onNavigate, onSubmitted }: Props) {
                   className={`${inputCls} pl-10 pr-3`} />
               </div>
             </div>
+          </div>
+          <div className="border-t border-slate-100 dark:border-slate-700/60 pt-4">
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Lokasi Kejadian <span className="text-red-500">*</span></label>
+            <MapPicker value={lokasi} onChange={(newVal) => setLokasi(newVal)} />
           </div>
         </section>
 
@@ -201,12 +203,12 @@ export function LaporanPage({ user, onNavigate, onSubmitted }: Props) {
             type="file"
             id="fileInput"
             className="hidden"
-            accept=".jpg,.jpeg,.png,.pdf"
+            accept=".jpg,.jpeg,.png,.pdf,.mp4"
             onChange={(e) => {
               if (e.target.files && e.target.files[0]) {
                 const selected = e.target.files[0];
-                if (selected.size > 10 * 1024 * 1024) {
-                  setError("Ukuran file maksimal 10 MB.");
+                if (selected.size > 20 * 1024 * 1024) {
+                  setError("Ukuran file maksimal 20 MB.");
                   return;
                 }
                 setFile(selected);
@@ -234,7 +236,7 @@ export function LaporanPage({ user, onNavigate, onSubmitted }: Props) {
                   Klik untuk memilih file
                 </p>
                 <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                  JPG, JPEG, PNG, PDF — Maks. 10 MB
+                  JPG, JPEG, PNG, PDF, MP4 — Maks. 20 MB
                 </p>
               </>
             )}

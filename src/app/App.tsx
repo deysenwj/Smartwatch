@@ -20,7 +20,7 @@ import {
   signOutWithSupabase, hasSupabaseConfig, getSupabaseNotifications,
   markAllSupabaseNotificationsRead, markSupabaseNotificationRead, clearSupabaseNotifications,
   getSupabaseChatMessages, addSupabaseChatMessage, markSupabaseChatRead,
-  supabase, type SupabaseChatMessage,
+  supabase, type SupabaseChatMessage, notifyAdmins,
 } from "./lib/supabase";
 
 import { MessageSquare, Send, X, Headphones } from "lucide-react";
@@ -132,12 +132,18 @@ export default function App() {
         sender_name: user.name,
         text,
       });
+      try {
+        await notifyAdmins(`Pesan chat baru dari ${user.name}: "${text.substring(0, 30)}..."`, "info");
+      } catch (adminNotifErr) {
+        console.error("Gagal mengirim notifikasi chat ke admin di Supabase:", adminNotifErr);
+      }
     } else {
       addChatMessage(user.email, {
         from: "user",
         senderName: user.name,
         text,
       });
+      addNotification("admin@smartwatch.go.id", `Pesan chat baru dari ${user.name}: "${text.substring(0, 30)}..."`, "info");
     }
     loadChat();
   }
@@ -340,7 +346,7 @@ export default function App() {
           />
           <main className="flex-1">
             {page === "dashboard" && (
-              <DashboardPage user={user} onNavigate={navigate} onViewReport={viewReport} />
+              <DashboardPage user={user} onNavigate={navigate} onViewReport={viewReport} isDark={isDark} />
             )}
             {page === "laporan" && (
               <LaporanPage

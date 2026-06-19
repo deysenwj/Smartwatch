@@ -17,6 +17,8 @@ export interface ReportNote {
   status: string;
   by: string;
   at: string;
+  buktiUrl?: string;
+  buktiName?: string;
 }
 
 export interface Report {
@@ -66,17 +68,319 @@ const SEED_USERS: User[] = [
 ];
 
 const SEED_REPORTS: Report[] = [
-  { id: "LW-2024-001", judul: "Ketidaksesuaian Data Lahan",    kategori: "Agraria",  deskripsi: "Ditemukan perbedaan antara sertifikat digital dan koordinat fisik tanah yang signifikan.",                                              lokasi: "Kecamatan X, Jakarta",       tanggalKejadian: "2024-10-10", tanggalDibuat: "2024-10-12T09:00:00Z", status: "Selesai",  userId: "ahmad@mail.com", userName: "Ahmad Fauzi",  catatan: [{ text: "Laporan telah diverifikasi dan diselesaikan oleh tim agraria.", status: "Selesai", by: "Admin", at: "2024-10-14T10:00:00Z" }] },
-  { id: "LW-2024-002", judul: "Prosedur Pengadaan Barang",     kategori: "Korupsi",  deskripsi: "Diduga ada penyimpangan prosedur tender di instansi pemerintah daerah tanpa transparansi.",                                              lokasi: "Balai Kota Jakarta",         tanggalKejadian: "2024-10-14", tanggalDibuat: "2024-10-15T14:00:00Z", status: "Diproses", userId: "ahmad@mail.com", userName: "Ahmad Fauzi",  catatan: [{ text: "Laporan sedang dalam proses investigasi.", status: "Diproses", by: "Admin", at: "2024-10-16T08:00:00Z" }] },
-  { id: "LW-2024-003", judul: "Tindakan Pungutan Liar",        kategori: "Pungli",   deskripsi: "Saya diminta membayar Rp 250.000 oleh petugas loket A untuk pengurusan surat keterangan domisili tanpa kuitansi resmi.",                 lokasi: "Kecamatan X, Jakarta",       tanggalKejadian: "2024-10-15", tanggalDibuat: "2024-10-18T10:00:00Z", status: "Diproses", userId: "ahmad@mail.com", userName: "Ahmad Fauzi",  catatan: [{ text: "Laporan sedang dalam proses investigasi.", status: "Diproses", by: "Admin", at: "2024-10-19T09:00:00Z" }] },
-  { id: "LW-2024-004", judul: "Pelayanan Administrasi Lambat", kategori: "Hukum",    deskripsi: "Proses administrasi penerbitan KTP memakan waktu lebih dari 3 bulan tanpa penjelasan yang memadai.",                                      lokasi: "Dinas Kependudukan Jakarta", tanggalKejadian: "2024-10-18", tanggalDibuat: "2024-10-20T08:00:00Z", status: "Selesai",  userId: "ahmad@mail.com", userName: "Ahmad Fauzi",  catatan: [{ text: "Masalah telah diselesaikan dengan koordinasi dinas terkait.", status: "Selesai", by: "Admin", at: "2024-10-25T09:00:00Z" }] },
-  { id: "LW-2024-005", judul: "Laporan Tidak Valid",           kategori: "Lainnya",  deskripsi: "Laporan uji coba tanpa bukti yang cukup.",                                                                                               lokasi: "Online",                     tanggalKejadian: "2024-10-20", tanggalDibuat: "2024-10-22T11:00:00Z", status: "Ditolak",  userId: "ahmad@mail.com", userName: "Ahmad Fauzi",  catatan: [{ text: "Laporan tidak memenuhi syarat kelengkapan bukti yang diperlukan.", status: "Ditolak", by: "Admin", at: "2024-10-23T08:00:00Z" }] },
-  { id: "LW-2024-006", judul: "Penyalahgunaan Wewenang",       kategori: "Hukum",    deskripsi: "Petugas kelurahan menyalahgunakan wewenang untuk kepentingan pribadi.",                                                                  lokasi: "Kelurahan Y, Bandung",       tanggalKejadian: "2024-11-01", tanggalDibuat: "2024-11-03T13:00:00Z", status: "Menunggu", userId: "siti@mail.com",  userName: "Siti Rahayu",  catatan: [] },
+  // JANUARI 2026 (2 reports)
+  {
+    id: "LW-2026-001",
+    judul: "Percobaan Phishing Email Instansi",
+    kategori: "Siber",
+    deskripsi: "Ditemukan sebaran email palsu mengatasnamakan instansi pelayanan publik untuk mencuri credential data kependudukan.",
+    lokasi: "Kecamatan Menteng, Jakarta Pusat",
+    tanggalKejadian: "2026-01-08",
+    tanggalDibuat: "2026-01-10T09:00:00Z",
+    status: "Selesai",
+    userId: "ahmad@mail.com",
+    userName: "Ahmad Fauzi",
+    catatan: [{ text: "Laporan diteruskan ke unit siber. Domain phising telah diblokir.", status: "Selesai", by: "Admin", at: "2026-01-12T14:30:00Z" }]
+  },
+  {
+    id: "LW-2026-002",
+    judul: "Penipuan Toko Online Palsu",
+    kategori: "Penipuan",
+    deskripsi: "Toko online fiktif di media sosial menjanjikan barang murah namun menghilang setelah transfer dana dilakukan.",
+    lokasi: "Kelurahan Kebon Sirih, Jakarta Pusat",
+    tanggalKejadian: "2026-01-15",
+    tanggalDibuat: "2026-01-18T10:15:00Z",
+    status: "Selesai",
+    userId: "siti@mail.com",
+    userName: "Siti Rahayu",
+    catatan: [{ text: "Bukti transfer telah diverifikasi. Rekening pelaku dilaporkan untuk dibekukan.", status: "Selesai", by: "Admin", at: "2026-01-20T11:00:00Z" }]
+  },
+
+  // FEBRUARI 2026 (4 reports)
+  {
+    id: "LW-2026-003",
+    judul: "Pencurian Helm di Area Parkir Kantor",
+    kategori: "Pencurian",
+    deskripsi: "Hilang helm bermerek di parkiran basemen kantor balai kota pada siang hari.",
+    lokasi: "Gedung Balai Kota, Jakarta",
+    tanggalKejadian: "2026-02-05",
+    tanggalDibuat: "2026-02-06T14:20:00Z",
+    status: "Selesai",
+    userId: "ahmad@mail.com",
+    userName: "Ahmad Fauzi",
+    catatan: [{ text: "CCTV telah diperiksa dan diserahkan kepada pihak keamanan setempat.", status: "Selesai", by: "Admin", at: "2026-02-08T09:00:00Z" }]
+  },
+  {
+    id: "LW-2026-004",
+    judul: "Investasi Emas Bodong Telegram",
+    kategori: "Penipuan",
+    deskripsi: "Grup Telegram menjanjikan investasi emas dengan keuntungan 50% per minggu yang berujung penipuan berantai.",
+    lokasi: "Online / Media Sosial",
+    tanggalKejadian: "2026-02-12",
+    tanggalDibuat: "2026-02-14T08:30:00Z",
+    status: "Diproses",
+    userId: "siti@mail.com",
+    userName: "Siti Rahayu",
+    catatan: [{ text: "Sedang dilakukan investigasi awal terhadap grup Telegram terkait.", status: "Diproses", by: "Admin", at: "2026-02-15T10:00:00Z" }]
+  },
+  {
+    id: "LW-2026-005",
+    judul: "Peretasan Akun WhatsApp Publik",
+    kategori: "Siber",
+    deskripsi: "Akun WhatsApp pengurus lingkungan diretas dan digunakan untuk meminta pinjaman uang kepada warga sekitar.",
+    lokasi: "Kecamatan Gambir, Jakarta Pusat",
+    tanggalKejadian: "2026-02-20",
+    tanggalDibuat: "2026-02-22T11:45:00Z",
+    status: "Diproses",
+    userId: "ahmad@mail.com",
+    userName: "Ahmad Fauzi",
+    catatan: [{ text: "Proses pemulihan akun sedang dibantu berkoordinasi dengan penyedia layanan komunikasi.", status: "Diproses", by: "Admin", at: "2026-02-23T15:00:00Z" }]
+  },
+  {
+    id: "LW-2026-006",
+    judul: "Kekerasan Verbal di Tempat Umum",
+    kategori: "Kekerasan",
+    deskripsi: "Kejadian intimidasi dan ancaman kekerasan verbal oleh sekelompok orang di area taman kota.",
+    lokasi: "Taman Lapangan Banteng, Jakarta",
+    tanggalKejadian: "2026-02-25",
+    tanggalDibuat: "2026-02-26T16:00:00Z",
+    status: "Diproses",
+    userId: "siti@mail.com",
+    userName: "Siti Rahayu",
+    catatan: [{ text: "Laporan diteruskan ke Satpol PP pos terdekat untuk patroli rutin tambahan.", status: "Diproses", by: "Admin", at: "2026-02-27T08:30:00Z" }]
+  },
+
+  // MARET 2026 (3 reports)
+  {
+    id: "LW-2026-007",
+    judul: "Parkir Liar Menutupi Jalur Pedestrian",
+    kategori: "Ketertiban",
+    deskripsi: "Banyak mobil parkir di atas trotoar depan pertokoan yang mengganggu akses pejalan kaki.",
+    lokasi: "Jl. Gajah Mada, Jakarta Pusat",
+    tanggalKejadian: "2026-03-04",
+    tanggalDibuat: "2026-03-05T09:15:00Z",
+    status: "Selesai",
+    userId: "ahmad@mail.com",
+    userName: "Ahmad Fauzi",
+    catatan: [{ text: "Petugas Dishub telah diterjunkan untuk melakukan penertiban dan penggembokan roda.", status: "Selesai", by: "Admin", at: "2026-03-06T11:00:00Z" }]
+  },
+  {
+    id: "LW-2026-008",
+    judul: "Modus Penipuan Menang Undian SMS",
+    kategori: "Penipuan",
+    deskripsi: "Menerima pesan SMS penipuan yang menyatakan menang hadiah ratusan juta rupiah dengan melampirkan link palsu.",
+    lokasi: "Online / SMS",
+    tanggalKejadian: "2026-03-10",
+    tanggalDibuat: "2026-03-12T07:20:00Z",
+    status: "Selesai",
+    userId: "siti@mail.com",
+    userName: "Siti Rahayu",
+    catatan: [{ text: "Laporan nomor pengirim dan link palsu telah diserahkan ke aduankonten.id.", status: "Selesai", by: "Admin", at: "2026-03-13T16:00:00Z" }]
+  },
+  {
+    id: "LW-2026-009",
+    judul: "Pencurian Sepeda Lipat",
+    kategori: "Pencurian",
+    deskripsi: "Pencurian sepeda lipat di halaman teras rumah terekam kamera CCTV tetangga.",
+    lokasi: "Kelurahan Cideng, Jakarta Pusat",
+    tanggalKejadian: "2026-03-20",
+    tanggalDibuat: "2026-03-22T13:40:00Z",
+    status: "Diproses",
+    userId: "ahmad@mail.com",
+    userName: "Ahmad Fauzi",
+    catatan: [{ text: "Rekaman CCTV pelaku telah diserahkan ke pihak kepolisian setempat.", status: "Diproses", by: "Admin", at: "2026-03-24T10:00:00Z" }]
+  },
+
+  // APRIL 2026 (6 reports)
+  {
+    id: "LW-2026-010",
+    judul: "Penyebaran Malware Ransomware",
+    kategori: "Siber",
+    deskripsi: "Sistem komputer sekolah terkena ransomware yang mengunci data-data rapor siswa.",
+    lokasi: "SMA Negeri 10, Jakarta Pusat",
+    tanggalKejadian: "2026-04-03",
+    tanggalDibuat: "2026-04-05T09:00:00Z",
+    status: "Diproses",
+    userId: "siti@mail.com",
+    userName: "Siti Rahayu",
+    catatan: [{ text: "Laporan sedang diproses bersama ahli IT BSSN daerah untuk pemulihan.", status: "Diproses", by: "Admin", at: "2026-04-06T14:00:00Z" }]
+  },
+  {
+    id: "LW-2026-011",
+    judul: "Penipuan Arisan Online Fiktif",
+    kategori: "Penipuan",
+    deskripsi: "Owner arisan online kabur membawa uang tarikan para anggota sebesar puluhan juta rupiah.",
+    lokasi: "Kelurahan Petojo Utara, Jakarta Pusat",
+    tanggalKejadian: "2026-04-08",
+    tanggalDibuat: "2026-04-10T11:30:00Z",
+    status: "Diproses",
+    userId: "ahmad@mail.com",
+    userName: "Ahmad Fauzi",
+    catatan: [{ text: "Sedang dilakukan verifikasi dokumen keanggotaan arisan.", status: "Diproses", by: "Admin", at: "2026-04-12T09:00:00Z" }]
+  },
+  {
+    id: "LW-2026-012",
+    judul: "Pencurian Dompet di KRL",
+    kategori: "Pencurian",
+    deskripsi: "Pencopetan dompet di gerbong KRL rute Bogor - Jakarta Kota pada saat jam padat pulang kerja.",
+    lokasi: "Stasiun Sudirman, Jakarta",
+    tanggalKejadian: "2026-04-15",
+    tanggalDibuat: "2026-04-16T19:30:00Z",
+    status: "Selesai",
+    userId: "siti@mail.com",
+    userName: "Siti Rahayu",
+    catatan: [{ text: "Laporan diteruskan ke PKD stasiun. Kartu identitas korban berhasil ditemukan kembali.", status: "Selesai", by: "Admin", at: "2026-04-18T10:00:00Z" }]
+  },
+  {
+    id: "LW-2026-013",
+    judul: "Kekerasan Fisik / Tawuran Pelajar",
+    kategori: "Kekerasan",
+    deskripsi: "Aksi bentrokan antar pelajar sekolah di persimpangan jalan menggunakan benda tumpul.",
+    lokasi: "Jl. Kramat Raya, Jakarta Pusat",
+    tanggalKejadian: "2026-04-20",
+    tanggalDibuat: "2026-04-22T15:45:00Z",
+    status: "Selesai",
+    userId: "ahmad@mail.com",
+    userName: "Ahmad Fauzi",
+    catatan: [{ text: "Polsek setempat merespons cepat untuk membubarkan massa dan mengamankan pelaku.", status: "Selesai", by: "Admin", at: "2026-04-22T17:00:00Z" }]
+  },
+  {
+    id: "LW-2026-014",
+    judul: "Pelanggaran Pembuangan Sampah Liar",
+    kategori: "Ketertiban",
+    deskripsi: "Oknum warga membuang sampah rumah tangga dalam jumlah besar ke bantaran sungai pada malam hari.",
+    lokasi: "Kali Ciliwung, Jakarta Pusat",
+    tanggalKejadian: "2026-04-24",
+    tanggalDibuat: "2026-04-25T10:00:00Z",
+    status: "Diproses",
+    userId: "siti@mail.com",
+    userName: "Siti Rahayu",
+    catatan: [{ text: "Petugas kebersihan setempat telah dikerahkan dan dipasang spanduk larangan.", status: "Diproses", by: "Admin", at: "2026-04-27T08:00:00Z" }]
+  },
+  {
+    id: "LW-2026-015",
+    judul: "Lampu Penerangan Jalan Umum Padam",
+    kategori: "Lainnya",
+    deskripsi: "Tiga tiang lampu PJU mati total di jalur alternatif yang rawan kejahatan jalanan.",
+    lokasi: "Jl. Cideng Timur, Jakarta Pusat",
+    tanggalKejadian: "2026-04-28",
+    tanggalDibuat: "2026-04-29T21:00:00Z",
+    status: "Selesai",
+    userId: "ahmad@mail.com",
+    userName: "Ahmad Fauzi",
+    catatan: [{ text: "Suku dinas perindustrian dan energi telah memperbaiki sambungan lampu.", status: "Selesai", by: "Admin", at: "2026-05-01T10:00:00Z" }]
+  },
+
+  // MEI 2026 (8 reports)
+  {
+    id: "LW-2026-016",
+    judul: "Penipuan Mengatasnamakan Bank",
+    kategori: "Penipuan",
+    deskripsi: "Mendapat telepon dari oknum yang mengaku petugas bank meminta kode OTP kartu kredit.",
+    lokasi: "Telepon / Seluler",
+    tanggalKejadian: "2026-05-03",
+    tanggalDibuat: "2026-05-05T08:30:00Z",
+    status: "Menunggu",
+    userId: "siti@mail.com",
+    userName: "Siti Rahayu",
+    catatan: []
+  },
+  {
+    id: "LW-2026-017",
+    judul: "Deface Website Instansi Sekolah",
+    kategori: "Siber",
+    deskripsi: "Halaman utama situs web resmi sekolah diubah tampilannya oleh peretas luar negeri.",
+    lokasi: "Online / Website",
+    tanggalKejadian: "2026-05-06",
+    tanggalDibuat: "2026-05-08T10:00:00Z",
+    status: "Menunggu",
+    userId: "ahmad@mail.com",
+    userName: "Ahmad Fauzi",
+    catatan: []
+  },
+  {
+    id: "LW-2026-018",
+    judul: "Pencurian Komponen Listrik Gardu",
+    kategori: "Pencurian",
+    deskripsi: "Kabel tembaga dan komponen gardu listrik raib dicuri di kawasan industri kecil.",
+    lokasi: "Kecamatan Kemayoran, Jakarta Pusat",
+    tanggalKejadian: "2026-05-10",
+    tanggalDibuat: "2026-05-12T07:15:00Z",
+    status: "Menunggu",
+    userId: "siti@mail.com",
+    userName: "Siti Rahayu",
+    catatan: []
+  },
+  {
+    id: "LW-2026-019",
+    judul: "Kekerasan / Penganiayaan Ringan",
+    kategori: "Kekerasan",
+    deskripsi: "Pertengkaran tetangga berujung tindakan pemukulan fisik yang menyebabkan lebam.",
+    lokasi: "Kelurahan Serdang, Jakarta Pusat",
+    tanggalKejadian: "2026-05-14",
+    tanggalDibuat: "2026-05-15T14:40:00Z",
+    status: "Menunggu",
+    userId: "ahmad@mail.com",
+    userName: "Ahmad Fauzi",
+    catatan: []
+  },
+  {
+    id: "LW-2026-020",
+    judul: "Pelanggaran Jam Operasional Truk",
+    kategori: "Ketertiban",
+    deskripsi: "Truk besar melintas di jalan lingkungan di luar jam operasional yang ditentukan dinas.",
+    lokasi: "Jl. Kebon Kosong, Jakarta Pusat",
+    tanggalKejadian: "2026-05-18",
+    tanggalDibuat: "2026-05-19T11:20:00Z",
+    status: "Menunggu",
+    userId: "siti@mail.com",
+    userName: "Siti Rahayu",
+    catatan: []
+  },
+  {
+    id: "LW-2026-021",
+    judul: "Kebocoran Pipa Air PDAM",
+    kategori: "Lainnya",
+    deskripsi: "Saluran pipa air bersih pecah di pinggir jalan raya menyebabkan semburan air dan genangan tinggi.",
+    lokasi: "Jl. Gunung Sahari, Jakarta Pusat",
+    tanggalKejadian: "2026-05-22",
+    tanggalDibuat: "2026-05-24T09:00:00Z",
+    status: "Menunggu",
+    userId: "ahmad@mail.com",
+    userName: "Ahmad Fauzi",
+    catatan: []
+  },
+  {
+    id: "LW-2026-022",
+    judul: "Penipuan Berkedok Paket COD",
+    kategori: "Penipuan",
+    deskripsi: "Menerima kiriman paket COD yang tidak pernah dipesan dengan harga tagihan yang tidak wajar.",
+    lokasi: "Kelurahan Johar Baru, Jakarta Pusat",
+    tanggalKejadian: "2026-05-25",
+    tanggalDibuat: "2026-05-26T15:00:00Z",
+    status: "Menunggu",
+    userId: "siti@mail.com",
+    userName: "Siti Rahayu",
+    catatan: []
+  },
+  {
+    id: "LW-2026-023",
+    judul: "Penyebaran Berita Bohong (Hoaks)",
+    kategori: "Siber",
+    deskripsi: "Penyebaran pesan berantai hoaks yang memicu kepanikan warga mengenai bencana alam fiktif.",
+    lokasi: "Online / WhatsApp Group",
+    tanggalKejadian: "2026-05-28",
+    tanggalDibuat: "2026-05-29T10:30:00Z",
+    status: "Menunggu",
+    userId: "ahmad@mail.com",
+    userName: "Ahmad Fauzi",
+    catatan: []
+  }
 ];
 
 // ── Init ───────────────────────────────────────────────────────────────────
 
-const STORAGE_VERSION = "v3";
+const STORAGE_VERSION = "v6";
 
 export function initStorage() {
   // Re-seed when version changes so status "Menunggu" is applied

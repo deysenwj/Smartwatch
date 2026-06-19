@@ -838,3 +838,22 @@ export async function getSupabaseChatThreads(): Promise<SupabaseChatThread[]> {
     .sort((a, b) => b.lastTime.localeCompare(a.lastTime));
 }
 
+/** Kirim notifikasi ke semua admin di Supabase */
+export async function notifyAdmins(text: string, type: Notification["type"] = "info") {
+  if (!supabase) return;
+  try {
+    const { data: admins, error } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("role", "admin");
+    if (error) throw error;
+    if (admins) {
+      for (const adm of admins) {
+        await addSupabaseNotification(adm.id, text, type);
+      }
+    }
+  } catch (err) {
+    console.error("Gagal mengirim notifikasi ke admin di Supabase:", err);
+  }
+}
+

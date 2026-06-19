@@ -3,7 +3,8 @@ import {
   ClipboardCheck, Users, LogOut, X, Bell, Sun, Moon,
   Trash2, FileText, Clock, CheckCircle, XCircle, AlertCircle,
   ChevronRight, ChevronLeft, Menu, Search, Info, User, Calendar, MapPin,
-  TrendingUp, ShieldAlert, CheckCheck, Settings, MessageSquare, Send, Headphones,
+  TrendingUp, ShieldAlert, CheckCheck, Settings, MessageSquare, Send, Headphones, Video,
+  LayoutDashboard, BarChart3,
 } from "lucide-react";
 import systemLogo from "../../imports/system_logo_white.png";
 import {
@@ -16,11 +17,17 @@ import {
   hasSupabaseConfig, getSupabaseReports, getSupabaseUsers,
   updateSupabaseReport, deleteSupabaseUser, addSupabaseNotification,
   getSupabaseChatMessages, addSupabaseChatMessage, markSupabaseChatRead, getSupabaseChatThreads,
+  uploadSupabaseFile,
   type SupabaseChatMessage, type SupabaseChatThread,
 } from "../lib/supabase";
 import { SettingsPage } from "./SettingsPage";
+import { MapViewer } from "./MapComponent";
+import {
+  ResponsiveContainer, XAxis, YAxis, Tooltip as RechartsTooltip, BarChart, Bar, Cell,
+  LineChart, Line, CartesianGrid, AreaChart, Area
+} from "recharts";
 
-type AdminTab = "validasi" | "users" | "chat" | "settings";
+type AdminTab = "dashboard" | "validasi" | "users" | "chat" | "settings";
 type StatusFilter = "all" | Report["status"];
 
 interface Props {
@@ -134,10 +141,13 @@ function StatusBadge({ status }: { status: string }) {
 function ValidasiModal({ report, onClose, onUpdate }: {
   report: Report;
   onClose: () => void;
-  onUpdate: (id: string, status: Report["status"], note: string) => void;
+  onUpdate: (id: string, status: Report["status"], note: string, file: File | null, noteStatus?: string) => Promise<void>;
 }) {
   const [note, setNote]   = useState("");
   const [error, setError] = useState("");
+  const [file, setFile]   = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [actionType, setActionType] = useState<string>("Diproses");
   const [confirmConfig, setConfirmConfig] = useState<{
     title: string;
     description: string;
@@ -149,33 +159,56 @@ function ValidasiModal({ report, onClose, onUpdate }: {
     isDestructive?: boolean;
   } | null>(null);
 
-  function submit(status: Report["status"]) {
+  async function submitAction() {
     if (!note.trim()) { setError("Catatan wajib diisi sebelum mengambil tindakan."); return; }
-    
-    let title = "";
-    let description = "";
+
+    let status: Report["status"] = "Diproses";
+    let noteStatus: string | undefined = undefined;
+
+    let title = "Konfirmasi Tindakan";
+    let description = `Apakah Anda yakin ingin memproses laporan "${report.judul}"?`;
     let icon = Clock;
     let iconColor = "text-slate-500 dark:text-slate-400";
     let iconBg = "bg-slate-50 dark:bg-slate-800/60";
-    let confirmText = "Proses";
+    let confirmText = "Kirim";
     let isDestructive = false;
 
-    if (status === "Selesai") {
+    if (actionType === "Selesai") {
+      status = "Selesai";
       title = "Setujui Laporan";
       description = `Apakah Anda yakin ingin menyetujui laporan "${report.judul}" dan mengubah statusnya menjadi Selesai?`;
       icon = CheckCircle;
+      iconColor = "text-emerald-500";
+      iconBg = "bg-emerald-50 dark:bg-emerald-950/20";
       confirmText = "Setujui";
-    } else if (status === "Ditolak") {
+    } else if (actionType === "Ditolak") {
+      status = "Ditolak";
       title = "Tolak Laporan";
       description = `Apakah Anda yakin ingin menolak laporan "${report.judul}"?`;
       icon = XCircle;
+      iconColor = "text-red-500";
+      iconBg = "bg-red-50 dark:bg-red-950/20";
       confirmText = "Tolak";
       isDestructive = true;
-    } else {
-      title = "Proses Laporan";
-      description = `Apakah Anda yakin ingin memproses laporan "${report.judul}"? Status laporan akan diubah menjadi Diproses.`;
-      icon = Clock;
-      confirmText = "Proses";
+    } else if (actionType === "MintaData") {
+      status = "Diproses";
+      noteStatus = "Meminta Data Tambahan";
+      title = "Minta Data Tambahan";
+      description = `Apakah Anda yakin ingin meminta data tambahan untuk laporan "${report.judul}"? Status laporan akan menjadi Diproses.`;
+      icon = Info;
+      iconColor = "text-blue-500";
+      iconBg = "bg-blue-50 dark:bg-blue-950/20";
+      confirmText = "Minta Data";
+    } else if (actionType.startsWith("Disposisi_")) {
+      status = "Diproses";
+      const agency = actionType.replace("Disposisi_", "").replace("SatpolPP", "Satpol PP").replace("Instansi", "Instansi Terkait");
+      noteStatus = `Disposisi: ${agency}`;
+      title = `Disposisi Ke ${agency}`;
+      description = `Apakah Anda yakin ingin mendisposisikan laporan "${report.judul}" ke ${agency}? Status laporan akan menjadi Diproses.`;
+      icon = Send;
+      iconColor = "text-indigo-500";
+      iconBg = "bg-indigo-50 dark:bg-indigo-950/20";
+      confirmText = "Disposisi";
     }
 
     setConfirmConfig({
@@ -186,9 +219,15 @@ function ValidasiModal({ report, onClose, onUpdate }: {
       iconBg,
       confirmText,
       isDestructive,
-      onConfirm: () => {
+      onConfirm: async () => {
         setConfirmConfig(null);
-        onUpdate(report.id, status, note.trim());
+        setLoading(true);
+        try {
+          await onUpdate(report.id, status, note.trim(), file, noteStatus);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Gagal memproses validasi laporan.");
+          setLoading(false);
+        }
       }
     });
   }
@@ -203,8 +242,8 @@ function ValidasiModal({ report, onClose, onUpdate }: {
             <p className="text-xs font-mono font-semibold text-slate-400 dark:text-slate-500">{report.id}</p>
             <h3 className="text-base font-bold text-slate-900 dark:text-white mt-0.5">Validasi Laporan</h3>
           </div>
-          <button onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+          <button onClick={onClose} disabled={loading}
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition disabled:opacity-50">
             <X className="w-4 h-4 text-slate-500 dark:text-slate-400" />
           </button>
         </div>
@@ -241,7 +280,7 @@ function ValidasiModal({ report, onClose, onUpdate }: {
               {report.lokasi && (
                 <div className="col-span-2 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                   <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span>{report.lokasi}</span>
+                  <span className="truncate">{report.lokasi.split(" | ")[0]}</span>
                 </div>
               )}
             </div>
@@ -263,9 +302,13 @@ function ValidasiModal({ report, onClose, onUpdate }: {
                     href={report.buktiUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex flex-col items-center justify-center w-28 h-28 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl gap-2 cursor-pointer hover:border-slate-400 dark:hover:border-slate-500 transition"
+                    className="flex flex-col items-center justify-center w-28 h-28 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl gap-2 cursor-pointer hover:border-slate-450 dark:hover:border-slate-400 transition"
                   >
-                    <FileText className="w-5 h-5 text-slate-400" />
+                    {report.buktiName?.toLowerCase().endsWith(".mp4") ? (
+                      <Video className="w-5 h-5 text-slate-400" />
+                    ) : (
+                      <FileText className="w-5 h-5 text-slate-400" />
+                    )}
                     <p className="text-[10px] text-slate-500 dark:text-slate-400 text-center px-2 leading-tight truncate max-w-full">
                       {report.buktiName || "bukti_lampiran"}
                     </p>
@@ -274,14 +317,53 @@ function ValidasiModal({ report, onClose, onUpdate }: {
               </div>
             )}
 
+            {/* Location Map */}
+            {report.lokasi && (
+              <div className="mb-4">
+                <MapViewer locationStr={report.lokasi} />
+              </div>
+            )}
+
             {/* Previous notes */}
             {report.catatan?.length > 0 && (
-              <div>
+              <div className="mt-4">
                 <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-2">Riwayat Catatan</p>
                 <div className="space-y-2">
                   {report.catatan.map((c, i) => (
                     <div key={i} className="text-sm bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2.5 border-l-2 border-slate-300 dark:border-slate-600">
+                      <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                        {c.status.startsWith("Disposisi:") ? (
+                          <span className="px-2 py-0.5 bg-indigo-50 text-indigo-750 dark:bg-indigo-900/30 dark:text-indigo-350 text-[10px] font-bold rounded">
+                            Disposisi Ke {c.status.replace("Disposisi: ", "")}
+                          </span>
+                        ) : c.status === "Meminta Data Tambahan" ? (
+                          <span className="px-2 py-0.5 bg-blue-50 text-blue-755 dark:bg-blue-900/30 dark:text-blue-350 text-[10px] font-bold rounded">
+                            Minta Data Tambahan
+                          </span>
+                        ) : (
+                          <span className={`px-2 py-0.5 text-[10px] font-bold rounded ${c.status === "Selesai" ? "bg-emerald-50 text-emerald-700" : c.status === "Ditolak" ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700"}`}>
+                            {c.status}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-slate-700 dark:text-slate-300">{c.text}</p>
+                      {c.buktiUrl && (
+                        <div className="mt-1.5 mb-1 flex flex-wrap gap-2">
+                          <a
+                            href={c.buktiUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+                          >
+                            {c.buktiName?.toLowerCase().endsWith(".mp4") ? (
+                              <Video className="w-3.5 h-3.5 shrink-0" />
+                            ) : (
+                              <FileText className="w-3.5 h-3.5 shrink-0" />
+                            )}
+                            <span className="truncate max-w-[250px]">{c.buktiName || "lampiran_tindakan"}</span>
+                          </a>
+                        </div>
+                      )}
                       <p className="text-xs text-slate-400 mt-1">{c.by} · {formatDate(c.at)}</p>
                     </div>
                   ))}
@@ -294,27 +376,109 @@ function ValidasiModal({ report, onClose, onUpdate }: {
           <div className="px-6 py-5 space-y-4">
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                Tindakan Validasi / Status Baru <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={actionType}
+                onChange={(e) => setActionType(e.target.value)}
+                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition"
+              >
+                <optgroup label="Status Standard">
+                  <option value="Diproses">Proses Laporan (Diproses)</option>
+                  <option value="Selesai">Setujui Laporan (Selesai)</option>
+                  <option value="Ditolak">Tolak Laporan (Ditolak)</option>
+                </optgroup>
+                <optgroup label="Tindakan Khusus">
+                  <option value="MintaData">Minta Data Tambahan (Diproses)</option>
+                  <option value="Disposisi_Polisi">Disposisi Ke Polisi (Diproses)</option>
+                  <option value="Disposisi_SatpolPP">Disposisi Ke Satpol PP (Diproses)</option>
+                  <option value="Disposisi_Kejaksaan">Disposisi Ke Kejaksaan (Diproses)</option>
+                  <option value="Disposisi_Instansi">Disposisi Ke Instansi Terkait (Diproses)</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 Catatan Tindakan <span className="text-red-500">*</span>
               </label>
               <textarea rows={3} value={note} onChange={e => { setNote(e.target.value); setError(""); }}
+                disabled={loading}
                 placeholder="Tuliskan catatan, alasan, atau tindak lanjut untuk pelapor..."
-                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition resize-none" />
+                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition resize-none disabled:opacity-60" />
               {error && <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" />{error}</p>}
             </div>
 
+            {/* Lampiran file */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                Lampiran File / Dokumen <span className="font-normal text-slate-400 dark:text-slate-500">(Opsional)</span>
+              </label>
+              <input
+                type="file"
+                id="adminFileInput"
+                className="hidden"
+                disabled={loading}
+                accept=".jpg,.jpeg,.png,.pdf,.mp4"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    const selected = e.target.files[0];
+                    if (selected.size > 20 * 1024 * 1024) {
+                      setError("Ukuran file maksimal 20 MB.");
+                      return;
+                    }
+                    setFile(selected);
+                    setError("");
+                  }
+                }}
+              />
+              <div
+                onClick={() => !loading && document.getElementById("adminFileInput")?.click()}
+                className={`border border-dashed border-slate-300 dark:border-slate-600 rounded-xl py-5 text-center transition duration-200 group
+                  ${loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:border-slate-450 dark:hover:border-slate-400 hover:bg-slate-50/40 dark:hover:bg-slate-700/10"}`}
+              >
+                <div className="flex flex-col items-center gap-1">
+                  {file ? (
+                    <>
+                      <p className="text-xs font-bold text-slate-900 dark:text-white truncate px-4 max-w-full">
+                        {file.name}
+                      </p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                        {(file.size / (1024 * 1024)).toFixed(2)} MB — Klik untuk mengganti
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                        Klik untuk memilih file lampiran
+                      </p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                        JPG, JPEG, PNG, PDF, MP4 — Maks. 20 MB
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* Action buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button onClick={() => submit("Selesai")}
-                className="flex items-center justify-center gap-2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold transition">
-                <CheckCircle className="w-4 h-4" /> Setujui
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={loading}
+                className="flex-1 py-2.5 border border-slate-300 dark:border-slate-750 text-slate-700 dark:text-slate-350 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+              >
+                Batal
               </button>
-              <button onClick={() => submit("Ditolak")}
-                className="flex items-center justify-center gap-2 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition">
-                <XCircle className="w-4 h-4" /> Tolak
-              </button>
-              <button onClick={() => submit("Diproses")}
-                className="flex items-center justify-center gap-2 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-semibold transition">
-                <Clock className="w-4 h-4" /> Proses
+              <button
+                type="button"
+                onClick={submitAction}
+                disabled={loading}
+                className="flex-1.5 py-2.5 bg-slate-900 hover:bg-slate-850 dark:bg-slate-100 dark:hover:bg-slate-200 text-white dark:text-slate-900 rounded-lg text-sm font-semibold transition disabled:opacity-60 flex items-center justify-center gap-1.5"
+              >
+                <CheckCircle className="w-4 h-4" />
+                {loading ? "Mengirim..." : "Kirim Tindakan"}
               </button>
             </div>
           </div>
@@ -371,11 +535,14 @@ function ValidasiModal({ report, onClose, onUpdate }: {
 
 // ── Main AdminPage ─────────────────────────────────────────────────────────
 export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark, onMarkAllRead, onClearNotifs, onLogout, onSaved, onMarkRead }: Props) {
-  const [tab,         setTab]        = useState<AdminTab>("validasi");
+  const [tab,         setTab]        = useState<AdminTab>("dashboard");
   const [reports,     setReports]    = useState<Report[]>([]);
   const [users,       setUsers]      = useState<UserType[]>([]);
   const [filter,      setFilter]     = useState<StatusFilter>("all");
   const [search,      setSearch]     = useState("");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [startDate,      setStartDate]      = useState<string>("");
+  const [endDate,        setEndDate]        = useState<string>("");
   const [modal,       setModal]      = useState<Report | null>(null);
   const [confirmConfig, setConfirmConfig] = useState<{
     title: string;
@@ -454,9 +621,37 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
     setTimeout(() => setToast(null), 3500);
   }
 
-  async function handleUpdate(id: string, status: Report["status"], note: string) {
+  async function handleUpdate(id: string, status: Report["status"], note: string, file: File | null, noteStatus?: string) {
+    let uploadedFile: { url: string; name: string } | null = null;
+    if (file) {
+      if (hasSupabaseConfig()) {
+        try {
+          uploadedFile = await uploadSupabaseFile(file);
+        } catch (uploadErr) {
+          showToast("Gagal mengunggah file lampiran ke Supabase.", "error");
+          throw uploadErr;
+        }
+      } else {
+        uploadedFile = {
+          url: URL.createObjectURL(file),
+          name: file.name,
+        };
+      }
+    }
+
+    const noteObj: any = {
+      text: note,
+      status: noteStatus || status,
+      by: user.name,
+      at: new Date().toISOString()
+    };
+    if (uploadedFile) {
+      noteObj.buktiUrl = uploadedFile.url;
+      noteObj.buktiName = uploadedFile.name;
+    }
+
     const prev    = reports.find(r => r.id === id);
-    const newCatatan = [...(prev?.catatan ?? []), { text: note, status, by: user.name, at: new Date().toISOString() }];
+    const newCatatan = [...(prev?.catatan ?? []), noteObj];
 
     if (hasSupabaseConfig()) {
       try {
@@ -466,10 +661,10 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
         });
         if (updated) {
           try {
-            const verb = status === "Selesai" ? "disetujui" : status === "Ditolak" ? "ditolak" : "sedang diproses";
+            const verb = noteStatus || (status === "Selesai" ? "disetujui" : status === "Ditolak" ? "ditolak" : "sedang diproses");
             await addSupabaseNotification(
               (updated as any).userUUID || updated.userId,
-              `Laporan "${updated.judul}" telah ${verb}. Catatan: ${note}`,
+              `Laporan "${updated.judul}": ${verb}. Catatan: ${note}`,
               status === "Selesai" ? "success" : status === "Ditolak" ? "error" : "warning"
             );
           } catch (notifErr) {
@@ -478,7 +673,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
         }
       } catch (err) {
         showToast("Gagal memperbarui laporan di Supabase.", "error");
-        return;
+        throw err;
       }
     } else {
       const updated = updateReport(id, {
@@ -486,8 +681,8 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
         catatan: newCatatan,
       });
       if (updated) {
-        const verb = status === "Selesai" ? "disetujui" : status === "Ditolak" ? "ditolak" : "sedang diproses";
-        addNotification(updated.userId, `Laporan "${updated.judul}" telah ${verb}. Catatan: ${note}`, status === "Selesai" ? "success" : status === "Ditolak" ? "error" : "warning");
+        const verb = noteStatus || (status === "Selesai" ? "disetujui" : status === "Ditolak" ? "ditolak" : "sedang diproses");
+        addNotification(updated.userId, `Laporan "${updated.judul}": ${verb}. Catatan: ${note}`, status === "Selesai" ? "success" : status === "Ditolak" ? "error" : "warning");
       }
     }
     await refresh();
@@ -533,6 +728,57 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
     showToast("Pengguna berhasil dihapus.");
   }
 
+  // helper stats functions
+  const getMonthlyData = () => {
+    const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+    const counts: Record<string, number> = {};
+    reports.forEach(r => {
+      if (!r.tanggalDibuat) return;
+      const d = new Date(r.tanggalDibuat);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; // "2024-10"
+      counts[key] = (counts[key] || 0) + 1;
+    });
+
+    return Object.keys(counts)
+      .sort()
+      .map(key => {
+        const [year, month] = key.split("-");
+        const monthIndex = parseInt(month) - 1;
+        const monthName = months[monthIndex] || "N/A";
+        return {
+          month: `${monthName} ${year.slice(-2)}`,
+          "Jumlah Laporan": counts[key]
+        };
+      });
+  };
+
+  const getCategoryData = () => {
+    const counts: Record<string, number> = {
+      "Siber": 0,
+      "Penipuan": 0,
+      "Pencurian": 0,
+      "Kekerasan": 0,
+      "Ketertiban": 0,
+      "Lainnya": 0
+    };
+    reports.forEach(r => {
+      if (r.kategori) {
+        if (r.kategori in counts) {
+          counts[r.kategori]++;
+        } else {
+          counts["Lainnya"]++;
+        }
+      }
+    });
+    return Object.keys(counts).map(cat => ({
+      name: cat,
+      "Jumlah": counts[cat]
+    })).sort((a, b) => b.Jumlah - a.Jumlah);
+  };
+
+  const catData = getCategoryData();
+  const topCategoryText = catData[0] ? `${catData[0].name} (${catData[0].Jumlah} Laporan)` : "—";
+
   // Stats
   const total    = reports.length;
   const menunggu = reports.filter(r => r.status === "Menunggu").length;
@@ -541,12 +787,22 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
   const ditolak  = reports.filter(r => r.status === "Ditolak").length;
 
   const filteredReports = reports.filter(r => {
-    const mf = filter === "all" || r.status === filter;
-    const ms = !search || r.judul.toLowerCase().includes(search.toLowerCase())
+    const matchesStatus = filter === "all" || r.status === filter;
+    const matchesCategory = filterCategory === "all" || r.kategori === filterCategory;
+    
+    let matchesDate = true;
+    const dateVal = r.tanggalKejadian || r.tanggalDibuat.split("T")[0];
+    if (startDate && dateVal < startDate) matchesDate = false;
+    if (endDate && dateVal > endDate) matchesDate = false;
+
+    const matchesSearch = !search || r.judul.toLowerCase().includes(search.toLowerCase())
       || r.id.toLowerCase().includes(search.toLowerCase())
       || r.userName.toLowerCase().includes(search.toLowerCase());
-    return mf && ms;
+
+    return matchesStatus && matchesCategory && matchesDate && matchesSearch;
   });
+
+  const uniqueCategories = Array.from(new Set(reports.map(r => r.kategori).filter(Boolean)));
 
   const filterTabs: { key: StatusFilter; label: string; count?: number }[] = [
     { key: "all",       label: "Semua",     count: total },
@@ -557,6 +813,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
   ];
 
   const navItems: { key: AdminTab; label: string; icon: React.ElementType }[] = [
+    { key: "dashboard", label: "Statistik Dashboard", icon: LayoutDashboard },
     { key: "validasi", label: "Validasi Laporan", icon: ClipboardCheck },
     { key: "users",    label: "Kelola Pengguna",  icon: Users },
     { key: "chat",     label: "Chat Support",     icon: MessageSquare },
@@ -599,6 +856,11 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
         sender_name: user.name,
         text,
       });
+      try {
+        await addSupabaseNotification(activeChatUUID, `Pesan chat baru dari Admin: "${text.substring(0, 30)}..."`, "info");
+      } catch (userNotifErr) {
+        console.error("Gagal mengirim notifikasi chat ke user di Supabase:", userNotifErr);
+      }
       const msgs = await getSupabaseChatMessages(activeChatUUID);
       setActiveChatMsgs(msgs);
       const threads = await getSupabaseChatThreads();
@@ -606,6 +868,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
     } else if (activeChatEmail) {
       setAdminChatInput("");
       addChatMessage(activeChatEmail, { from: "admin", senderName: user.name, text });
+      addNotification(activeChatEmail, `Pesan chat baru dari Admin: "${text.substring(0, 30)}..."`, "info");
       setActiveChatMsgs(getChatMessages(activeChatEmail));
       setChatThreads(getChatThreads());
     }
@@ -695,7 +958,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
             </button>
             <div>
               <h2 className="text-base md:text-lg font-bold text-slate-900 dark:text-white">
-                {tab === "validasi" ? "Validasi Laporan" : tab === "users" ? "Kelola Pengguna" : tab === "chat" ? "Chat Support" : "Pengaturan"}
+                {tab === "dashboard" ? "Statistik Dashboard" : tab === "validasi" ? "Validasi Laporan" : tab === "users" ? "Kelola Pengguna" : tab === "chat" ? "Chat Support" : "Pengaturan"}
               </h2>
             </div>
           </div>
@@ -723,6 +986,132 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
         {/* ── Page content ── */}
         <main className="flex-1 p-6 md:p-10 pb-28 md:pb-10 custom-scrollbar max-w-7xl mx-auto w-full space-y-6">
 
+          {/* ════════ STATISTIK DASHBOARD TAB ════════ */}
+          {tab === "dashboard" && (
+            <>
+              {/* Summary Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                {[
+                  { label: "Total Laporan", val: total, icon: FileText, num: "text-slate-900 dark:text-white", bg: "bg-slate-50 dark:bg-slate-700/50", iconCol: "text-slate-500" },
+                  { label: "Laporan Menunggu", val: menunggu, icon: Clock, num: "text-indigo-700 dark:text-indigo-300", bg: "bg-indigo-50 dark:bg-indigo-950/20", iconCol: "text-indigo-500" },
+                  { label: "Laporan Diproses", val: diproses, icon: TrendingUp, num: "text-amber-700 dark:text-amber-300", bg: "bg-amber-50 dark:bg-amber-950/20", iconCol: "text-amber-500" },
+                  { label: "Laporan Selesai", val: selesai, icon: CheckCircle, num: "text-emerald-700 dark:text-emerald-300", bg: "bg-emerald-50 dark:bg-emerald-950/20", iconCol: "text-emerald-500" },
+                ].map(({ label, val, icon: Icon, num, bg, iconCol }) => (
+                  <div key={label} className="bg-white dark:bg-slate-800 rounded-[20px] p-5 border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between h-36 hover:shadow-md transition">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">{label}</p>
+                      <div className={`w-8 h-8 ${bg} rounded-xl flex items-center justify-center`}>
+                        <Icon className={`w-4 h-4 ${iconCol}`} />
+                      </div>
+                    </div>
+                    <div className="mt-2 min-w-0">
+                      {typeof val === "number" ? (
+                        <p className={`text-2xl md:text-3xl font-extrabold ${num}`}>{val}</p>
+                      ) : (
+                        <p className={`${num} truncate leading-tight`} title={val}>{val}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Charts grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                
+                {/* Monthly Trend Area Chart */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-[24px] border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="pb-3 mb-4 border-b border-slate-100 dark:border-slate-700/50">
+                      <h3 className="text-base font-bold text-slate-800 dark:text-white">Laporan Bulanan</h3>
+                    </div>
+                    <div className="w-full h-72 text-xs">
+                      {getMonthlyData().length === 0 ? (
+                        <div className="h-full flex items-center justify-center text-slate-400">Tidak ada data bulanan.</div>
+                      ) : (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={getMonthlyData()} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                            <defs>
+                              <linearGradient id="colorReports" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor={isDark ? "#ffffff" : "#030213"} stopOpacity={0.15}/>
+                                <stop offset="95%" stopColor={isDark ? "#ffffff" : "#030213"} stopOpacity={0.0}/>
+                              </linearGradient>
+                            </defs>
+                            <XAxis
+                              dataKey="month"
+                              stroke={isDark ? "#64748b" : "#94a3b8"}
+                              fontSize={11}
+                              tickLine={false}
+                              axisLine={{ stroke: isDark ? "#334155" : "#e2e8f0", strokeWidth: 1 }}
+                              tickFormatter={(tick) => tick.split(" ")[0]}
+                            />
+                            <YAxis hide={true} />
+                            <RechartsTooltip
+                              contentStyle={{
+                                background: isDark ? "#0f172a" : "#ffffff",
+                                borderColor: isDark ? "#1e293b" : "#e2e8f0",
+                                borderRadius: "12px",
+                                color: isDark ? "#f8fafc" : "#030213",
+                                boxShadow: isDark ? "0 8px 24px rgba(0,0,0,0.4)" : "0 8px 24px rgba(0,0,0,0.08)",
+                                fontSize: "12px",
+                                fontWeight: 600,
+                              }}
+                            />
+                            <Area
+                              type="monotone"
+                              dataKey="Jumlah Laporan"
+                              stroke={isDark ? "#ffffff" : "#030213"}
+                              strokeWidth={2}
+                              fillOpacity={1}
+                              fill="url(#colorReports)"
+                              activeDot={{ r: 5, strokeWidth: 2, stroke: isDark ? "#ffffff" : "#030213", fill: isDark ? "#0f172a" : "#ffffff" }}
+                              dot={{ r: 3.5, strokeWidth: 2, stroke: isDark ? "#ffffff" : "#030213", fill: isDark ? "#0f172a" : "#ffffff" }}
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Category Distribution Progress Bars */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-[24px] border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="pb-3 mb-6 border-b border-slate-100 dark:border-slate-700/50">
+                      <h3 className="text-base font-bold text-slate-800 dark:text-white">Kategori Terbanyak</h3>
+                    </div>
+                    <div className="space-y-4">
+                      {getCategoryData().length === 0 ? (
+                        <div className="h-full flex items-center justify-center text-slate-400 py-12">Tidak ada data kategori.</div>
+                      ) : (
+                        getCategoryData().map((item) => {
+                          const maxVal = Math.max(...getCategoryData().map(d => d.Jumlah), 1);
+                          const percentage = (item.Jumlah / maxVal) * 100;
+                          return (
+                            <div key={item.name} className="space-y-2">
+                              <div className="flex justify-between items-center text-sm font-semibold">
+                                <span className="text-slate-700 dark:text-slate-300">
+                                  {item.name === "Siber" ? "Cybercrime" : item.name}
+                                </span>
+                                <span className="text-slate-900 dark:text-white">{item.Jumlah}</span>
+                              </div>
+                              <div className="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+                                <div
+                                  className="bg-[#030213] dark:bg-slate-100 h-full rounded-full transition-all duration-500"
+                                  style={{ width: `${percentage}%` }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </>
+          )}
+
           {/* ════════ VALIDASI TAB ════════ */}
           {tab === "validasi" && (
             <>
@@ -738,7 +1127,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                   <div key={label} className={`bg-white dark:bg-slate-800 rounded-[24px] p-5 border border-slate-100 dark:border-slate-800/80 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between`}>
                     <div>
                       <div className="flex items-center justify-between mb-3">
-                        <p className="text-[11px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-widest">{label}</p>
+                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">{label}</p>
                         <div className={`w-8 h-8 ${icon_bg} rounded-xl flex items-center justify-center`}>
                           <Icon className={`w-4 h-4 ${icon_c}`} />
                         </div>
@@ -773,6 +1162,30 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input type="text" placeholder="Cari ID, judul, atau pelapor…" value={search} onChange={e => setSearch(e.target.value)}
                     className="w-full sm:w-64 pl-9 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition" />
+                </div>
+              </div>
+
+              {/* Secondary Filters */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 p-4 rounded-2xl shadow-sm">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-450 dark:text-slate-550 uppercase tracking-wider mb-1">Kategori</label>
+                  <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition">
+                    <option value="all">Semua Kategori</option>
+                    {uniqueCategories.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-450 dark:text-slate-550 uppercase tracking-wider mb-1">Tanggal Mulai</label>
+                  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-450 dark:text-slate-550 uppercase tracking-wider mb-1">Tanggal Selesai</label>
+                  <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition" />
                 </div>
               </div>
 

@@ -7,6 +7,10 @@ import { getUserReports, formatDate, type User, type Report } from "../lib/stora
 import {
   hasSupabaseConfig, getSupabaseUserReports,
 } from "../lib/supabase";
+import {
+  ResponsiveContainer, XAxis, YAxis, Tooltip as RechartsTooltip,
+  AreaChart, Area
+} from "recharts";
 import courtroomBanner from "../../imports/courtroom_banner.png";
 
 type Page = "dashboard" | "laporan" | "riwayat" | "settings";
@@ -15,6 +19,7 @@ interface Props {
   user: User;
   onNavigate: (page: Page) => void;
   onViewReport: (reportId: string) => void;
+  isDark?: boolean;
 }
 
 const MOCK_PILLS: Record<string, string> = {
@@ -24,7 +29,7 @@ const MOCK_PILLS: Record<string, string> = {
   Ditolak: "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400",
 };
 
-export function DashboardPage({ user, onNavigate, onViewReport }: Props) {
+export function DashboardPage({ user, onNavigate, onViewReport, isDark = false }: Props) {
   const [reports, setReports] = useState<Report[]>([]);
   useEffect(() => {
     async function refresh() {
@@ -74,6 +79,53 @@ export function DashboardPage({ user, onNavigate, onViewReport }: Props) {
   const recent = [...reports]
     .sort((a, b) => b.tanggalDibuat.localeCompare(a.tanggalDibuat))
     .slice(0, 5);
+
+  const getMonthlyData = () => {
+    const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+    const counts: Record<string, number> = {};
+    reports.forEach(r => {
+      if (!r.tanggalDibuat) return;
+      const d = new Date(r.tanggalDibuat);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      counts[key] = (counts[key] || 0) + 1;
+    });
+
+    return Object.keys(counts)
+      .sort()
+      .map(key => {
+        const [year, month] = key.split("-");
+        const monthIndex = parseInt(month) - 1;
+        const monthName = months[monthIndex] || "N/A";
+        return {
+          month: `${monthName} ${year.slice(-2)}`,
+          "Jumlah Laporan": counts[key]
+        };
+      });
+  };
+
+  const getCategoryData = () => {
+    const counts: Record<string, number> = {
+      "Siber": 0,
+      "Penipuan": 0,
+      "Pencurian": 0,
+      "Kekerasan": 0,
+      "Ketertiban": 0,
+      "Lainnya": 0
+    };
+    reports.forEach(r => {
+      if (r.kategori) {
+        if (r.kategori in counts) {
+          counts[r.kategori]++;
+        } else {
+          counts["Lainnya"]++;
+        }
+      }
+    });
+    return Object.keys(counts).map(cat => ({
+      name: cat,
+      "Jumlah": counts[cat]
+    })).sort((a, b) => b.Jumlah - a.Jumlah);
+  };
 
   return (
     <div className="flex-1 overflow-y-auto p-6 md:p-10 pb-28 md:pb-10 custom-scrollbar max-w-7xl mx-auto w-full">
@@ -203,6 +255,101 @@ export function DashboardPage({ user, onNavigate, onViewReport }: Props) {
               </button>
             </div>
           )}
+
+          {/* Charts grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-2">
+            
+            {/* Monthly Trend Area Chart */}
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-[24px] border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="pb-3 mb-4 border-b border-slate-100 dark:border-slate-700/50">
+                  <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">Laporan Bulanan</h3>
+                </div>
+                <div className="w-full h-64 text-xs">
+                  {getMonthlyData().length === 0 ? (
+                    <div className="h-full flex items-center justify-center text-slate-400">Tidak ada data bulanan.</div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={getMonthlyData()} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="colorReportsUser" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={isDark ? "#ffffff" : "#030213"} stopOpacity={0.15}/>
+                            <stop offset="95%" stopColor={isDark ? "#ffffff" : "#030213"} stopOpacity={0.0}/>
+                          </linearGradient>
+                        </defs>
+                        <XAxis
+                          dataKey="month"
+                          stroke={isDark ? "#64748b" : "#94a3b8"}
+                          fontSize={11}
+                          tickLine={false}
+                          axisLine={{ stroke: isDark ? "#334155" : "#e2e8f0", strokeWidth: 1 }}
+                          tickFormatter={(tick) => tick.split(" ")[0]}
+                        />
+                        <YAxis hide={true} />
+                        <RechartsTooltip
+                          contentStyle={{
+                            background: isDark ? "#0f172a" : "#ffffff",
+                            borderColor: isDark ? "#1e293b" : "#e2e8f0",
+                            borderRadius: "12px",
+                            color: isDark ? "#f8fafc" : "#030213",
+                            boxShadow: isDark ? "0 8px 24px rgba(0,0,0,0.4)" : "0 8px 24px rgba(0,0,0,0.08)",
+                            fontSize: "12px",
+                            fontWeight: 600,
+                          }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="Jumlah Laporan"
+                          stroke={isDark ? "#ffffff" : "#030213"}
+                          strokeWidth={2}
+                          fillOpacity={1}
+                          fill="url(#colorReportsUser)"
+                          activeDot={{ r: 5, strokeWidth: 2, stroke: isDark ? "#ffffff" : "#030213", fill: isDark ? "#0f172a" : "#ffffff" }}
+                          dot={{ r: 3.5, strokeWidth: 2, stroke: isDark ? "#ffffff" : "#030213", fill: isDark ? "#0f172a" : "#ffffff" }}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Category Distribution Progress Bars */}
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-[24px] border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="pb-3 mb-6 border-b border-slate-100 dark:border-slate-700/50">
+                  <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">Kategori Terbanyak</h3>
+                </div>
+                <div className="space-y-4">
+                  {getCategoryData().length === 0 ? (
+                    <div className="h-full flex items-center justify-center text-slate-400 py-12">Tidak ada data kategori.</div>
+                  ) : (
+                    getCategoryData().map((item) => {
+                      const maxVal = Math.max(...getCategoryData().map(d => d.Jumlah), 1);
+                      const percentage = maxVal > 0 && item.Jumlah > 0 ? (item.Jumlah / maxVal) * 100 : 0;
+                      return (
+                        <div key={item.name} className="space-y-2">
+                          <div className="flex justify-between items-center text-sm font-semibold">
+                            <span className="text-slate-700 dark:text-slate-300">
+                              {item.name === "Siber" ? "Cybercrime" : item.name}
+                            </span>
+                            <span className="text-slate-900 dark:text-white">{item.Jumlah}</span>
+                          </div>
+                          <div className="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+                            <div
+                              className="bg-[#030213] dark:bg-slate-100 h-full rounded-full transition-all duration-500"
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
+
+          </div>
 
           {/* Recent Reports Section */}
           <section className="bg-white dark:bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-800/80 overflow-hidden shadow-sm">
