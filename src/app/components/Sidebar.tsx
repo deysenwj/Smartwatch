@@ -59,8 +59,8 @@ export function Sidebar({ currentPage, onNavigate, onLogout, isOpen, onClose, us
         {/* Logo */}
         <div className="flex items-center justify-between px-5 h-16 border-b border-slate-200 dark:border-slate-700/60 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-[#0d1b3e] rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
-              <img src={systemLogo} alt="Logo" className="w-full h-full object-cover" />
+            <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shrink-0 overflow-hidden shadow border border-slate-200 dark:border-slate-600">
+              <img src={systemLogo} alt="Logo" className="w-[85%] h-[85%] object-contain" />
             </div>
             <div>
               <p className="font-bold text-sm leading-tight text-slate-900 dark:text-white">Smartwatch</p>
