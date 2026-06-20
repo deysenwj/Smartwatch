@@ -483,7 +483,7 @@ function ValidasiModal({ report, onClose, onUpdate }: {
                   className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold transition disabled:opacity-60 flex items-center justify-center gap-1.5"
                 >
                   <CheckCircle className="w-4 h-4" />
-                  Terima
+                  Selesai
                 </button>
               </div>
               <button
