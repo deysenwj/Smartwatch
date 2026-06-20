@@ -255,6 +255,7 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
               <input
                 type="password"
                 placeholder="Minimal 6 karakter"
+                autoComplete="new-password"
                 value={form.password}
                 onChange={set("password")}
                 className={inputCls}
@@ -283,6 +284,7 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
               <input
                 type="password"
                 placeholder="Ulangi kata sandi"
+                autoComplete="new-password"
                 value={form.confirm}
                 onChange={set("confirm")}
                 className={inputCls}

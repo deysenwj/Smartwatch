@@ -197,6 +197,7 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
                   <input
                     type="email"
                     placeholder="nama@email.com"
+                    autoComplete="username"
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
@@ -232,6 +233,7 @@ export function LoginPage({ onLogin, onGoRegister }: Props) {
                   <input
                     type={showPw ? "text" : "password"}
                     placeholder="••••••••"
+                    autoComplete="current-password"
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
