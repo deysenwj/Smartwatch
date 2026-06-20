@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   FileText, Clock, CheckCircle, AlertCircle,
   ChevronRight, Inbox
@@ -76,11 +76,12 @@ export function DashboardPage({ user, onNavigate, onViewReport, isDark = false }
       ? `+${growthPct}% dari bulan lalu`
       : `${growthPct}% dari bulan lalu`;
 
-  const recent = [...reports]
-    .sort((a, b) => b.tanggalDibuat.localeCompare(a.tanggalDibuat))
-    .slice(0, 5);
+  const recent = useMemo(
+    () => [...reports].sort((a, b) => b.tanggalDibuat.localeCompare(a.tanggalDibuat)).slice(0, 5),
+    [reports]
+  );
 
-  const getMonthlyData = () => {
+  const monthlyData = useMemo(() => {
     const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
     const counts: Record<string, number> = {};
     reports.forEach(r => {
@@ -101,9 +102,9 @@ export function DashboardPage({ user, onNavigate, onViewReport, isDark = false }
           "Jumlah Laporan": counts[key]
         };
       });
-  };
+  }, [reports]);
 
-  const getCategoryData = () => {
+  const categoryData = useMemo(() => {
     const counts: Record<string, number> = {
       "Siber": 0,
       "Penipuan": 0,
@@ -125,7 +126,7 @@ export function DashboardPage({ user, onNavigate, onViewReport, isDark = false }
       name: cat,
       "Jumlah": counts[cat]
     })).sort((a, b) => b.Jumlah - a.Jumlah);
-  };
+  }, [reports]);
 
   return (
     <div className="flex-1 overflow-y-auto p-6 md:p-10 pb-28 md:pb-10 custom-scrollbar max-w-7xl mx-auto w-full">
@@ -266,11 +267,11 @@ export function DashboardPage({ user, onNavigate, onViewReport, isDark = false }
                   <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">Laporan Bulanan</h3>
                 </div>
                 <div className="w-full h-64 text-xs">
-                  {getMonthlyData().length === 0 ? (
+                  {monthlyData.length === 0 ? (
                     <div className="h-full flex items-center justify-center text-slate-400">Tidak ada data bulanan.</div>
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={getMonthlyData()} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <AreaChart data={monthlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
                           <linearGradient id="colorReportsUser" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor={isDark ? "#ffffff" : "#030213"} stopOpacity={0.15}/>
@@ -321,11 +322,11 @@ export function DashboardPage({ user, onNavigate, onViewReport, isDark = false }
                   <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">Kategori Terbanyak</h3>
                 </div>
                 <div className="space-y-4">
-                  {getCategoryData().length === 0 ? (
+                  {categoryData.length === 0 ? (
                     <div className="h-full flex items-center justify-center text-slate-400 py-12">Tidak ada data kategori.</div>
                   ) : (
-                    getCategoryData().map((item) => {
-                      const maxVal = Math.max(...getCategoryData().map(d => d.Jumlah), 1);
+                    categoryData.map((item) => {
+                      const maxVal = Math.max(...categoryData.map(d => d.Jumlah), 1);
                       const percentage = maxVal > 0 && item.Jumlah > 0 ? (item.Jumlah / maxVal) * 100 : 0;
                       return (
                         <div key={item.name} className="space-y-2">
