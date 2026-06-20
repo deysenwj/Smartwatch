@@ -128,9 +128,6 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center px-4 py-16 relative overflow-hidden">
-      {/* Ambient background flares */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] rounded-full bg-indigo-500/5 dark:bg-indigo-500/10 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 translate-y-1/2 w-[550px] h-[550px] rounded-full bg-blue-500/5 dark:bg-blue-500/10 blur-3xl pointer-events-none" />
 
       {/* Card Wrapper with absolute logo */}
       <div className="relative w-full max-w-4xl mt-8 z-10">
@@ -142,10 +139,7 @@ export function RegisterPage({ onRegister, onGoLogin }: Props) {
 
         <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800/80 overflow-hidden flex flex-col md:flex-row relative z-10">
           {/* Left panel */}
-          <div className="flex flex-col justify-between p-8 md:p-10 pt-16 md:pt-10 md:w-1/2 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white relative overflow-hidden">
-            {/* Ambient light flare overlays */}
-            <div className="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+          <div className="flex flex-col justify-between p-8 md:p-10 pt-16 md:pt-10 md:w-1/2 bg-[#020C25] text-white relative overflow-hidden">
 
             <div className="relative z-10">
               <span className="text-2xl font-bold tracking-tight">
