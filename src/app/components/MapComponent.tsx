@@ -190,23 +190,30 @@ export function MapPicker({ value, onChange }: MapPickerProps) {
     <div className="space-y-3">
       {/* Consolidated Input field & Locate Button */}
       <div className="flex gap-2">
-        <form onSubmit={handleSearch} className="flex-1 relative">
+        <div className="flex-1 relative">
           <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           <input
             type="text"
             placeholder="Tulis alamat atau cari lokasi kejadian..."
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleSearch(e as unknown as React.FormEvent);
+              }
+            }}
             className={`${inputCls} pl-10 pr-16`}
           />
           <button
-            type="submit"
+            type="button"
+            onClick={(e) => handleSearch(e as unknown as React.FormEvent)}
             disabled={loading}
             className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-lg text-xs font-semibold transition"
           >
             Cari
           </button>
-        </form>
+        </div>
         <button
           type="button"
           onClick={handleGetCurrentLocation}
