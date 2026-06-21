@@ -12,6 +12,7 @@ import {
   AreaChart, Area
 } from "recharts";
 import courtroomBanner from "../../imports/courtroom_banner.png";
+import deysenPhoto from "../../assets/deysen-photo.png";
 
 type Page = "dashboard" | "laporan" | "riwayat" | "settings";
 
@@ -467,13 +468,13 @@ export function DashboardPage({ user, onNavigate, onViewReport, isDark = false }
                 Sistem kami memastikan setiap laporan hukum diproses dengan standar profesionalisme tertinggi untuk transparansi dan keadilan.
               </p>
               <div className="flex items-center gap-4 border-t border-white/20 pt-6">
-                <div className="flex -space-x-3">
-                  <div className="w-8 h-8 rounded-full border-2 border-[#0f172a] dark:border-[#090e1a] bg-indigo-500 flex items-center justify-center text-[9px] font-bold text-white">JD</div>
-                  <div className="w-8 h-8 rounded-full border-2 border-[#0f172a] dark:border-[#090e1a] bg-orange-500 flex items-center justify-center text-[9px] font-bold text-white">RH</div>
-                  <div className="w-8 h-8 rounded-full border-2 border-[#0f172a] dark:border-[#090e1a] bg-emerald-500 flex items-center justify-center text-[9px] font-bold text-white">MK</div>
-                </div>
+                <img
+                  src={deysenPhoto}
+                  alt="DEYSEN"
+                  className="w-10 h-10 rounded-full border-2 border-white/40 object-cover"
+                />
                 <p className="text-[10px] font-bold text-white uppercase tracking-widest">
-                  Didukung oleh Tim Ahli
+                  Develop by DEYSEN
                 </p>
               </div>
             </div>
