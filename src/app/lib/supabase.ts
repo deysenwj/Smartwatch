@@ -1,8 +1,8 @@
 import { createClient, type User as SupabaseUser } from "@supabase/supabase-js";
 import type { User, Report, Notification } from "./storage";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = (window as any).env?.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = (window as any).env?.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase =
   supabaseUrl && supabaseAnonKey

@@ -1,0 +1,18 @@
+services:
+  smartwatch:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VITE_SUPABASE_URL
+        - VITE_SUPABASE_ANON_KEY
+        - VITE_RESEND_API_KEY
+        - VITE_RESEND_FROM_EMAIL
+    container_name: smartwatch-app
+    ports:
+      - "8082:80"
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production

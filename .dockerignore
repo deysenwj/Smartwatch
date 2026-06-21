@@ -1,0 +1,13 @@
+node_modules
+dist
+.git
+.gitignore
+.vscode
+.commandcode
+*.md
+.env
+.env.example
+guidelines
+pnpm-workspace.yaml
+default_shadcn_theme.css
+vite-env.d.ts
