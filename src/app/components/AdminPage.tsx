@@ -1610,16 +1610,7 @@ export function AdminPage({ user, notifs, onRefreshNotifs, isDark, onToggleDark,
           </div>
         </div>
       )}
-      <footer className="md:pl-60 p-4 text-center text-xs text-slate-500 dark:text-slate-400 mt-8">
-        <div className="flex items-center justify-center gap-2">
-          <img
-            src="/path/to/deysen_photo.png" 
-            alt="Deysen"
-            className="w-6 h-6 rounded-full object-cover"
-          />
-          <span>Develop by Deysen</span>
-        </div>
-      </footer>
+
     </div>
   );
 }

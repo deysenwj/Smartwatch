@@ -147,9 +147,6 @@
     background-color: var(--nike-canvas) !important;
     color: var(--nike-ink) !important;
     font-family: var(--font-primary) !important;
-    background-image: url('../assets/bg-pattern.svg') !important;
-    background-repeat: repeat !important;
-    background-size: 60px 60px !important;
   }
 
   html { font-size: var(--font-size); }
