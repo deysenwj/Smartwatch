@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { User, Lock, Bell, ChevronRight, AlertTriangle, LogOut, CheckCircle, Eye, EyeOff, Camera, X } from "lucide-react";
 import { getSettings, saveSettings, updateUserProfile, type User as UserType } from "../lib/storage";
 import { hasSupabaseConfig, updateSupabaseProfile, updateSupabasePassword, uploadSupabaseAvatar } from "../lib/supabase";
@@ -63,6 +63,7 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
 
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarUrl,  setAvatarUrl]  = useState(user.avatarUrl || "");
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const [settings,   setSettings]  = useState(() => {
     const local = getSettings(user.email);
@@ -260,6 +261,7 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
               id="avatarInput"
               accept=".jpg,.jpeg,.png"
               className="hidden"
+              ref={avatarInputRef}
               onChange={(e) => {
                 if (e.target.files && e.target.files[0]) {
                   const selected = e.target.files[0];
@@ -274,8 +276,8 @@ export function SettingsPage({ user, onLogout, onSaved }: Props) {
             />
             <button
               type="button"
-              onClick={() => document.getElementById("avatarInput")?.click()}
-              className="absolute inset-0 bg-black/60 backdrop-blur-[2px] text-white rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer"
+              onClick={() => avatarInputRef.current?.click()}
+              className="absolute inset-0 bg-black/50 dark:bg-black/60 text-white rounded-full flex flex-col items-center justify-center transition-all duration-300 cursor-pointer text-xs font-semibold"
             >
               <Camera className="w-4 h-4 mb-0.5" />
               <span className="text-[10px] font-semibold">Ubah</span>
